@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace server.Entities;
+
+public partial class TaskHistory
+{
+    public long Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public long TaskId { get; set; }
+
+    public Guid CreatedBy { get; set; }
+
+    public string Description { get; set; } = null!;
+
+    public virtual Profile CreatedByNavigation { get; set; } = null!;
+
+    public virtual Tasks Tasks { get; set; } = null!;
+}

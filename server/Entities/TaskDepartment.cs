@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace server.Entities;
+
+public partial class TaskDepartment
+{
+    public long Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public long TaskId { get; set; }
+
+    public long DepartmentId { get; set; }
+
+    public virtual Department Department { get; set; } = null!;
+
+    public virtual Tasks Tasks { get; set; } = null!;
+}
