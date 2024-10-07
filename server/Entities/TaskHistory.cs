@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class TaskHistory
+public class TaskHistory
 {
     public long Id { get; set; }
 
@@ -17,5 +14,5 @@ public partial class TaskHistory
 
     public virtual Profile CreatedByNavigation { get; set; } = null!;
 
-    public virtual Tasks Tasks { get; set; } = null!;
+    public virtual Tasks Task { get; set; } = null!;
 }

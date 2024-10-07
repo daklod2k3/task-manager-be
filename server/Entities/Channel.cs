@@ -15,5 +15,7 @@ public partial class Channel
 
     public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
 
+    public virtual ICollection<ChannelUser> ChannelUsers { get; set; } = new List<ChannelUser>();
+
     public virtual Profile CreatedByNavigation { get; set; } = null!;
 }

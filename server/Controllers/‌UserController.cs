@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using server.Context;
 using server.Entities;
-using Supabase;
+using Supabase.Gotrue;
+using Client = Supabase.Client;
 
 namespace server.Controllers;
 
@@ -23,7 +24,9 @@ public class UserController : Controller
     [HttpGet]
     public ActionResult Get()
     {
+        var user = HttpContext.Items["user"] as User;
         return Ok(HttpContext.Items["User"]);
+        
     }
     
 }

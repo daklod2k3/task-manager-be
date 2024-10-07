@@ -4,8 +4,8 @@ namespace server.Middlewares;
 
 public class AuthMiddleware
 {
-    private readonly RequestDelegate _next;
     private readonly Client _client;
+    private readonly RequestDelegate _next;
 
     public AuthMiddleware(RequestDelegate next, Client client)
     {
@@ -15,24 +15,34 @@ public class AuthMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Your custom authentication logic here
-        if (!context.Request.Headers.ContainsKey("Authorization"))
+        if (context.Request.Path.StartsWithSegments("/auth"))
         {
-            context.Response.StatusCode = 401; // Unauthorized
-            await context.Response.WriteAsync("Authorization header missing");
+            await _next(context);
             return;
         }
-        
-        string token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        
+
+        var token = "";
+        // Your custom authentication logic here
+        if (context.Request.Headers.ContainsKey("Authorization"))
+            token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+        if (context.Request.Cookies.ContainsKey("acessToken"))
+            token = context.Request.Cookies["acessToken"];
+        if (string.IsNullOrEmpty(token))
+        {
+            context.Response.StatusCode = 401; // Unauthorized
+            await context.Response.WriteAsync("Authorization token missing");
+            return;
+        }
+
         var user = await _client.Auth.GetUser(token);
         if (user == null)
         {
             context.Response.StatusCode = 401; // Unauthorized
-            await context.Response.WriteAsync("Authorization header missing");
+            await context.Response.WriteAsync("Authorization failed");
             return;
         }
-        
+
         context.Items["User"] = user;
         // Call the next middleware in the pipeline
         await _next(context);

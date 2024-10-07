@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class TaskUser
+public class TaskUser
 {
     public long Id { get; set; }
 
@@ -13,7 +10,7 @@ public partial class TaskUser
 
     public long TaskId { get; set; }
 
-    public virtual Tasks Tasks { get; set; } = null!;
+    public virtual Tasks Task { get; set; } = null!;
 
     public virtual Profile User { get; set; } = null!;
 }

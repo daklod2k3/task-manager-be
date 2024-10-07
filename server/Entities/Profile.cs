@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class Profile
+public class Profile
 {
     public Guid Id { get; set; }
 
@@ -14,6 +11,8 @@ public partial class Profile
     public string? Avt { get; set; }
 
     public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
+
+    public virtual ICollection<ChannelUser> ChannelUsers { get; set; } = new List<ChannelUser>();
 
     public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
 

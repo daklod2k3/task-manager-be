@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class TaskDepartment
+public class TaskDepartment
 {
     public long Id { get; set; }
 
@@ -15,5 +12,5 @@ public partial class TaskDepartment
 
     public virtual Department Department { get; set; } = null!;
 
-    public virtual Tasks Tasks { get; set; } = null!;
+    public virtual Tasks Task { get; set; } = null!;
 }
