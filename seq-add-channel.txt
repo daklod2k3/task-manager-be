@@ -1,0 +1,37 @@
+title Channel
+
+messagestyle <wordwrap:30>
+
+autoactivation 
+
+actor Actor
+participant "Client" as A
+participant ":Controller" as B
+participant ":Context" as C
+
+Actor->A:Add channel
+A->B:Post /channel
+B->C:insertChannel(channelName, createdBy)
+C-->B:createdChannel
+B-->A:createdChannel
+deactivate A
+
+alt channel create error
+A-->Actor: Show error
+else 
+A-->Actor: Show add people UI
+Actor->A: <wordwrap:30>Add people (by id, email,...) with permission select</wordwrap>
+A->B:Put /channel with people list
+loop user:UserList
+B->C:insertChannelUser(channelId, userId, perrmisstion)
+C-->B:
+end
+B-->A: Return result
+A-->Actor:Show result
+end
+
+
+
+
+
+
