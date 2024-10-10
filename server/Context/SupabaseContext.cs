@@ -260,6 +260,9 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Title)
                 .HasColumnType("character varying")
                 .HasColumnName("title");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Priority).HasColumnName("priority");
+
         });
 
         modelBuilder.Entity<TaskDepartment>(entity =>
