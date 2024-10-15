@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using server.Context;
 using server.Entities;
-using server.Services;
+using server.Interfaces;
+using server.Repository;
 
 namespace server.Controllers;
 
@@ -9,16 +10,17 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class TaskController : Controller
 {
-    SupabaseContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TaskController(SupabaseContext context)
+    public TaskController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
-    
+
     [HttpGet]
-    public ActionResult<IEnumerable<Tasks>> Get()
+    public ActionResult<IEnumerable<Tasks>> GetAllTask()
     {
-        return _context.Tasks.ToList();
+        var listTasks = _unitOfWork.Task.GetAll();
+        return Ok( new { listTasks });
     }
 }
