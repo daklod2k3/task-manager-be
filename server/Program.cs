@@ -9,6 +9,7 @@ using server.Helpers;
 using server.Interfaces;
 using server.Middlewares;
 using server.Repository;
+using server.Services;
 using Supabase;
 
 Env.Load();
@@ -56,6 +57,7 @@ var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
 var supabase = new Supabase.Client(supabaseUrl, supabaseAnonKey);
 builder.Services.AddSingleton(supabase);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 var app = builder.Build();
 
