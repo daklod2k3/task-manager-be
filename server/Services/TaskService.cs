@@ -13,6 +13,12 @@ namespace server.Services
             _unitOfWork = unitOfWork;
         }
 
+        public void CreatTask(Tasks task)
+        {
+            _unitOfWork.Task.Add(task);
+            _unitOfWork.Save();
+        }
+
         public IEnumerable<Tasks> GetAllTask()
         {
             return _unitOfWork.Task.GetAll();

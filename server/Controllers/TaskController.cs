@@ -24,4 +24,12 @@ public class TaskController : Controller
         var taskList = _taskService.GetAllTask();
         return Ok(new { taskList });
     }
+    [HttpPost]
+    public ActionResult CreateTask(Tasks task)
+    {
+        _taskService.CreatTask(task);
+        return Ok(new {taskAdded = task});  
+       
+    }
+
 }
