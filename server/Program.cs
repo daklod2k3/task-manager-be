@@ -1,11 +1,10 @@
+using System.Text.Json.Serialization;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using server;
 using server.Context;
 using server.Entities;
-using server.Helpers;
 using server.Interfaces;
 using server.Middlewares;
 using server.Repository;
@@ -17,12 +16,15 @@ Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         In = ParameterLocation.Header,
@@ -47,6 +49,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
+dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
+dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<SupabaseContext>(options =>
     options.UseNpgsql(dataSource));
@@ -54,7 +58,7 @@ builder.Services.AddDbContext<SupabaseContext>(options =>
 // add supabase
 var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
 var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
-var supabase = new Supabase.Client(supabaseUrl, supabaseAnonKey);
+var supabase = new Client(supabaseUrl, supabaseAnonKey);
 builder.Services.AddSingleton(supabase);
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();

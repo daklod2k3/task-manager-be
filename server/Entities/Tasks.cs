@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class Tasks
+public class Tasks
 {
     public long Id { get; set; }
 
@@ -14,11 +11,11 @@ public partial class Tasks
     public string? Description { get; set; }
 
     public DateTime DueDate { get; set; }
-    
-    public String Priority { get; set; }
 
-    public String Status { get; set; }
-    
+    public ETaskPriority Priority { get; set; }
+
+    public ETaskStatus Status { get; set; }
+
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 
     public virtual ICollection<TaskHistory> TaskHistories { get; set; } = new List<TaskHistory>();
