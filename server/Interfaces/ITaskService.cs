@@ -5,6 +5,8 @@ namespace server.Interfaces
     public interface ITaskService
     {
         IEnumerable<Tasks> GetAllTask();
-        void CreatTask(Tasks task);
+        Tasks CreatTask(Tasks task);
+        int AssignTaskToDepartment(TaskDepartment[] taskDepartments);
+        int AssignTaskToUser(TaskUser[] taskUsers);
     }
 }

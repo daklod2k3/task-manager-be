@@ -4,6 +4,6 @@ namespace server.Interfaces
 {
     public interface ITaskRepository : IRepository<Tasks>
     {
-        public void Update (Tasks task);
+        public Tasks Update (Tasks task);
     }
 }

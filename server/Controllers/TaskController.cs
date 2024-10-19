@@ -27,9 +27,18 @@ public class TaskController : Controller
     [HttpPost]
     public ActionResult CreateTask(Tasks task)
     {
-        _taskService.CreatTask(task);
-        return Ok(new {taskAdded = task});  
-       
+        try {
+            return Ok(_taskService.CreatTask(task));
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not create" });
+        }
+        
+        
+
+
+
     }
 
 }

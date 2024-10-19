@@ -16,9 +16,9 @@ namespace server.Repository
             dbSet = _context.Set<T>();
         }
   
-        public void Add(T entity)
+        public T Add(T entity)
         {
-            dbSet.Add(entity);
+            return dbSet.Add(entity).Entity;
         }
 
         public bool Any(Expression<Func<T, bool>> filter)

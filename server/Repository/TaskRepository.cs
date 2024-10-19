@@ -2,6 +2,7 @@
 using server.Interfaces;
 using server.Entities;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace server.Repository
 {
@@ -13,9 +14,9 @@ namespace server.Repository
             _context = context;
 
         }
-        public void Update(Tasks task)
+        public Tasks Update(Tasks task)
         {
-            _context.Tasks.Update(task);
+            return _context.Tasks.Update(task).Entity;
         }
 
        

@@ -13,15 +13,34 @@ namespace server.Services
             _unitOfWork = unitOfWork;
         }
 
-        public void CreatTask(Tasks task)
+        public Tasks CreatTask(Tasks task)
         {
-            _unitOfWork.Task.Add(task);
-            _unitOfWork.Save();
-        }
 
+            var result = _unitOfWork.Task.Add(task);
+            _unitOfWork.Save();
+            return result;
+        }
+        
         public IEnumerable<Tasks> GetAllTask()
         {
             return _unitOfWork.Task.GetAll();
         }
+        public int AssignTaskToUser(TaskUser[] taskUsers)
+        {
+            foreach (var taskUser in taskUsers) {
+                _unitOfWork.TaskUser.Add(taskUser);
+            }
+            return _unitOfWork.Save();
+        }
+        public int AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+        {
+            foreach (var taskDepartment in taskDepartments)
+            {
+                _unitOfWork.TaskDepartment.Add(taskDepartment);
+            }
+            return _unitOfWork.Save();
+        }
+
+
     }
 }

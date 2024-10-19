@@ -10,7 +10,7 @@ public class TaskUser
 
     public long TaskId { get; set; }
 
-    public virtual Tasks Task { get; set; } = null!;
+    public virtual Tasks? Task { get; set; } = null!;
 
-    public virtual Profile User { get; set; } = null!;
+    public virtual Profile? User { get; set; } = null!;
 }

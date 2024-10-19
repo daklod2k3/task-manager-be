@@ -3,6 +3,8 @@
     public interface IUnitOfWork
     {
         ITaskRepository Task {  get; }
-        void Save();
+        ITaskDepartmentRepository TaskDepartment { get; }
+        ITaskUserRepository TaskUser { get; }
+        int Save();
     }
 }
