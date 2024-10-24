@@ -34,11 +34,30 @@ public class TaskController : Controller
             Console.WriteLine(ex.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not create" });
         }
-        
-        
-
-
-
+    }
+    [HttpPut]
+    public ActionResult UpdateTask(Tasks task) {
+        try
+        {
+            return Ok(_taskService.UpdateTask(task));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not update" });
+        }
+    }
+    [HttpDelete]
+    public ActionResult DeleteTask(long id) {
+        try
+        {
+            return Ok(_taskService.DeleteTask(id));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not delete" });
+        }
     }
 
 }

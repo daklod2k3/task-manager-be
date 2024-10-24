@@ -20,6 +20,31 @@ namespace server.Controllers
             
             return Ok(_taskService.AssignTaskToDepartment(taskDepartments));
         }
-       
+        [HttpPut]
+        public ActionResult UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
+        {
+            try
+            {
+                return Ok(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not update" });
+            }
+        }
+        [HttpDelete]
+        public ActionResult DeleteAssignTaskToDepartment(long id)
+        {
+            try
+            {
+                return Ok(_taskService.DeleteAssignTaskToDepartment(id));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not delete" });
+            }
+        }
     }
 }

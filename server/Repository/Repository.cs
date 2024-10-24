@@ -60,9 +60,9 @@ namespace server.Repository
             return query.ToList();
         }
 
-        public void Remove(T entity)
+        public T Remove(T entity)
         {
-            dbSet.Remove(entity);
+           return dbSet.Remove(entity).Entity;
         }
     }
 }

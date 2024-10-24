@@ -19,5 +19,31 @@ namespace server.Controllers
 
             return Ok(_taskService.AssignTaskToUser(taskUsers));
         }
+        [HttpPut]
+        public ActionResult UpdateAssignTaskToUser(TaskUser taskUser)
+        {
+            try
+            {
+                return Ok(_taskService.UpdateAssignTaskToUser(taskUser));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
+            }
+        }
+        [HttpDelete]
+        public ActionResult DeleteAssignTaskToUser(long id)
+        {
+            try
+            {
+                return Ok(_taskService.DeleteAssignTaskToUser(id));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not delete" });
+            }
+        }
     }
 }

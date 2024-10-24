@@ -8,6 +8,6 @@ namespace server.Interfaces
         T Get(Expression<Func<T, bool>>? filter, string includeProperties = null);
         T Add(T entity);
         bool Any(Expression<Func<T, bool>> filter);
-        void Remove(T entity);
+        T Remove(T entity);
     }
 }
