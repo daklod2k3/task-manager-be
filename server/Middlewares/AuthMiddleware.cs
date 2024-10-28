@@ -35,16 +35,20 @@ public class AuthMiddleware
             return;
         }
 
-        var user = await _client.Auth.GetUser(token);
-        if (user == null)
+        try
         {
+            var user = await _client.Auth.GetUser(token);
+            if (user == null) throw new UnauthorizedAccessException();
+
+            context.Items["User"] = user;
+            // Call the next middleware in the pipeline
+            await _next(context);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
             context.Response.StatusCode = 401; // Unauthorized
             await context.Response.WriteAsync("Authorization failed");
-            return;
         }
-
-        context.Items["User"] = user;
-        // Call the next middleware in the pipeline
-        await _next(context);
     }
 }
