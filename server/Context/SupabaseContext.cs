@@ -257,7 +257,7 @@ public partial class SupabaseContext : DbContext
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.DueDate).HasColumnName("dueDate");
+            entity.Property(e => e.DueDate).HasColumnName("due_date");
             entity.Property(e => e.Title)
                 .HasColumnType("character varying")
                 .HasColumnName("title");

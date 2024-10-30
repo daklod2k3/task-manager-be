@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
+using Sprache;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace server.Services
@@ -83,6 +85,17 @@ namespace server.Services
             var taskUser = _unitOfWork.TaskUser.Get(x => x.Id == id);
             var result = _unitOfWork.TaskUser.Remove(taskUser);
             _unitOfWork.Save();
+            return result;
+        }
+        public IEnumerable<Tasks> GetTaskByIdUser(Guid id)
+        {
+            var tasksByUser = _unitOfWork.Task.GetAll(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id), includeProperties: "TaskUsers");
+            var tasksByDepartment = _unitOfWork.Task.GetAll(
+                t => t.TaskDepartments
+                         .Any(taskDept => taskDept.Department.DepartmentUsers
+                            .Any(deptUser => deptUser.UserId == id)), "TaskDepartments,TaskDepartments.Department,TaskDepartments.Department.DepartmentUsers"
+                );
+            var result = tasksByUser.Union(tasksByDepartment).DistinctBy(t => t.Id).ToList();
             return result;
         }
     }

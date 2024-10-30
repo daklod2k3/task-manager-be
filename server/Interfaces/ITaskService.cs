@@ -14,6 +14,7 @@ namespace server.Interfaces
         TaskDepartment DeleteAssignTaskToDepartment(long id);
         TaskUser UpdateAssignTaskToUser(TaskUser taskUser);
         TaskUser DeleteAssignTaskToUser(long id);
+        public IEnumerable<Tasks> GetTaskByIdUser(Guid id);
 
     }
 }

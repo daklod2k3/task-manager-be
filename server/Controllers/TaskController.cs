@@ -17,13 +17,7 @@ public class TaskController : Controller
         _taskService = taskService;
     }
 
-    [HttpGet]
-    public ActionResult<IEnumerable<Tasks>> GetAllTask()
-    {
-
-        var taskList = _taskService.GetAllTask();
-        return Ok(new { taskList });
-    }
+    
     [HttpPost]
     public ActionResult CreateTask(Tasks task)
     {
@@ -59,5 +53,11 @@ public class TaskController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not delete" });
         }
     }
+    [HttpGet]
+    public ActionResult<IEnumerable<Tasks>> GetTaskGetTaskByIdUser(Guid id)
+    {
 
+        var taskList = _taskService.GetTaskByIdUser(id);
+        return Ok(new { taskList });
+    }
 }
