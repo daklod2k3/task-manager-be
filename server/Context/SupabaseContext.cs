@@ -30,7 +30,7 @@ public partial class SupabaseContext : DbContext
 
     public virtual DbSet<Profile> Profiles { get; set; }
 
-    public virtual DbSet<Tasks> Tasks { get; set; }
+    public virtual DbSet<ETask> Tasks { get; set; }
 
     public virtual DbSet<TaskDepartment> TaskDepartments { get; set; }
 
@@ -246,7 +246,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
         });
 
-        modelBuilder.Entity<Tasks>(entity =>
+        modelBuilder.Entity<ETask>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("tasks_pkey");
 
@@ -307,7 +307,7 @@ public partial class SupabaseContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_history_created_by_fkey");
 
-            entity.HasOne(d => d.Task).WithMany(p => p.TaskHistories)
+            entity.HasOne(d => d.ETask).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.TaskId)
                 .HasConstraintName("task_history_task_id_fkey");
         });

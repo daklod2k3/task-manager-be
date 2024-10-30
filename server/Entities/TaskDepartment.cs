@@ -12,5 +12,5 @@ public class TaskDepartment
 
     public virtual Department? Department { get; set; } = null!;
 
-    public virtual Tasks? Task { get; set; } = null!;
+    public virtual ETask? Task { get; set; } = null!;
 }

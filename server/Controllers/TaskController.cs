@@ -1,8 +1,7 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using server.Context;
 using server.Entities;
 using server.Interfaces;
-using server.Repository;
 
 namespace server.Controllers;
 
@@ -17,23 +16,27 @@ public class TaskController : Controller
         _taskService = taskService;
     }
 
-    
+
     [HttpPost]
-    public ActionResult CreateTask(Tasks task)
+    public ActionResult CreateTask(ETask eTask)
     {
-        try {
-            return Ok(_taskService.CreatTask(task));
+        try
+        {
+            return Ok(_taskService.CreatTask(eTask));
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Console.WriteLine(ex.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not create" });
         }
     }
+
     [HttpPut]
-    public ActionResult UpdateTask(Tasks task) {
+    public ActionResult UpdateTask(ETask eTask)
+    {
         try
         {
-            return Ok(_taskService.UpdateTask(task));
+            return Ok(_taskService.UpdateTask(eTask));
         }
         catch (Exception ex)
         {
@@ -41,8 +44,10 @@ public class TaskController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not update" });
         }
     }
+
     [HttpDelete]
-    public ActionResult DeleteTask(long id) {
+    public ActionResult DeleteTask(long id)
+    {
         try
         {
             return Ok(_taskService.DeleteTask(id));
@@ -53,11 +58,19 @@ public class TaskController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not delete" });
         }
     }
-    [HttpGet]
-    public ActionResult<IEnumerable<Tasks>> GetTaskGetTaskByIdUser(Guid id)
-    {
 
-        var taskList = _taskService.GetTaskByIdUser(id);
-        return Ok(new { taskList });
+    [HttpGet]
+    public ActionResult<IEnumerable<ETask>> GetTaskGetTaskByIdUser()
+    {
+        var id = HttpContext.Items["user_id"] as string;
+        if (id == null)
+            return BadRequest(new ErrorResponse
+            {
+                Status = HttpStatusCode.BadRequest,
+                Message = "User id error"
+            });
+
+        var taskList = _taskService.GetTaskByIdUser(new Guid(id));
+        return Ok(new SuccessResponse<ETask> { Data = taskList });
     }
 }

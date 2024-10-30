@@ -1,10 +1,10 @@
-﻿namespace server.Interfaces
+﻿namespace server.Interfaces;
+
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        ITaskRepository Task {  get; }
-        ITaskDepartmentRepository TaskDepartment { get; }
-        ITaskUserRepository TaskUser { get; }
-        int Save();
-    }
+    ITaskRepository Task { get; }
+    ITaskDepartmentRepository TaskDepartment { get; }
+    ITaskUserRepository TaskUser { get; }
+    IUserRepository User { get; }
+    int Save();
 }

@@ -1,6 +1,6 @@
 ﻿namespace server.Entities;
 
-public class Tasks
+public class ETask
 {
     public long Id { get; set; }
 
