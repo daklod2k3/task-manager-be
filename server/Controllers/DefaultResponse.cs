@@ -1,17 +1,22 @@
 using System.Net;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace server.Controllers;
 
-public class ErrorResponse
+[DefaultStatusCode(400)]
+public class ErrorResponse(string message = "Unexpected error") : StatusCodeResult(400)
 {
-    public HttpStatusCode Status { get; set; }
-    public string Message { get; set; }
+    [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
+    public HttpStatusCode Status { get; set; } = HttpStatusCode.BadRequest;
+
+    public string Message { get; set; } = message;
 }
 
-public class SuccessResponse<T>
+[DefaultStatusCode(200)]
+public class SuccessResponse<T>() : StatusCodeResult(200)
 {
-
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
 

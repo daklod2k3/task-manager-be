@@ -12,7 +12,7 @@ public class UserService
         _unitOfWork = unitOfWork;
     }
 
-    public Profile getProfile(Guid uuid)
+    public Profile GetProfile(Guid uuid)
     {
         return _unitOfWork.User.GetById(uuid);
     }

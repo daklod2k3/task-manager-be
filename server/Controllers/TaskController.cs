@@ -64,11 +64,7 @@ public class TaskController : Controller
     {
         var id = HttpContext.Items["user_id"] as string;
         if (id == null)
-            return BadRequest(new ErrorResponse
-            {
-                Status = HttpStatusCode.BadRequest,
-                Message = "User id error"
-            });
+            return new ErrorResponse("User id error") { Status = HttpStatusCode.InternalServerError };
 
         var taskList = _taskService.GetTaskByIdUser(new Guid(id));
         return Ok(new SuccessResponse<ETask> { Data = taskList });
