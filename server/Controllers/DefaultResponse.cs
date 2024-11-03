@@ -15,11 +15,16 @@ public class ErrorResponse(string message = "Unexpected error") : StatusCodeResu
 }
 
 [DefaultStatusCode(200)]
-public class SuccessResponse<T>() : StatusCodeResult(200)
+public class SuccessResponse<T> : StatusCodeResult
 {
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
 
+    public SuccessResponse(): base(StatusCodes.Status200OK)
+    {
+        
+    }
+    
     public string? Message { get; set; }
     public IEnumerable<T> Data { get; set; }
 }

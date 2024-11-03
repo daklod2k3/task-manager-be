@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using server.Context;
 using server.Entities;
+using server.Services;
 using Supabase.Gotrue;
 using Client = Supabase.Client;
 
@@ -13,19 +14,23 @@ public class UserController : Controller
     
     private readonly SupabaseContext _context;
     private readonly Client _client;
+    private readonly UserService _userService;
 
-    public UserController(SupabaseContext context, Client client)
+    public UserController(SupabaseContext context, Client client, UserService userService)
     {
         _context = context;
         _client = client;
+        _userService = userService;
     }
     
     // GET
     [HttpGet]
     public ActionResult Get()
     {
-        var user = HttpContext.Items["user"] as User;
-        return Ok(HttpContext.Items["User"]);
+        String user_id = HttpContext.Items["user_id"] as String;
+        if (user_id == null) return new NotFoundResult();
+        var user = _userService.GetProfile(new Guid(user_id));
+        return new SuccessResponse<Profile>(){Data = new []{ user }};
         
     }
     

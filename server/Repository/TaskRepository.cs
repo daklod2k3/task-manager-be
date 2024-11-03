@@ -10,8 +10,6 @@ public class TaskRepository : Repository<ETask>, ITaskRepository
 
     public TaskRepository(SupabaseContext context) : base(context)
     {
-        _context = context;
-        dbSet = _context.Set<ETask>();
     }
 
 

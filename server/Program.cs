@@ -65,6 +65,7 @@ var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
 var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
 var supabase = new Client(supabaseUrl, supabaseAnonKey);
 builder.Services.AddSingleton(supabase);
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 

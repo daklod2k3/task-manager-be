@@ -11,10 +11,11 @@ public class UserRepository : Repository<Profile>, IUserRepository
 
     public UserRepository(SupabaseContext context) : base(context)
     {
+        
     }
 
     public Profile GetById(Guid id)
-    {
-        return dbSet.Find(id);
+    {   if (id != Guid.Empty) return dbSet.Find(id);
+        return null;
     }
 }
