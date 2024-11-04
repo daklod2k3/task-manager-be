@@ -26,8 +26,8 @@ public class AuthMiddleware
         if (context.Request.Headers.ContainsKey("Authorization"))
             token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-        if (context.Request.Cookies.ContainsKey("acessToken"))
-            token = context.Request.Cookies["acessToken"];
+        if (context.Request.Cookies.ContainsKey("sb-ndoyladxdcpftovoalas-auth-token"))
+            token = context.Request.Cookies["sb-ndoyladxdcpftovoalas-auth-token"];
         if (string.IsNullOrEmpty(token))
         {
             context.Response.StatusCode = 401; // Unauthorized

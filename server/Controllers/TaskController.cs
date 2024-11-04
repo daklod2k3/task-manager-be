@@ -67,6 +67,6 @@ public class TaskController : Controller
             return new ErrorResponse("User id error") { Status = HttpStatusCode.InternalServerError };
 
         var taskList = _taskService.GetTaskByIdUser(new Guid(id));
-        return Ok(new SuccessResponse<ETask> { Data = taskList });
+        return new SuccessResponse<ETask>(taskList);
     }
 }

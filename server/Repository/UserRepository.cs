@@ -7,15 +7,16 @@ namespace server.Repository;
 
 public class UserRepository : Repository<Profile>, IUserRepository
 {
-    private readonly DbSet<Profile> dbSet;
+    private readonly DbSet<Profile> _dbSet;
 
     public UserRepository(SupabaseContext context) : base(context)
     {
-        
+        _dbSet = context.Set<Profile>();
     }
 
     public Profile GetById(Guid id)
-    {   if (id != Guid.Empty) return dbSet.Find(id);
+    {
+        if (id != Guid.Empty) return _dbSet.Find(id);
         return null;
     }
 }
