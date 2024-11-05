@@ -23,13 +23,19 @@ public class UserController : Controller
     }
 
     // GET
-    [HttpGet]
-    public ActionResult Get()
+    public ActionResult GetAuthUser()
     {
         var user_id = HttpContext.Items["user_id"] as string;
         if (user_id == null) return new NotFoundResult();
         var user = _userService.GetProfile(new Guid(user_id));
-        Console.WriteLine(user);
+        return new SuccessResponse<Profile>(new List<Profile> { user });
+    }
+
+    [HttpGet("{user_id}")]
+    public ActionResult Get(string user_id)
+    {
+        if (user_id == null) return GetAuthUser();
+        var user = _userService.GetProfile(new Guid(user_id));
         return new SuccessResponse<Profile>(new List<Profile> { user });
     }
 }

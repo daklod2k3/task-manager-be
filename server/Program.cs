@@ -1,13 +1,18 @@
+using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using server.Context;
+using server.Controllers;
 using server.Entities;
 using server.Interfaces;
-using server.Middlewares;
 using server.Repository;
 using server.Services;
 using Supabase;
@@ -15,8 +20,11 @@ using Supabase;
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
+var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtSecret"]!);
+var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
+
+// Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -53,6 +61,28 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Auth builder
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication().AddJwtBearer(option =>
+{
+    option.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(bytes),
+        ValidAudience = builder.Configuration["Authentication:ValidAudience"],
+        ValidIssuer = builder.Configuration["Authentication:ValidIssuer"]
+    };
+    option.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies[cookieAuthName];
+            return Task.CompletedTask;
+        }
+    };
+});
+
+//ORM builder
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
 dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
 dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
@@ -64,7 +94,10 @@ builder.Services.AddDbContext<SupabaseContext>(options =>
 var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
 var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
 var supabase = new Client(supabaseUrl, supabaseAnonKey);
+supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
 builder.Services.AddSingleton(supabase);
+
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -78,10 +111,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<AuthMiddleware>();
 
 app.UseHttpsRedirection();
-// app.UseAuthorization();
-app.MapControllers();
+app.MapControllers().RequireAuthorization();
+app.UseExceptionHandler(e =>
+{
+    e.Run(async context =>
+    {
+        var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+        if (contextFeature == null) return;
+        var json = JsonSerializer.Serialize(new ErrorResponse(contextFeature.Error.Message)
+            { Status = HttpStatusCode.InternalServerError });
+        Console.WriteLine(context.Response.StatusCode);
+        // if (context.Response.StatusCode != 0)
+        //     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(json);
+    });
+});
+// app.UseMiddleware<AuthMiddleware>();
 
 app.Run();

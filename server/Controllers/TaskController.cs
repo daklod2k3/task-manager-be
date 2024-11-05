@@ -22,7 +22,7 @@ public class TaskController : Controller
     {
         try
         {
-            return Ok(_taskService.CreatTask(eTask));
+            return new SuccessResponse<ETask>(new[] { _taskService.CreatTask(eTask) });
         }
         catch (Exception ex)
         {
@@ -50,7 +50,7 @@ public class TaskController : Controller
     {
         try
         {
-            return Ok(_taskService.DeleteTask(id));
+            return new SuccessResponse<ETask>(new[] { _taskService.DeleteTask(id) });
         }
         catch (Exception ex)
         {

@@ -8,21 +8,21 @@ namespace server.Controllers;
 [DefaultStatusCode(400)]
 public class ErrorResponse : ActionResult
 {
+    public ErrorResponse()
+    {
+        Error = "Unexpected error";
+    }
+
+    public ErrorResponse(string error)
+    {
+        Error = error;
+    }
+
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.BadRequest;
 
-    public string Message { get; set; }
+    public string Error { get; set; }
 
-    public ErrorResponse()
-    {
-        Message = "Unexpected error";
-    }
-
-    public ErrorResponse(string message)
-    {
-        Message = message;
-    }
-    
     public override async Task ExecuteResultAsync(ActionContext context)
     {
         var jsonResult = new JsonResult(this);
