@@ -1,6 +1,9 @@
+using System.Linq.Expressions;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 
 namespace server.Controllers;
@@ -59,14 +62,42 @@ public class TaskController : Controller
         }
     }
 
-    [HttpGet]
-    public ActionResult<IEnumerable<ETask>> GetTaskGetTaskByIdUser()
+    public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string filterString)
     {
-        var id = HttpContext.Items["user_id"] as string;
-        if (id == null)
-            return new ErrorResponse("User id error") { Status = HttpStatusCode.InternalServerError };
+        
 
-        var taskList = _taskService.GetTaskByIdUser(new Guid(id));
+        var filterResult = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString))
+        {
+            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        }
+        var filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
+        var taskList = _taskService.GetTaskByIdUser(new Guid(userId),filter);
         return Ok(new SuccessResponse<ETask> { Data = taskList });
     }
+    [HttpGet]
+    public ActionResult<IEnumerable<ETask>> Get(string filter)
+    {
+        string id = HttpContext.Items["user_id"] as string;
+        return GetTaskByIdUser(id, filter);
+    }
+    [HttpGet]
+    [Route("{userId}")]
+    public ActionResult<IEnumerable<ETask>> GetById(string userId, string filter)
+    {
+        return GetTaskByIdUser(userId, filter);
+    }
+    public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)
+    {
+        var filterResult = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString))
+        {
+            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        }
+        var compositeFilterExpression = CompositeFilter<ETask>.ApplyFilter(filterResult);
+
+        var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
+        return Ok(new SuccessResponse<ETask> { Data = taskList });
+    }
+
 }
