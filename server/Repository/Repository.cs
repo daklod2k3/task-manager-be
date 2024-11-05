@@ -8,22 +8,22 @@ namespace server.Repository;
 public class Repository<T> : IRepository<T> where T : class
 {
     // private readonly SupabaseContext _context;
-    internal DbSet<T> dbSet;
+    private readonly DbSet<T> _dbSet;
 
     public Repository(SupabaseContext context)
     {
         // _context = context;
-        dbSet = context.Set<T>();
+        _dbSet = context.Set<T>();
     }
 
     public T Add(T entity)
     {
-        return dbSet.Add(entity).Entity;
+        return _dbSet.Add(entity).Entity;
     }
 
     public bool Any(Expression<Func<T, bool>> filter)
     {
-        return dbSet.Any(filter);
+        return _dbSet.Any(filter);
     }
 
 
@@ -39,17 +39,17 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual T GetById(int id)
     {
-        return dbSet.Find(id);
+        return _dbSet.Find(id);
     }
 
     public T Remove(T entity)
     {
-        return dbSet.Remove(entity).Entity;
+        return _dbSet.Remove(entity).Entity;
     }
 
     private IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
     {
-        IQueryable<T> query = dbSet;
+        IQueryable<T> query = _dbSet;
 
         if (filter != null) query = query.Where(filter);
 

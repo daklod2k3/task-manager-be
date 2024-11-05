@@ -23,6 +23,7 @@ public class TaskService : ITaskService
 
     public IEnumerable<ETask> GetAllTask()
     {
+        this.CreatTask(eTask:new ETask());
         return _unitOfWork.Task.GetAll();
     }
 

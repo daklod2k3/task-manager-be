@@ -6,20 +6,42 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace server.Controllers;
 
 [DefaultStatusCode(400)]
-public class ErrorResponse(string message = "Unexpected error") : StatusCodeResult(400)
+public class ErrorResponse : ActionResult
 {
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.BadRequest;
 
-    public string Message { get; set; } = message;
+    public string Message { get; set; }
+
+    public ErrorResponse()
+    {
+        Message = "Unexpected error";
+    }
+
+    public ErrorResponse(string message)
+    {
+        Message = message;
+    }
+    
+    public override async Task ExecuteResultAsync(ActionContext context)
+    {
+        var jsonResult = new JsonResult(this);
+        await jsonResult.ExecuteResultAsync(context);
+    }
 }
 
-[DefaultStatusCode(200)]
-public class SuccessResponse<T>() : StatusCodeResult(200)
+public sealed class SuccessResponse<T>(IEnumerable<T> data) : ActionResult
 {
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
 
-    public string? Message { get; set; }
-    public IEnumerable<T> Data { get; set; }
+    public string? Message { get; set; } = "Success";
+    public IEnumerable<T> Data { get; set; } = data;
+
+
+    public override async Task ExecuteResultAsync(ActionContext context)
+    {
+        var jsonResult = new JsonResult(this);
+        await jsonResult.ExecuteResultAsync(context);
+    }
 }
