@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Context;
 using server.Entities;
 using server.Services;
@@ -23,19 +24,20 @@ public class UserController : Controller
     }
 
     // GET
-    public ActionResult GetAuthUser()
+    [HttpGet]
+    public ActionResult GetUserAuthorized()
     {
-        var user_id = HttpContext.Items["user_id"] as string;
-        if (user_id == null) return new NotFoundResult();
-        var user = _userService.GetProfile(new Guid(user_id));
-        return new SuccessResponse<Profile>(new List<Profile> { user });
+        var user_id = AuthController.GetUserId(HttpContext);
+
+        return GetProfile(user_id);
     }
 
     [HttpGet("{user_id}")]
-    public ActionResult Get(string user_id)
+    public ActionResult GetProfile(string user_id)
     {
-        if (user_id == null) return GetAuthUser();
+        if (user_id == null) 
+            return new ErrorResponse("no user found");
         var user = _userService.GetProfile(new Guid(user_id));
-        return new SuccessResponse<Profile>(new List<Profile> { user });
+        return new SuccessResponse<Profile>( user );
     }
 }

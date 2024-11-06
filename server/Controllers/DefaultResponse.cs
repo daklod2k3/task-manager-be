@@ -13,7 +13,7 @@ public class ErrorResponse : ActionResult
         Error = "Unexpected error";
     }
 
-    public ErrorResponse(string error)
+    public ErrorResponse(object error)
     {
         Error = error;
     }
@@ -21,7 +21,7 @@ public class ErrorResponse : ActionResult
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.BadRequest;
 
-    public string Error { get; set; }
+    public object Error { get; set; }
 
     public override async Task ExecuteResultAsync(ActionContext context)
     {
@@ -30,13 +30,13 @@ public class ErrorResponse : ActionResult
     }
 }
 
-public sealed class SuccessResponse<T>(IEnumerable<T> data) : ActionResult
+public class SuccessResponse<T>(T data) : ActionResult
 {
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
 
     public string? Message { get; set; } = "Success";
-    public IEnumerable<T> Data { get; set; } = data;
+    public T Data { get; set; } = data;
 
 
     public override async Task ExecuteResultAsync(ActionContext context)
@@ -45,3 +45,5 @@ public sealed class SuccessResponse<T>(IEnumerable<T> data) : ActionResult
         await jsonResult.ExecuteResultAsync(context);
     }
 }
+public class SuccessResponse(object data): SuccessResponse<object>(data){}
+

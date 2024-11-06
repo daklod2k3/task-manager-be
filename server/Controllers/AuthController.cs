@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Supabase.Gotrue;
@@ -26,6 +27,11 @@ public class AuthController : Controller
     public AuthController(Client client)
     {
         _client = client;
+    }
+
+    public static string GetUserId(HttpContext context)
+    {
+        return context.User.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 
 

@@ -22,7 +22,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(new[] { _taskService.CreatTask(eTask) });
+            return new SuccessResponse<IEnumerable<ETask>>(new[] { _taskService.CreatTask(eTask) });
         }
         catch (Exception ex)
         {
@@ -50,7 +50,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(new[] { _taskService.DeleteTask(id) });
+            return new SuccessResponse<IEnumerable<ETask>>(new[] { _taskService.DeleteTask(id) });
         }
         catch (Exception ex)
         {
@@ -67,6 +67,6 @@ public class TaskController : Controller
             return new ErrorResponse("User id error") { Status = HttpStatusCode.InternalServerError };
 
         var taskList = _taskService.GetTaskByIdUser(new Guid(id));
-        return new SuccessResponse<ETask>(taskList);
+        return new SuccessResponse<IEnumerable<ETask>>(taskList);
     }
 }
