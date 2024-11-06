@@ -62,7 +62,7 @@ public class TaskController : Controller
         }
     }
 
-    public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string filterString)
+    public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
     {
         
 
@@ -76,10 +76,10 @@ public class TaskController : Controller
         return new SuccessResponse<IEnumerable<ETask>>(taskList);
     }
     [HttpGet]
-    public ActionResult<IEnumerable<ETask>> Get(string filter)
+    public ActionResult<IEnumerable<ETask>> Get(string? filter)
     {
-        string id = HttpContext.Items["user_id"] as string;
-        return GetTaskByIdUser(id, filter);
+        var id = AuthController.GetUserId(HttpContext);
+        return GetTaskByFilter(filter);
     }
     [HttpGet]
     [Route("{userId}")]
