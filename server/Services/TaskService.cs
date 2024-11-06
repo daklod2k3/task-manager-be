@@ -1,7 +1,7 @@
-﻿using LinqKit;
+﻿using System.Linq.Expressions;
+using LinqKit;
 using server.Entities;
 using server.Interfaces;
-using System.Linq.Expressions;
 
 namespace server.Services;
 
@@ -23,7 +23,7 @@ public class TaskService : ITaskService
 
     public IEnumerable<ETask> GetAllTask()
     {
-        this.CreatTask(eTask:new ETask());
+        CreatTask(new ETask());
         return _unitOfWork.Task.GetAll();
     }
 
@@ -50,7 +50,6 @@ public class TaskService : ITaskService
     public ETask UpdateTask(ETask eTask)
     {
         var result = _unitOfWork.Task.Update(eTask);
-        _unitOfWork.Save();
         return result;
     }
 
@@ -86,12 +85,9 @@ public class TaskService : ITaskService
 
     public IEnumerable<ETask> GetTaskByIdUser(Guid id, Expression<Func<ETask, bool>>? filter)
     {
-        if (Guid.Empty == id)
-        {
-            return Enumerable.Empty<ETask>();
-        }
-        var tasksByUser = _unitOfWork.Task.GetAll(filter: filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
-        var tasksByDepartment = _unitOfWork.Task.GetAll(filter: filter.And(
+        if (Guid.Empty == id) return Enumerable.Empty<ETask>();
+        var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
+        var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
             t => t.TaskDepartments
                 .Any(taskDept => taskDept.Department.DepartmentUsers
                     .Any(deptUser => deptUser.UserId == id)))
@@ -99,8 +95,9 @@ public class TaskService : ITaskService
         var result = tasksByUser.Union(tasksByDepartment).DistinctBy(t => t.Id).ToList();
         return result;
     }
+
     public IEnumerable<ETask> GetTaskByFilter(Expression<Func<ETask, bool>> filter)
     {
-        return _unitOfWork.Task.GetAll(filter: filter);
+        return _unitOfWork.Task.GetAll(filter);
     }
 }

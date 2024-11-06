@@ -8,7 +8,7 @@ namespace server.Repository;
 public class Repository<T> : IRepository<T> where T : class
 {
     // private readonly SupabaseContext _context;
-    private readonly DbSet<T> _dbSet;
+    protected readonly DbSet<T> _dbSet;
 
     public Repository(SupabaseContext context)
     {
@@ -45,6 +45,11 @@ public class Repository<T> : IRepository<T> where T : class
     public T Remove(T entity)
     {
         return _dbSet.Remove(entity).Entity;
+    }
+
+    public T Update(T entity)
+    {
+        return _dbSet.Update(entity).Entity;
     }
 
     private IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)

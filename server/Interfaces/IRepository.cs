@@ -10,4 +10,5 @@ public interface IRepository<T> where T : class
     T Add(T entity);
     bool Any(Expression<Func<T, bool>> filter);
     T Remove(T entity);
+    T Update(T entity);
 }

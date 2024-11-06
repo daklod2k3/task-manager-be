@@ -25,6 +25,7 @@ public class ErrorResponse : ActionResult
 
     public override async Task ExecuteResultAsync(ActionContext context)
     {
+        context.HttpContext.Response.StatusCode = (int)Status;
         var jsonResult = new JsonResult(this);
         await jsonResult.ExecuteResultAsync(context);
     }
@@ -45,5 +46,7 @@ public class SuccessResponse<T>(T data) : ActionResult
         await jsonResult.ExecuteResultAsync(context);
     }
 }
-public class SuccessResponse(object data): SuccessResponse<object>(data){}
 
+public class SuccessResponse(object data) : SuccessResponse<object>(data)
+{
+}

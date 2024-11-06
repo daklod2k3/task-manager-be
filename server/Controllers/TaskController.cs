@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
@@ -39,12 +37,12 @@ public class TaskController : Controller
     {
         try
         {
-            return Ok(_taskService.UpdateTask(eTask));
+            return new SuccessResponse<ETask>(_taskService.UpdateTask(eTask));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not update" });
+            return new ErrorResponse("Task is not update");
         }
     }
 
@@ -64,36 +62,33 @@ public class TaskController : Controller
 
     public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
     {
-        
-
         var filterResult = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString))
-        {
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        }
         var filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
-        var taskList = _taskService.GetTaskByIdUser(new Guid(userId),filter);
+        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
         return new SuccessResponse<IEnumerable<ETask>>(taskList);
     }
+
     [HttpGet]
     public ActionResult<IEnumerable<ETask>> Get(string? filter)
     {
         var id = AuthController.GetUserId(HttpContext);
         return GetTaskByFilter(filter);
     }
+
     [HttpGet]
     [Route("{userId}")]
     public ActionResult<IEnumerable<ETask>> GetById(string userId, string filter)
     {
         return GetTaskByIdUser(userId, filter);
     }
+
     public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)
     {
         var filterResult = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString))
-        {
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        }
         var compositeFilterExpression = CompositeFilter<ETask>.ApplyFilter(filterResult);
 
         var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
