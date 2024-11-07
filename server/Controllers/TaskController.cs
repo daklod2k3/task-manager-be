@@ -23,12 +23,12 @@ public class TaskController : Controller
     {
         try
         {
-            return Ok(_taskService.CreatTask(eTask));
+            return new SuccessResponse<ETask>(_taskService.CreatTask(eTask));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not create" });
+            return new ErrorResponse("Task is not create");
         }
     }
 
@@ -51,12 +51,12 @@ public class TaskController : Controller
     {
         try
         {
-            return Ok(_taskService.DeleteTask(id));
+            return new SuccessResponse<ETask>(_taskService.DeleteTask(id));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Task is not delete" });
+            return new ErrorResponse("Task is not delete");
         }
     }
 
