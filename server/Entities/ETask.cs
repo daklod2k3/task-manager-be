@@ -12,9 +12,9 @@ public class ETask
 
     public DateTime? DueDate { get; set; }
 
-    public ETaskPriority Priority { get; set; }
+    public ETaskPriority? Priority { get; set; }
 
-    public ETaskStatus Status { get; set; }
+    public ETaskStatus? Status { get; set; }
 
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 

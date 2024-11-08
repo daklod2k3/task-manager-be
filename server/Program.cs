@@ -15,6 +15,7 @@ using server.Entities;
 using server.Interfaces;
 using server.Repository;
 using server.Services;
+using Supabase;
 
 Env.Load();
 
@@ -34,6 +35,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -90,11 +92,11 @@ builder.Services.AddDbContext<SupabaseContext>(options =>
     options.UseNpgsql(dataSource));
 
 // add supabase
-// var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
-// var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
-// var supabase = new Client(supabaseUrl, supabaseAnonKey);
-// supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
-// builder.Services.AddSingleton(supabase);
+var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
+var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
+var supabase = new Client(supabaseUrl, supabaseAnonKey);
+supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
+builder.Services.AddSingleton(supabase);
 
 
 builder.Services.AddScoped<UserService>();

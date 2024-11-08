@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Repository;
 
 namespace server.Controllers;
 
@@ -32,12 +34,12 @@ public class TaskController : Controller
         }
     }
 
-    [HttpPut]
-    public ActionResult UpdateTask(ETask eTask)
+    [HttpPatch("{id}")]
+    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<ETask> patchDoc)
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.UpdateTask(eTask));
+            return new SuccessResponse<ETask>(_taskService.UpdateTask(id,patchDoc));
         }
         catch (Exception ex)
         {
@@ -74,14 +76,22 @@ public class TaskController : Controller
     public ActionResult<IEnumerable<ETask>> Get(string? filter)
     {
         var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByFilter(filter);
+        return GetTaskByIdUser(id,filter);
     }
 
     [HttpGet]
-    [Route("{userId}")]
-    public ActionResult<IEnumerable<ETask>> GetById(string userId, string filter)
+    [Route("{taskId}")]
+    public ActionResult<IEnumerable<ETask>> GetTaskById(long taskId)
     {
-        return GetTaskByIdUser(userId, filter);
+        try
+        {
+            return new SuccessResponse<ETask>(_taskService.GetTask(taskId));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not get");
+        }
     }
 
     public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)

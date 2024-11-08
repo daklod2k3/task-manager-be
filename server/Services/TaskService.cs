@@ -1,5 +1,8 @@
 ﻿using System.Linq.Expressions;
+using System.Threading.Tasks;
 using LinqKit;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
 
@@ -19,6 +22,11 @@ public class TaskService : ITaskService
         var result = _unitOfWork.Task.Add(eTask);
         _unitOfWork.Save();
         return result;
+    }
+    public ETask GetTask(long id)
+    {
+        
+        return _unitOfWork.Task.Get(x =>x.Id == id);
     }
 
     public IEnumerable<ETask> GetAllTask()
@@ -47,10 +55,20 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public ETask UpdateTask(ETask eTask)
+    public ETask UpdateTask(long id, [FromBody] JsonPatchDocument<ETask> patchDoc)
     {
-        var result = _unitOfWork.Task.Update(eTask);
-        return result;
+        
+        var task =  _unitOfWork.Task.Get(x => x.Id == id);
+        if (task == null)
+        {
+            throw new Exception("not found task");
+        }
+
+        patchDoc.ApplyTo(task);
+
+        _unitOfWork.Save();
+
+        return task;
     }
 
     public TaskDepartment UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
