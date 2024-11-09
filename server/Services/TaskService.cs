@@ -104,6 +104,7 @@ public class TaskService : ITaskService
     public IEnumerable<ETask> GetTaskByIdUser(Guid id, Expression<Func<ETask, bool>>? filter)
     {
         if (Guid.Empty == id) return Enumerable.Empty<ETask>();
+        filter ??= t => true;
         var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
         var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
             t => t.TaskDepartments

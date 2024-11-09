@@ -5,6 +5,7 @@ using server.Entities;
 using server.Helpers;
 using server.Interfaces;
 using server.Repository;
+using System.Linq.Expressions;
 
 namespace server.Controllers;
 
@@ -65,9 +66,13 @@ public class TaskController : Controller
     public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
     {
         var filterResult = new ClientFilter();
+        Expression<Func<ETask, bool>>? filter = null;
+
         if (!string.IsNullOrEmpty(filterString))
+        {
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
+            filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
+        }
         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
         return new SuccessResponse<IEnumerable<ETask>>(taskList);
     }
