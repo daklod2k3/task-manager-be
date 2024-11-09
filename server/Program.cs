@@ -12,6 +12,7 @@ using Npgsql;
 using server.Context;
 using server.Controllers;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 using server.Repository;
 using server.Services;
@@ -25,17 +26,38 @@ var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
 
 // Add services to the container.
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
-    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-});
+builder.Services.AddControllers(options =>
+    {
+        options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+//     .AddNewtonsoftJson(options =>
+// {
+//     options.SerializerSettings.ContractResolver = new DefaultContractResolver
+//     {
+//         NamingStrategy = new SnakeCaseNamingStrategy()
+//     };
+//
+//     // Convert enums to strings
+//     options.SerializerSettings.Converters.Add(new StringEnumConverter());
+//
+//     // Ignore cycles to prevent reference loops
+//     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+//
+//     // Ignore null values when serializing
+//     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+//     
+// });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
