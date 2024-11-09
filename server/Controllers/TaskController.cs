@@ -1,11 +1,10 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
-using server.Repository;
-using System.Linq.Expressions;
 
 namespace server.Controllers;
 
@@ -40,7 +39,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.UpdateTask(id,patchDoc));
+            return new SuccessResponse<ETask>(_taskService.UpdateTask(id, patchDoc));
         }
         catch (Exception ex)
         {
@@ -63,6 +62,7 @@ public class TaskController : Controller
         }
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
     {
         var filterResult = new ClientFilter();
@@ -73,6 +73,7 @@ public class TaskController : Controller
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
             filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
         }
+
         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
         return new SuccessResponse<IEnumerable<ETask>>(taskList);
     }
@@ -81,7 +82,7 @@ public class TaskController : Controller
     public ActionResult<IEnumerable<ETask>> Get(string? filter)
     {
         var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(id,filter);
+        return GetTaskByIdUser(id, filter);
     }
 
     [HttpGet]
@@ -99,6 +100,7 @@ public class TaskController : Controller
         }
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)
     {
         var filterResult = new ClientFilter();

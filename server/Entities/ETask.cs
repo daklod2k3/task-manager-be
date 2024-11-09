@@ -14,7 +14,7 @@ public class ETask
 
     public ETaskPriority? Priority { get; set; }
 
-    public ETaskStatus? Status { get; set; }
+    public ETaskStatus? Status { get; set; } = ETaskStatus.To_do;
 
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 

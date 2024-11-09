@@ -47,6 +47,7 @@ public class SuccessResponse<T>(T data) : ActionResult
     }
 }
 
-public class SuccessResponse(object data) : SuccessResponse<object>(data)
-{
-}
+// public void SuccessResponse(object data)
+// {
+//     return new SuccessResponse<typeo>(data)
+// }
