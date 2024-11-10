@@ -2,6 +2,6 @@
 
 namespace server.Interfaces;
 
-public interface ITaskRepository : IRepository<ETask>
+public interface ITaskRepository : IRepository<TaskEntity>
 {
 }

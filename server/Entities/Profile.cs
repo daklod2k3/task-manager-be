@@ -15,6 +15,9 @@ public class Profile
     public virtual ICollection<ChannelUser> ChannelUsers { get; set; } = new List<ChannelUser>();
 
     public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
+    
+    public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
+
 
     public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 

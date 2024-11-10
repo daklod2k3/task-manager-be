@@ -21,11 +21,11 @@ public class TaskController : Controller
 
 
     [HttpPost]
-    public ActionResult CreateTask(ETask eTask)
+    public ActionResult CreateTask(TaskEntity taskEntity)
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.CreatTask(eTask));
+            return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
         }
         catch (Exception ex)
         {
@@ -35,11 +35,11 @@ public class TaskController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<ETask> patchDoc)
+    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.UpdateTask(id, patchDoc));
+            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(id, patchDoc));
         }
         catch (Exception ex)
         {
@@ -53,7 +53,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.DeleteTask(id));
+            return new SuccessResponse<TaskEntity>(_taskService.DeleteTask(id));
         }
         catch (Exception ex)
         {
@@ -63,23 +63,24 @@ public class TaskController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString)
     {
         var filterResult = new ClientFilter();
-        Expression<Func<ETask, bool>>? filter = null;
+        Expression<Func<TaskEntity, bool>>? filter = null;
 
         if (!string.IsNullOrEmpty(filterString))
         {
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-            filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
+            filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
-        return new SuccessResponse<IEnumerable<ETask>>(taskList);
+        // var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
+        var taskList = _taskService.GetAllTask();
+        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ETask>> Get(string? filter)
+    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter)
     {
         var id = AuthController.GetUserId(HttpContext);
         return GetTaskByIdUser(id, filter);
@@ -87,11 +88,11 @@ public class TaskController : Controller
 
     [HttpGet]
     [Route("{taskId}")]
-    public ActionResult<IEnumerable<ETask>> GetTaskById(long taskId)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId)
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.GetTask(taskId));
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId));
         }
         catch (Exception ex)
         {
@@ -101,14 +102,14 @@ public class TaskController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByFilter(string filterString)
     {
         var filterResult = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString))
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<ETask>.ApplyFilter(filterResult);
+        var compositeFilterExpression = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
 
         var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<ETask>>(taskList);
+        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 }

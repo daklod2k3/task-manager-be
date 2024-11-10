@@ -17,21 +17,19 @@ public class TaskService : ITaskService
         _unitOfWork = unitOfWork;
     }
 
-    public ETask CreatTask(ETask eTask)
+    public TaskEntity CreatTask(TaskEntity taskEntity)
     {
-        var result = _unitOfWork.Task.Add(eTask);
+        var result = _unitOfWork.Task.Add(taskEntity);
         _unitOfWork.Save();
         return result;
     }
-    public ETask GetTask(long id)
+    public TaskEntity GetTask(long id)
     {
-        
         return _unitOfWork.Task.Get(x =>x.Id == id);
     }
 
-    public IEnumerable<ETask> GetAllTask()
+    public IEnumerable<TaskEntity> GetAllTask()
     {
-        CreatTask(new ETask());
         return _unitOfWork.Task.GetAll();
     }
 
@@ -47,7 +45,7 @@ public class TaskService : ITaskService
         return _unitOfWork.Save();
     }
 
-    public ETask DeleteTask(long id)
+    public TaskEntity DeleteTask(long id)
     {
         var task = _unitOfWork.Task.Get(x => x.Id == id);
         var result = _unitOfWork.Task.Remove(task);
@@ -55,7 +53,7 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public ETask UpdateTask(long id, [FromBody] JsonPatchDocument<ETask> patchDoc)
+    public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
         
         var task =  _unitOfWork.Task.Get(x => x.Id == id);
@@ -101,9 +99,9 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<ETask> GetTaskByIdUser(Guid id, Expression<Func<ETask, bool>>? filter)
+    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter)
     {
-        if (Guid.Empty == id) return Enumerable.Empty<ETask>();
+        if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
         var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
         var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
@@ -115,7 +113,7 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<ETask> GetTaskByFilter(Expression<Func<ETask, bool>> filter)
+    public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> filter)
     {
         return _unitOfWork.Task.GetAll(filter);
     }
