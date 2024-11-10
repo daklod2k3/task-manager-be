@@ -91,7 +91,12 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.GetTask(taskId));
+            var task = _taskService.GetTask(taskId);
+            if(task == null)
+            {
+                return new ErrorResponse("Task is not exist");
+            }
+            return new SuccessResponse<ETask>(task);
         }
         catch (Exception ex)
         {
