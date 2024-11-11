@@ -3,11 +3,10 @@ namespace server.Entities;
 public enum ETaskStatus
 {
     To_do,
-    In_Progress,
-    In_Preview,
-    In_Complete, 
-    QA, 
-    Done, 
-    Archived	
-    
+    In_progress,
+    In_preview,
+    In_complete,
+    Qa,
+    Done,
+    Archived
 }

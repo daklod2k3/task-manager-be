@@ -10,7 +10,7 @@ public class TaskDepartment
 
     public long DepartmentId { get; set; }
 
-    public virtual Department Department { get; set; } = null!;
+    public virtual Department? Department { get; set; } = null!;
 
-    public virtual Tasks Task { get; set; } = null!;
+    public virtual ETask? Task { get; set; } = null!;
 }

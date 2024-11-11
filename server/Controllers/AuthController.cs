@@ -1,12 +1,9 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Http.HttpResults;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using server.Helpers;
 using Supabase.Gotrue;
 using Supabase.Gotrue.Exceptions;
-using Supabase.Gotrue.Interfaces;
-using static Supabase.Gotrue.StatelessClient;
-
+using Client = Supabase.Client;
 
 namespace server.Controllers;
 
@@ -14,37 +11,30 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class AuthController : Controller
 {
+    // private Client CreateStatelessClient()
+    // {
+    //     return new Client(new ClientOptions
+    //     {
+    //         Url = Environment.GetEnvironmentVariable("SUPABASE_URL") + "/auth/v1",
+    //         Headers = new Dictionary<string, string>
+    //         {
+    //             { "apikey", Environment.GetEnvironmentVariable("SUPABASE_PUB_KEY") }
+    //         },
+    //     });
+    // }
+    private readonly Client _client;
+
+    public AuthController(Client client)
+    {
+        _client = client;
+    }
+
+    public static string GetUserId(HttpContext context)
+    {
+        return context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+    }
 
 
-    public class LoginBody
-    {
-        public string email { get; set; }
-        public string password { get; set; }
-    }
-    
-    public class RegisterBody: LoginBody
-    {
-        
-        public string name { get; set; }
-    }
-    
-    public AuthController()
-    {
-    }
-
-    private Client CreateStatelessClient()
-    {
-        return new Supabase.Gotrue.Client(new ClientOptions
-        {
-            Url = Environment.GetEnvironmentVariable("SUPABASE_URL") + "/auth/v1",
-            Headers = new Dictionary<string, string>
-            {
-                { "apikey", Environment.GetEnvironmentVariable("SUPABASE_PUB_KEY") },
-            }
-        });
-    }
-        
-    
     // create user
     // [HttpPost()]
     // public string register([FromBody] RegisterModel registerModel)
@@ -61,40 +51,38 @@ public class AuthController : Controller
     //      // Debug.WriteLine(result.Result);
     //     return result.Result.ToString();
     // }
-    
+
     // create user
-    [HttpPost()]
+    [AllowAnonymous]
+    [HttpPost]
     [Route("register")]
-    public string register([FromBody] RegisterBody registerModel)
+    public IActionResult register([FromBody] RegisterBody registerModel)
     {
         var options = new SignUpOptions();
-        options.Data = new Dictionary<string, object>()
+        options.Data = new Dictionary<string, object>
         {
             { "name", registerModel.name }
         };
-        var client = CreateStatelessClient();
         try
         {
-            var result = client.SignUp(registerModel.email, registerModel.password, options);
-            return result.Result.User.ToString();
-
+            var result = _client.Auth.SignUp(registerModel.email, registerModel.password, options);
+            return Ok(result.Result);
         }
         catch (AggregateException e)
         {
-            return ((GotrueException)e.InnerException).StatusCode.ToString();
+            return BadRequest(((GotrueException)e.InnerException).Message);
         }
     }
-    
-    [HttpPost()]
+
+    [AllowAnonymous]
+    [HttpPost]
     [Route("login")]
     public IActionResult login([FromBody] LoginBody registerModel)
     {
-        var client = CreateStatelessClient();
         try
         {
-            var result = client.SignIn(registerModel.email, registerModel.password);
+            var result = _client.Auth.SignIn(registerModel.email, registerModel.password);
             return Ok(result.Result);
-
         }
         catch (AggregateException e)
         {
@@ -107,8 +95,15 @@ public class AuthController : Controller
         }
     }
 
-    
 
-    
-    
+    public class LoginBody
+    {
+        public string email { get; set; }
+        public string password { get; set; }
+    }
+
+    public class RegisterBody : LoginBody
+    {
+        public string name { get; set; }
+    }
 }
