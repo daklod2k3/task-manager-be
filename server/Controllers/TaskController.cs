@@ -74,8 +74,7 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-        // var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
-        var taskList = _taskService.GetAllTask();
+         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
