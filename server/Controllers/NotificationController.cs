@@ -6,6 +6,8 @@ using System.Text;
 using server.Context;
 using server.Entities;
 using server.Interfaces;
+using Newtonsoft.Json;
+using server.Helpers;
 
 namespace server.Controllers;
 
@@ -28,6 +30,18 @@ public class NotificationController : Controller
         
     }
 
+    //lấy mọi notifications của login id
+    [HttpGet("/byiduser")]
+    public ActionResult<IEnumerable<Notification>> GetByIdUser(string? filter)
+    {
+        var id = AuthController.GetUserId(HttpContext);
+        var filterResult = new ClientFilter();
+        if (!string.IsNullOrEmpty(filter))
+            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filter);
+        var compositeFilterExpression = CompositeFilter<Notification>.ApplyFilter(filterResult);
+        return _notificationService.GetNotificationById(new Guid(id), compositeFilterExpression).ToList();
+        
+    }
 
     //tạo notification mới
     [HttpPost]
