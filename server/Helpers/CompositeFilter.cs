@@ -8,9 +8,10 @@ namespace server.Helpers
             public static Expression<Func<T, bool>> ApplyFilter( ClientFilter filter)
             {
                 if (filter == null || filter.Filters == null || !filter.Filters.Any())
-                    return x => true;
+                //return x => true;
+                return null;
 
-                Expression<Func<T, bool>> compositeFilterExpression = null;
+            Expression<Func<T, bool>> compositeFilterExpression = null;
                 if (filter.Filters.Count == 1)
                 {
                     compositeFilterExpression = GetSingleFilterExpression(filter.Filters.First());
