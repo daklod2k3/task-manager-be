@@ -115,6 +115,12 @@ namespace server.Helpers
                     return null;
                 var property = Expression.Property(parameter, filter.Field);
                 var constant = Expression.Constant(filter.Value);
+                
+                var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                var propertyLower = Expression.Call(property, toLowerMethod);
+                var constantLower = Expression.Call(constant, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
+
+
                 if (property.Type.IsEnum || Nullable.GetUnderlyingType(property.Type)?.IsEnum == true)
                 {
                     var enumType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
@@ -135,22 +141,15 @@ namespace server.Helpers
                         return Expression.GreaterThan(property, constant);
                     case "gte":
                         return Expression.GreaterThanOrEqual(property, constant);
-                    case "contains":
-                        var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
-
-                        // Chuyển property và constant về chữ thường
-                        var propertyToLower = Expression.Call(property, toLowerMethod);
-                        var constantToLower = Expression.Call(constant, toLowerMethod);
-
+                    case "ctn":
                         var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                        return Expression.Call(propertyToLower, containsMethod, constantToLower);
-                    case "startswith":
+                        return Expression.Call(propertyLower, containsMethod, constantLower);
+                    case "stw":
                         var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string), typeof(StringComparison) });
 
                         // Convert the constant value to lowercase for case-insensitive comparison
-                        var constantLower = Expression.Call(constant, typeof(string).GetMethod("ToLower", Type.EmptyTypes));
-
-                        return Expression.Call(property, startsWithMethod, constantLower, Expression.Constant(StringComparison.OrdinalIgnoreCase));
+                        // return Expression.Lambda()
+                        return Expression.Call(propertyLower, startsWithMethod, constantLower);
 
 
                     // Add more operators as needed...
