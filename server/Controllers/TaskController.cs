@@ -23,8 +23,9 @@ public class TaskController : Controller
     [HttpPost]
     public ActionResult CreateTask(TaskEntity taskEntity)
     {
+        var user_id = AuthController.GetUserId(HttpContext);
         try
-        {
+        {   taskEntity.CreatedBy = new Guid(user_id);
             return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
         }
         catch (Exception ex)
