@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
@@ -46,6 +47,34 @@ public class DepartmentController : Controller
         }
     }
 
+    [HttpPatch("{id}")]
+    public ActionResult UpdateDepartmentPatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
+    {
+        try
+        {
+            return new SuccessResponse<Department>(_departmentService.UpdateDepartmentPatch(id, patchDoc));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("department is not update");
+        }
+    }
+
+    [HttpDelete]
+    public ActionResult DeleteDepartment(long id)
+    {
+        try
+        {
+            return new SuccessResponse<Department>(_departmentService.DeleteDepartment(id));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("department is not delete");
+        }
+    }
+
     public ActionResult<IEnumerable<Department>> GetDepartmentByFilter(string filterString)
     {
         var filterResult = new ClientFilter();
@@ -62,5 +91,20 @@ public class DepartmentController : Controller
     {
         //var id = AuthController.GetUserId(HttpContext);
         return GetDepartmentByFilter(filter);
+    }
+
+    [HttpGet]
+    [Route("{departmentId}")]
+    public ActionResult<IEnumerable<Department>> GetDepartmentById(long departmentId)
+    {
+        try
+        {
+            return new SuccessResponse<Department>(_departmentService.GetDepartment(departmentId));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("department is not get");
+        }
     }
 }

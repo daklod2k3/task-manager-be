@@ -12,6 +12,7 @@ using Npgsql;
 using server.Context;
 using server.Controllers;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 using server.Repository;
 using server.Services;
@@ -23,15 +24,39 @@ var builder = WebApplication.CreateBuilder(args);
 var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtSecret"]!);
 var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
-    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-});
 
+// Add services to the container.
+builder.Services.AddControllers(options =>
+    {
+        options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+//     .AddNewtonsoftJson(options =>
+// {
+//     options.SerializerSettings.ContractResolver = new DefaultContractResolver
+//     {
+//         NamingStrategy = new SnakeCaseNamingStrategy()
+//     };
+//
+//     // Convert enums to strings
+//     options.SerializerSettings.Converters.Add(new StringEnumConverter());
+//
+//     // Ignore cycles to prevent reference loops
+//     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+//
+//     // Ignore null values when serializing
+//     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+//     
+// });
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

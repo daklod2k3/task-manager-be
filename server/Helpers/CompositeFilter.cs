@@ -8,11 +8,15 @@ namespace server.Helpers
             public static Expression<Func<T, bool>> ApplyFilter( ClientFilter filter)
             {
                 if (filter == null || filter.Filters == null || !filter.Filters.Any())
-                    return null;
+                //return x => true;
+                return null;
 
-                Expression<Func<T, bool>> compositeFilterExpression = null;
-
-                if (filter.Logic?.ToLower() == "and")
+            Expression<Func<T, bool>> compositeFilterExpression = null;
+                if (filter.Filters.Count == 1)
+                {
+                    compositeFilterExpression = GetSingleFilterExpression(filter.Filters.First());
+                }
+                else if (filter.Logic?.ToLower() == "and")
                 {
                     compositeFilterExpression = GetAndFilterExpression(filter.Filters);
                 }
@@ -23,7 +27,12 @@ namespace server.Helpers
 
             return compositeFilterExpression;
             }
-
+            private static Expression<Func<T, bool>> GetSingleFilterExpression(Filter filter)
+            {
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var filterExpression = BuildFilterExpression(filter, parameter);
+                return Expression.Lambda<Func<T, bool>>(filterExpression, parameter);
+            }
             private static Expression<Func<T, bool>> GetAndFilterExpression(List<Filter> filters)
             {
                 if (filters == null || !filters.Any())
