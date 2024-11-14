@@ -3,12 +3,10 @@ namespace server.Helpers
 {
     public class CompositeFilter<T>
     {
-        private const string eq = "eq";
 
             public static Expression<Func<T, bool>> ApplyFilter( ClientFilter filter)
             {
                 if (filter == null || filter.Filters == null || !filter.Filters.Any())
-                //return x => true;
                 return null;
 
             Expression<Func<T, bool>> compositeFilterExpression = null;
@@ -117,10 +115,15 @@ namespace server.Helpers
                     return null;
                 var property = Expression.Property(parameter, filter.Field);
                 var constant = Expression.Constant(filter.Value);
-
+                if (property.Type.IsEnum || Nullable.GetUnderlyingType(property.Type)?.IsEnum == true)
+                {
+                    var enumType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
+                    var enumValue = Enum.Parse(enumType, filter.Value.ToString(), ignoreCase: true);
+                    constant = Expression.Constant(enumValue, property.Type);
+                }
                 switch (filter.Operator.ToLower())
                 {
-                    case CompositeFilter<T>.eq:
+                    case "eq":
                         return Expression.Equal(property, constant);
                     case "neq":
                         return Expression.NotEqual(property, constant);
@@ -133,8 +136,14 @@ namespace server.Helpers
                     case "gte":
                         return Expression.GreaterThanOrEqual(property, constant);
                     case "contains":
+                        var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+
+                        // Chuyển property và constant về chữ thường
+                        var propertyToLower = Expression.Call(property, toLowerMethod);
+                        var constantToLower = Expression.Call(constant, toLowerMethod);
+
                         var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                        return Expression.Call(property, containsMethod, constant);
+                        return Expression.Call(propertyToLower, containsMethod, constantToLower);
                     case "startswith":
                         var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string), typeof(StringComparison) });
 
