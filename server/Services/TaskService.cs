@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Threading.Tasks;
 using LinqKit;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +22,10 @@ public class TaskService : ITaskService
         _unitOfWork.Save();
         return result;
     }
+
     public TaskEntity GetTask(long id)
     {
-        return _unitOfWork.Task.Get(x =>x.Id == id);
+        return _unitOfWork.Task.Get(x => x.Id == id);
     }
 
     public IEnumerable<TaskEntity> GetAllTask()
@@ -55,12 +55,8 @@ public class TaskService : ITaskService
 
     public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
-        
-        var task =  _unitOfWork.Task.Get(x => x.Id == id);
-        if (task == null)
-        {
-            throw new Exception("not found task");
-        }
+        var task = _unitOfWork.Task.Get(x => x.Id == id);
+        if (task == null) throw new Exception("not found task");
 
         patchDoc.ApplyTo(task);
 
@@ -103,7 +99,8 @@ public class TaskService : ITaskService
     {
         if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
-        var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
+        var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id))
+            .Or(t => t.CreatedBy == id));
         var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
             t => t.TaskDepartments
                 .Any(taskDept => taskDept.Department.DepartmentUsers
