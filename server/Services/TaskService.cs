@@ -103,13 +103,25 @@ public class TaskService : ITaskService
     {
         if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
-        var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
-        var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
-            t => t.TaskDepartments
-                .Any(taskDept => taskDept.Department.DepartmentUsers
-                    .Any(deptUser => deptUser.UserId == id)))
-        );
-        var result = tasksByUser.Union(tasksByDepartment).DistinctBy(t => t.Id).ToList();
+        var tasks = _unitOfWork.Task.GetAll(filter: filter);
+        var taskDepartments = _unitOfWork.TaskDepartment.GetAll();
+        var taskUsers = _unitOfWork.TaskUser.GetAll(filter: x => x.UserId == id);
+        var departments = _unitOfWork.Department.GetAll();
+        var departmentUsers = _unitOfWork.DepartmentUser.GetAll(filter: x => x.UserId == id);
+        //var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
+        //var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
+        //    t => t.TaskDepartments
+        //        .Any(taskDept => taskDept.Department.DepartmentUsers
+        //            .Any(deptUser => deptUser.UserId == id)))
+        //);
+        //var result = tasksByUser.Union(tasksByDepartment).DistinctBy(t => t.Id).ToList();
+        var result = (from t in tasks
+                      join td in taskDepartments on t.Id equals td.TaskId
+                      join d in departments on td.DepartmentId equals d.Id
+                      join du in departmentUsers on d.Id equals du.DepartmentId select t).Union
+                      (from t in tasks
+                       join tu in taskUsers on t.Id equals tu.TaskId select t).Union
+                       (from t in tasks where t.CreatedBy == id select t).ToList();
         return result;
     }
 
