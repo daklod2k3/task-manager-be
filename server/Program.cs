@@ -101,7 +101,7 @@ builder.Services.AddSingleton(supabase);
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
-
+builder.Services.AddScoped<IReportService, ReportService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
