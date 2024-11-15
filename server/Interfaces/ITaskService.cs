@@ -18,6 +18,6 @@ public interface ITaskService
     TaskDepartment DeleteAssignTaskToDepartment(long id);
     TaskUser UpdateAssignTaskToUser(TaskUser taskUser);
     TaskUser DeleteAssignTaskToUser(long id);
-    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? compositeFilterExpression);
+    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? compositeFilterExpression, string includes = "");
     public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> compositeFilterExpression);
 }

@@ -95,12 +95,12 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter)
+    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter, string includes = null)
     {
         if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
         var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id))
-            .Or(t => t.CreatedBy == id));
+            .Or(t => t.CreatedBy == id), includes );
         var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
             t => t.TaskDepartments
                 .Any(taskDept => taskDept.Department.DepartmentUsers

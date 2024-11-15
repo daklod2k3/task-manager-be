@@ -25,7 +25,8 @@ public class TaskController : Controller
     {
         var user_id = AuthController.GetUserId(HttpContext);
         try
-        {   taskEntity.CreatedBy = new Guid(user_id);
+        {
+            taskEntity.CreatedBy = new Guid(user_id);
             return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
         }
         catch (Exception ex)
@@ -64,7 +65,8 @@ public class TaskController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,
+        string inlucdes = "")
     {
         var filterResult = new ClientFilter();
         Expression<Func<TaskEntity, bool>>? filter = null;
@@ -75,15 +77,15 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
+        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter)
+    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter, string? includes)
     {
         var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(id, filter);
+        return GetTaskByIdUser(id, filter, includes);
     }
 
     [HttpGet]

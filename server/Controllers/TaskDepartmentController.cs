@@ -1,50 +1,62 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
+using server.Repository;
 
-namespace server.Controllers
+namespace server.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class TaskDepartmentController : Controller
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class TaskDepartmentController : Controller
+    private readonly ITaskDepartmentRepository _taskDepartmentRepository;
+    private readonly ITaskService _taskService;
+
+    public TaskDepartmentController(ITaskService taskService, TaskDepartmentRepository taskDepartmentRepository)
     {
-        private readonly ITaskService _taskService;
-        
-        public TaskDepartmentController(ITaskService taskService)
+        _taskService = taskService;
+        _taskDepartmentRepository = taskDepartmentRepository;
+    }
+
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        return new SuccessResponse<IEnumerable<TaskDepartment>>(_taskDepartmentRepository.GetAll());
+    }
+
+    [HttpPost]
+    public IActionResult AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+    {
+        return Ok(_taskService.AssignTaskToDepartment(taskDepartments));
+    }
+
+    [HttpPut]
+    public ActionResult UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
+    {
+        try
         {
-            _taskService = taskService;
+            return Ok(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
         }
-        [HttpPost]
-        public IActionResult AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+        catch (Exception ex)
         {
-            
-            return Ok(_taskService.AssignTaskToDepartment(taskDepartments));
+            Console.WriteLine(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "TaskDepartment is not update" });
         }
-        [HttpPut]
-        public ActionResult UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
+    }
+
+    [HttpDelete]
+    public ActionResult DeleteAssignTaskToDepartment(long id)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not update" });
-            }
+            return Ok(_taskService.DeleteAssignTaskToDepartment(id));
         }
-        [HttpDelete]
-        public ActionResult DeleteAssignTaskToDepartment(long id)
+        catch (Exception ex)
         {
-            try
-            {
-                return Ok(_taskService.DeleteAssignTaskToDepartment(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not delete" });
-            }
+            Console.WriteLine(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "TaskDepartment is not delete" });
         }
     }
 }
