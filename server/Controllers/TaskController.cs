@@ -33,7 +33,19 @@ public class TaskController : Controller
             return new ErrorResponse("Task is not create");
         }
     }
-
+    [HttpPut]
+    public ActionResult UpdateTask(TaskEntity taskEntity)
+    {
+        try
+        {
+            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(taskEntity));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not update");
+        }
+    }
     [HttpPatch("{id}")]
     public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
@@ -63,8 +75,13 @@ public class TaskController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString, string? includeProperties, int? page, int? pageItem)
     {
+        Pagination pagination = null;
+        if (page != null && pageItem != null)
+        {
+            pagination = new Pagination() { PageNumber = (int)page, PageSize = (int)pageItem };
+        }
         var filterResult = new ClientFilter();
         Expression<Func<TaskEntity, bool>>? filter = null;
 
@@ -74,15 +91,15 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
+         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter)
+    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter, string? includes, int? page, int? pageItem)
     {
         var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(id, filter);
+        return GetTaskByIdUser(id, filter, includes, page, pageItem);
     }
 
     [HttpGet]
