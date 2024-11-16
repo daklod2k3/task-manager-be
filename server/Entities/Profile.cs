@@ -1,4 +1,6 @@
-﻿namespace server.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace server.Entities;
 
 public class Profile
 {
@@ -10,26 +12,37 @@ public class Profile
 
     public string? Avt { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
+    [JsonIgnore]
 
     public virtual ICollection<ChannelUser> ChannelUsers { get; set; } = new List<ChannelUser>();
+    [JsonIgnore]
 
     public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
+    [JsonIgnore]
     
     public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
+    [JsonIgnore]
 
 
     public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
+    [JsonIgnore]
 
     public virtual ICollection<Files> Files { get; set; } = new List<Files>();
+    [JsonIgnore]
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    [JsonIgnore]
 
     public virtual ICollection<TaskHistory> TaskHistories { get; set; } = new List<TaskHistory>();
+    [JsonIgnore]
 
     public virtual ICollection<TaskUser> TaskUsers { get; set; } = new List<TaskUser>();
+    [JsonIgnore]
 
     public virtual ICollection<UserMessage> UserMessageFroms { get; set; } = new List<UserMessage>();
+    [JsonIgnore]
 
     public virtual ICollection<UserMessage> UserMessageTos { get; set; } = new List<UserMessage>();
 }

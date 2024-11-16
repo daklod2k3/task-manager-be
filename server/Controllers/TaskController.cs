@@ -19,10 +19,11 @@ public class TaskController : Controller
         _taskService = taskService;
     }
 
-
     [HttpPost]
     public ActionResult CreateTask(TaskEntity taskEntity)
     {
+        var id = AuthController.GetUserId(HttpContext);
+        taskEntity.CreatedBy = new Guid(id);
         try
         {
             return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
@@ -33,6 +34,7 @@ public class TaskController : Controller
             return new ErrorResponse("Task is not create");
         }
     }
+
     [HttpPut]
     public ActionResult UpdateTask(TaskEntity taskEntity)
     {
@@ -46,6 +48,7 @@ public class TaskController : Controller
             return new ErrorResponse("Task is not update");
         }
     }
+
     [HttpPatch("{id}")]
     public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
@@ -75,13 +78,12 @@ public class TaskController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString, string? includeProperties, int? page, int? pageItem)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,
+        string? includeProperties, int? page, int? pageItem)
     {
         Pagination pagination = null;
         if (page != null && pageItem != null)
-        {
-            pagination = new Pagination() { PageNumber = (int)page, PageSize = (int)pageItem };
-        }
+            pagination = new Pagination { PageNumber = (int)page, PageSize = (int)pageItem };
         var filterResult = new ClientFilter();
         Expression<Func<TaskEntity, bool>>? filter = null;
 
@@ -91,7 +93,7 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-         var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
+        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
@@ -104,17 +106,10 @@ public class TaskController : Controller
 
     [HttpGet]
     [Route("{taskId}")]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(string? filter, string? includes, int? page, int? pageItem)
     {
-        try
-        {
-            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not get");
-        }
+        var id = AuthController.GetUserId(HttpContext);
+        return GetTaskByIdUser(id, filter, includes, page, pageItem);
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
