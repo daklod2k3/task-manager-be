@@ -118,6 +118,7 @@ public class TaskService : ITaskService
     public TaskEntity UpdateTask(TaskEntity taskEntity)
     {
         var result = _unitOfWork.Task.Update(taskEntity);
+        _unitOfWork.Save();
         return result;
     }
 }
