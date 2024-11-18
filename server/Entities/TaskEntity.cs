@@ -33,7 +33,6 @@ public class TaskEntity
         {
             return TaskUsers.Count;
         }
-        set { AssignedToUser = value; }
     }
 
     [NotMapped]
@@ -43,7 +42,6 @@ public class TaskEntity
         {
             return TaskDepartments.Count;
         }
-        set { AssignedToUser = value; }
     }
     public virtual Profile? CreatedByNavigation { get; set; } = null!;
 }
