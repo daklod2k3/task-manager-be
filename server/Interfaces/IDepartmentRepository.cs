@@ -4,6 +4,6 @@ namespace server.Interfaces
 {
     public interface IDepartmentRepository : IRepository<Department>
     {
-        
+
     }
 }
