@@ -37,6 +37,7 @@ public class DepartmentUserService : IDepartmentUserService
     public DepartmentUser UpdateDepartmentUser(DepartmentUser departmentUser)
     {
         var result = _unitOfWork.DepartmentUser.Update(departmentUser);
+        _unitOfWork.Save();
         return result;
     }
 
