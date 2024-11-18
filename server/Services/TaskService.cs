@@ -23,9 +23,9 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public TaskEntity GetTask(long id)
+    public TaskEntity GetTask(long id,string? includes)
     {
-        return _unitOfWork.Task.Get(x => x.Id == id);
+        return _unitOfWork.Task.Get(x => x.Id == id, includes);
     }
 
     public IEnumerable<TaskEntity> GetAllTask()

@@ -106,10 +106,17 @@ public class TaskController : Controller
 
     [HttpGet]
     [Route("{taskId}")]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(string? filter, string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId, string? includes)
     {
-        var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(id, filter, includes, page, pageItem);
+        try
+        {
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId, includes));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not found");
+        }
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
