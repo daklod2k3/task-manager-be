@@ -1,7 +1,9 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
+using server.Helpers;
 using server.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace server.Repository;
 
@@ -32,7 +34,7 @@ public class Repository<T> : IRepository<T> where T : class
         return GetQuery(filter, includeProperties).FirstOrDefault();
     }
 
-    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IEnumerable<T> GetAll( Expression<Func<T, bool>>? filter, string? includeProperties)
     {
         return GetQuery(filter, includeProperties).ToList();
     }
@@ -52,7 +54,7 @@ public class Repository<T> : IRepository<T> where T : class
         return _dbSet.Update(entity).Entity;
     }
 
-    private IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
     {
         IQueryable<T> query = _dbSet;
 

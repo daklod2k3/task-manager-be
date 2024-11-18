@@ -21,6 +21,8 @@ public class UnitOfWork : IUnitOfWork
 
     public ITaskRepository Task { get; }
     public ITaskDepartmentRepository TaskDepartment { get; }
+    public IDepartment Department {  get; }
+    public IDepartmentUser DepartmentUser { get; }
     public ITaskUserRepository TaskUser { get; }
     public IUserRepository User { get; }
     public IDepartmentRepository Department {  get; }
