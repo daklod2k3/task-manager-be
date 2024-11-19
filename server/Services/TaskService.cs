@@ -23,9 +23,16 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public TaskEntity GetTask(long id,string? includes)
+    public TaskEntity GetTask(Guid idUser,long idTask,string? includes)
     {
-        return _unitOfWork.Task.Get(x => x.Id == id, includes);
+        var query = _unitOfWork.Task.GetQuery(x => x.Id == idTask, includes)
+            .Where(t =>
+                t.CreatedBy == idUser ||
+                t.TaskUsers.Any(tu => tu.UserId == idUser) ||
+                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == idUser))
+            )
+            .Distinct();
+        return query.FirstOrDefault();
     }
 
     public IEnumerable<TaskEntity> GetAllTask()

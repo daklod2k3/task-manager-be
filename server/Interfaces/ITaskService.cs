@@ -10,7 +10,7 @@ public interface ITaskService
 {
     IEnumerable<TaskEntity> GetAllTask();
     TaskEntity CreatTask(TaskEntity taskEntity);
-    public TaskEntity GetTask(long id, string? includes);
+    public TaskEntity GetTask(Guid idUser, long id, string? includes);
     int AssignTaskToDepartment(TaskDepartment[] taskDepartments);
     int AssignTaskToUser(TaskUser[] taskUsers);
     TaskEntity DeleteTask(long idTask);

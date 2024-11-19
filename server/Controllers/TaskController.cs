@@ -108,9 +108,10 @@ public class TaskController : Controller
     [Route("{taskId}")]
     public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId, string? includes)
     {
+        var id = AuthController.GetUserId(HttpContext);
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId, includes));
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(new Guid(id),taskId, includes));
         }
         catch (Exception ex)
         {
