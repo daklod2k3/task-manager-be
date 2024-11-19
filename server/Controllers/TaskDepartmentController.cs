@@ -15,22 +15,30 @@ namespace server.Controllers
             _taskService = taskService;
         }
         [HttpPost]
-        public IActionResult AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+        public IActionResult AssignTaskToDepartment(TaskDepartment taskDepartment)
         {
-            
-            return Ok(_taskService.AssignTaskToDepartment(taskDepartments));
+
+            try
+            {
+                return new SuccessResponse<TaskDepartment>(_taskService.AssignTaskToDepartment(taskDepartment));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new ErrorResponse("Task is not assign to department");
+            }
         }
         [HttpPut]
         public ActionResult UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
         {
             try
             {
-                return Ok(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
+                return new SuccessResponse<TaskDepartment>(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not update" });
+                return new ErrorResponse("TaskDepartment is not update");
             }
         }
         [HttpDelete]
@@ -38,13 +46,14 @@ namespace server.Controllers
         {
             try
             {
-                return Ok(_taskService.DeleteAssignTaskToDepartment(id));
+                return new SuccessResponse<TaskDepartment>(_taskService.DeleteAssignTaskToDepartment(id));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskDepartment is not delete" });
+                return new ErrorResponse("TaskDepartment is not delete");
             }
+            
         }
     }
 }

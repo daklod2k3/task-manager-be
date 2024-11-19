@@ -11,8 +11,8 @@ public interface ITaskService
     IEnumerable<TaskEntity> GetAllTask();
     TaskEntity CreatTask(TaskEntity taskEntity);
     public TaskEntity GetTask(Guid idUser, long id, string? includes);
-    int AssignTaskToDepartment(TaskDepartment[] taskDepartments);
-    int AssignTaskToUser(TaskUser[] taskUsers);
+    TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment);
+    TaskUser AssignTaskToUser(TaskUser taskUser);
     TaskEntity DeleteTask(long idTask);
     TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc);
     TaskEntity UpdateTask(TaskEntity taskEntity);

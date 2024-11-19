@@ -40,16 +40,19 @@ public class TaskService : ITaskService
         return _unitOfWork.Task.GetAll();
     }
 
-    public int AssignTaskToUser(TaskUser[] taskUsers)
+    public TaskUser AssignTaskToUser(TaskUser taskUser)
     {
-        foreach (var taskUser in taskUsers) _unitOfWork.TaskUser.Add(taskUser);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskUser.Add(taskUser);
+        _unitOfWork.Save();
+        return result;
     }
 
-    public int AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+    public TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment)
     {
-        foreach (var taskDepartment in taskDepartments) _unitOfWork.TaskDepartment.Add(taskDepartment);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskDepartment.Add(taskDepartment);
+        _unitOfWork.Save();
+        return result; 
+
     }
 
     public TaskEntity DeleteTask(long id)
