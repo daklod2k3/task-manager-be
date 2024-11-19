@@ -3,4 +3,6 @@
     image: server
     build:
       context: .
-      dockerfile: server/Dockerfile
+      dockerfile: Dockerfile
+    expose:
+      - 8080:80
