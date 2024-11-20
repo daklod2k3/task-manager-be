@@ -124,6 +124,7 @@ builder.Services.AddSingleton(supabase);
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
 
 var app = builder.Build();
 
