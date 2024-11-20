@@ -153,5 +153,5 @@ app.UseExceptionHandler(e =>
     });
 });
 // app.UseMiddleware<AuthMiddleware>();
-
+if (!app.Environment.IsDevelopment()) app.Urls.Add("http://0.0.0.0:" + builder.Configuration.GetValue<int>("PORT"));
 app.Run();
