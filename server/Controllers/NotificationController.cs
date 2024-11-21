@@ -8,6 +8,7 @@ using server.Entities;
 using server.Interfaces;
 using Newtonsoft.Json;
 using server.Helpers;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace server.Controllers;
 
@@ -30,18 +31,23 @@ public class NotificationController : Controller
         
     }
 
-    //lấy mọi notifications của login id
-    [HttpGet("/byiduser")]
-    public ActionResult<IEnumerable<Notification>> GetByIdUser(string? filter)
+    [HttpGet("{id}")]
+    public ActionResult<IEnumerable<Notification>> Get(string id, string filter)
     {
-        var id = AuthController.GetUserId(HttpContext);
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filter))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filter);
-        var compositeFilterExpression = CompositeFilter<Notification>.ApplyFilter(filterResult);
-        return _notificationService.GetNotificationById(new Guid(id), compositeFilterExpression).ToList();
-        
+        return GetNotificationById(id,filter);
     }
+
+    public ActionResult<IEnumerable<Notification>> GetNotificationById(string id,string filterString)
+    {
+        var filterResult = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString))
+            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        var compositeFilterExpression = CompositeFilter<Notification>.ApplyFilter(filterResult);
+
+        var notiList = _notificationService.GetNotificationById(new Guid(id),compositeFilterExpression);
+        return new SuccessResponse<IEnumerable<Notification>>(notiList);
+    }
+
 
     //tạo notification mới
     [HttpPost]
@@ -130,6 +136,20 @@ public ActionResult<Notification> UpdateNotification(Notification notification)
         {
             Console.WriteLine(ex.ToString());
             return new ErrorResponse("Notification did not update");
+        }
+}
+
+[HttpPatch("{id}")]
+public ActionResult<Notification> PatchNotification(long id, [FromBody]JsonPatchDocument<Notification> notification)
+{
+    try
+        {
+            return new SuccessResponse<Notification>(_notificationService.PatchNotification(id,notification));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Notification did not patch");
         }
 }
 

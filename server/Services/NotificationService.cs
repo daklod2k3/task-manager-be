@@ -2,6 +2,8 @@ using System.Linq.Expressions;
 using LinqKit;
 using server.Entities;
 using server.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 
 namespace server.Services;
 
@@ -40,10 +42,29 @@ public class NotificationService : INotificationService
         return result;
     }
 
+    public Notification PatchNotification(long id,[FromBody] JsonPatchDocument<Notification> notification)
+    {
+        var noti = _unitnotification.Notification.Get(x => x.Id == id);
+        if (noti == null) throw new Exception("not found notification");
+
+        notification.ApplyTo(noti);
+
+        _unitnotification.Save();
+
+        return noti;
+    }
+
     public IEnumerable<Notification> GetNotificationById(Guid id, Expression<Func<Notification, bool>>? filter)
     {
         if (Guid.Empty == id) return Enumerable.Empty<Notification>();
         var result = _unitnotification.Notification.GetAll(filter.And(t => t.UserId == id)).ToList();
+        return result;
+    }
+
+    public Notification? GetNotificationById(Guid id)
+    {
+        if (Guid.Empty == id) return null;
+        var result = _unitnotification.Notification.Get(t => t.UserId == id);
         return result;
     }
 
