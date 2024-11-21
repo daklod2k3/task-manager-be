@@ -231,6 +231,67 @@ public partial class SupabaseContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("notifications_user_id_fkey");
         });
+        
+        modelBuilder.Entity<Resource>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("resources_pkey");
+
+            entity.ToTable("resources");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+            entity.Property(e => e.Path)
+                .HasColumnType("character varying")
+                .HasColumnName("path");
+        });
+
+        
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("permissions_pkey");
+
+            entity.ToTable("permissions");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Create).HasColumnName("create");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Delete).HasColumnName("delete");
+            entity.Property(e => e.ResourceId).HasColumnName("resource_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.Update).HasColumnName("update");
+            entity.Property(e => e.View).HasColumnName("view");
+
+            entity.HasOne(d => d.Resource).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.ResourceId)
+                .HasConstraintName("permissions_resource_id_fkey");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("permissions_role_id_fkey");
+        });
+        
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("roles_pkey");
+
+            entity.ToTable("roles");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+        });
 
         modelBuilder.Entity<Profile>(entity =>
         {
