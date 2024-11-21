@@ -40,7 +40,7 @@ namespace server.Controllers
                 return new ErrorResponse("TaskUser is not update");
             }
         }
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public ActionResult DeleteAssignTaskToUser(long id)
         {
             try
