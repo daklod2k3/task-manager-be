@@ -2,7 +2,8 @@
 using server.Entities;
 using server.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
-
+using System.Linq.Expressions;
+using server.Helpers;
 namespace server.Controllers
 {
     [ApiController]
@@ -17,132 +18,93 @@ namespace server.Controllers
             _taskUserService = taskUserService;
         }
 
-        //phuong thuc get
         [HttpGet]
-        public IActionResult GetAllTaskUsers()
+        public IActionResult GetAllTaskUser()
         {
-            var taskUsers = _taskUserService.GetAllTaskUsers();
-            return Ok(taskUsers);
+            try
+            {
+                return Ok(_taskUserService.GetAllTaskUsers());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not found" });
+            }
         }
         //phuong thuc get theo id
         [HttpGet("{id}")]
-        public IActionResult GetTaskUserById(int id)
+        public IActionResult GetTaskUserById(long id)
         {
             try
             {
-                var taskUser = _taskUserService.GetTaskUserById(id);
-                if (taskUser == null)
-                {
-                    return NotFound(new { message = "TaskUser không tồn tại" });
-                }
-                return Ok(taskUser);
+                return Ok(_taskUserService.GetTaskUserById(id));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể lấy thông tin TaskUser" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not found" });
             }
         }
-         // Tạo TaskUser mới
-        [HttpPost]
-        public IActionResult CreateTaskUser([FromBody] TaskUser taskUser)
+
+        //phuong thuc post tao 1 department
+        [HttpPost("create")]
+        public IActionResult CreateTaskUser(TaskUser taskUser)
         {
             try
             {
-                if (taskUser == null)
-                {
-                    return BadRequest(new { message = "Dữ liệu không hợp lệ" });
-                }
-
-                _taskUserService.CreateTaskUser(taskUser);
-                return CreatedAtAction(nameof(GetTaskUserById), new { id = taskUser.Id }, taskUser);
+                return Ok(_taskUserService.CreateTaskUser(taskUser));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể tạo TaskUser" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not create" });
             }
         }
 
-        // Cập nhật thông tin TaskUser toàn bộ
+        //phuong thuc put update 1 department
         [HttpPut("{id}")]
-        public IActionResult UpdateTaskUser(int id, [FromBody] TaskUser taskUser)
+        public IActionResult UpdateTaskUserById(long id, TaskUser taskUser)
         {
             try
             {
-                if (taskUser == null || taskUser.Id != id)
-                {
-                    return BadRequest(new { message = "Dữ liệu không hợp lệ" });
-                }
-
-                bool result = _taskUserService.UpdateTaskUser(id,taskUser);
-                if (!result)
-                {
-                    return NotFound(new { message = "TaskUser không tồn tại" });
-                }
-
-                return Ok(new { message = "Cập nhật TaskUser thành công" });
+                return Ok(_taskUserService.UpdateTaskUserById(id, taskUser));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể cập nhật TaskUser" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
             }
         }
 
-        // Cập nhật thông tin TaskUser với JSON Patch
+        //phuong thuc patch update 1 taskuser
         [HttpPatch("{id}")]
-        public IActionResult PatchTaskUser(int id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
+        public IActionResult PatchTaskUserById(long id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
         {
             try
             {
-                if (patchDoc == null)
-                {
-                    return BadRequest(new { message = "Patch document không hợp lệ" });
-                }
-
-                var taskUser = _taskUserService.GetTaskUserById(id);
-                if (taskUser == null)
-                {
-                    return NotFound(new { message = "TaskUser không tồn tại" });
-                }
-
-                patchDoc.ApplyTo(taskUser, ModelState);
-
-                if (!TryValidateModel(taskUser))
-                {
-                    return ValidationProblem(ModelState);
-                }
-
-                _taskUserService.UpdateTaskUser(id,taskUser);
-                return Ok(new { message = "Cập nhật một phần thông tin TaskUser thành công" });
+                return Ok(_taskUserService.PatchTaskUserById(id, patchDoc));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể cập nhật TaskUser" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
             }
         }
-        // Xóa TaskUser theo ID
-        [HttpDelete("{id}")]
-        public IActionResult DeleteTaskUser(int id)
+
+        //phuong thuc delete 1 taskuser
+        public IActionResult DeleteTaskUserById(long id)
         {
             try
             {
-                bool result = _taskUserService.DeleteTaskUser(id);
-                if (!result)
-                {
-                    return NotFound(new { message = "TaskUser không tồn tại" });
-                }
-
-                return Ok(new { message = "Xóa TaskUser thành công" });
+                return Ok(_taskUserService.DeleteTaskUserById(id));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Không thể xóa TaskUser" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not delete" });
             }
         }
+
 
 
         [HttpPost]

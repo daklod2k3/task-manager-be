@@ -21,6 +21,8 @@ using Supabase;
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+// Load configuration from secret.json
+builder.Configuration.AddJsonFile("secret.json", optional: true, reloadOnChange: true);
 var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtSecret"]!);
 var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
@@ -125,7 +127,10 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITaskUserService, TaskUserService>();
-
+builder.Services.AddScoped<ITaskDepartmentService, TaskDepartmentService>();
+builder.Services.AddScoped<ITaskHistoryService, TaskHistoryService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

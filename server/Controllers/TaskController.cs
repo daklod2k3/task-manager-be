@@ -21,7 +21,7 @@ public class TaskController : Controller
 
 
     [HttpPost]
-    public ActionResult CreateTask(TaskEntity taskEntity)
+    public IActionResult CreateTask(TaskEntity taskEntity)
     {
         var user_id = AuthController.GetUserId(HttpContext);
         try
@@ -36,7 +36,7 @@ public class TaskController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
+    public IActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
         try
         {

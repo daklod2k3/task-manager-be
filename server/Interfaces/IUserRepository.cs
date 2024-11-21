@@ -4,7 +4,7 @@ namespace server.Interfaces;
 
 public interface IUserRepository : IRepository<Profile>
 {
-    Profile IRepository<Profile>.GetById(int id)
+    Profile IRepository<Profile>.GetById(long id)
     {
         throw new NotImplementedException();
     }

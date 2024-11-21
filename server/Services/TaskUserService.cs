@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace server.Services
 {
@@ -16,44 +17,49 @@ namespace server.Services
             _unitOfWork = unitOfWork;
         }
 
+        public TaskUser CreateTaskUser(TaskUser taskUser)
+        {
+            var result = _unitOfWork.TaskUser.Add(taskUser);
+            _unitOfWork.Save();
+            return result;
+        }
+
+        public TaskUser DeleteTaskUserById(long id)
+        {
+            var taskUser = _unitOfWork.TaskUser.Get(x => x.Id == id);
+            var result = _unitOfWork.TaskUser.Remove(taskUser);
+            _unitOfWork.Save();
+            return result;
+        }
+
         public IEnumerable<TaskUser> GetAllTaskUsers()
         {
             return _unitOfWork.TaskUser.GetAll();
         }
 
-        public TaskUser? GetTaskUserById(int id)
+        public TaskUser GetTaskUserById(long id)
         {
-            return _unitOfWork.TaskUser.GetById(id);
+            return _unitOfWork.TaskUser.Get(x => x.Id == id);
         }
 
-        public void CreateTaskUser(TaskUser taskUser)
+        public TaskUser PatchTaskUserById(long id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
         {
-            _unitOfWork.TaskUser.Add(taskUser);
+            var taskUser = _unitOfWork.TaskUser.Get(x => x.Id == id);
+            if (taskUser == null) throw new Exception("not found taskUser");
+            patchDoc.ApplyTo(taskUser);
             _unitOfWork.Save();
+            return taskUser;
         }
 
-        public bool UpdateTaskUser(int id, TaskUser updatedTaskUser)
+        public TaskUser UpdateTaskUserById(long id, TaskUser taskUser)
         {
-            var taskUser = _unitOfWork.TaskUser.GetById(id);
-            if (taskUser == null) return false;
-
-            taskUser.TaskId = updatedTaskUser.TaskId;
-            taskUser.UserId = updatedTaskUser.UserId;
-            taskUser.CreatedAt = updatedTaskUser.CreatedAt;
-
-            _unitOfWork.TaskUser.Update(taskUser);
+            var taskUserInDb = _unitOfWork.TaskUser.Get(x => x.Id == id);
+            if (taskUserInDb == null) throw new Exception("not found taskUser");
+            taskUserInDb.UserId = taskUser.UserId;
+            taskUserInDb.TaskId = taskUser.TaskId;
+            taskUserInDb.CreatedAt = taskUser.CreatedAt;
             _unitOfWork.Save();
-            return true;
-        }
-
-        public bool DeleteTaskUser(int id)
-        {
-            var taskUser = _unitOfWork.TaskUser.GetById(id);
-            if (taskUser == null) return false;
-
-            _unitOfWork.TaskUser.Remove(taskUser);
-            _unitOfWork.Save();
-            return true;
+            return taskUserInDb;
         }
     }
 }

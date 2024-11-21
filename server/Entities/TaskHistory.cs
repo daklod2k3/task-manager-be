@@ -12,7 +12,7 @@ public class TaskHistory
 
     public string Description { get; set; } = null!;
 
-    public virtual Profile CreatedByNavigation { get; set; } = null!;
+    public virtual Profile? CreatedByNavigation { get; set; } = null!;
 
-    public virtual TaskEntity TaskEntity { get; set; } = null!;
+    public virtual TaskEntity? TaskEntity { get; set; } = null!;
 }

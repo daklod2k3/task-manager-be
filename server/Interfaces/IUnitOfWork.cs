@@ -6,5 +6,8 @@ public interface IUnitOfWork
     ITaskDepartmentRepository TaskDepartment { get; }
     ITaskUserRepository TaskUser { get; }
     IUserRepository User { get; }
+    ITaskHistoryRepository TaskHistory { get; }
+    IDepartmentRepository Department { get; }
+    IDepartmentUserRepository DepartmentUser { get; }
     int Save();
 }

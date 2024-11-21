@@ -37,7 +37,7 @@ public class Repository<T> : IRepository<T> where T : class
         return GetQuery(filter, includeProperties).ToList();
     }
 
-    public virtual T GetById(int id)
+    public virtual T GetById(long id)
     {
         return _dbSet.Find(id);
     }
