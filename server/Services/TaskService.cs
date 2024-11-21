@@ -23,9 +23,16 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public TaskEntity GetTask(long id)
+    public TaskEntity GetTask(Guid idUser,long idTask,string? includes)
     {
-        return _unitOfWork.Task.Get(x => x.Id == id);
+        var query = _unitOfWork.Task.GetQuery(x => x.Id == idTask, includes)
+            .Where(t =>
+                t.CreatedBy == idUser ||
+                t.TaskUsers.Any(tu => tu.UserId == idUser) ||
+                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == idUser))
+            )
+            .Distinct();
+        return query.FirstOrDefault();
     }
 
     public IEnumerable<TaskEntity> GetAllTask()
@@ -33,16 +40,19 @@ public class TaskService : ITaskService
         return _unitOfWork.Task.GetAll();
     }
 
-    public int AssignTaskToUser(TaskUser[] taskUsers)
+    public TaskUser AssignTaskToUser(TaskUser taskUser)
     {
-        foreach (var taskUser in taskUsers) _unitOfWork.TaskUser.Add(taskUser);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskUser.Add(taskUser);
+        _unitOfWork.Save();
+        return result;
     }
 
-    public int AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+    public TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment)
     {
-        foreach (var taskDepartment in taskDepartments) _unitOfWork.TaskDepartment.Add(taskDepartment);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskDepartment.Add(taskDepartment);
+        _unitOfWork.Save();
+        return result; 
+
     }
 
     public TaskEntity DeleteTask(long id)

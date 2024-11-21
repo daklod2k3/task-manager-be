@@ -25,6 +25,9 @@ public class TaskEntity
     public virtual ICollection<TaskHistory> TaskHistories { get; set; } = new List<TaskHistory>();
 
     public virtual ICollection<TaskUser> TaskUsers { get; set; } = new List<TaskUser>();
+    
+    public virtual ICollection<TaskComment> TaskComments { get; set; } = new List<TaskComment>();
+
 
     [NotMapped]
     public int AssignedToUser

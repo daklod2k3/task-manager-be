@@ -123,8 +123,10 @@ builder.Services.AddSingleton(supabase);
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
+//builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+//builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -150,4 +152,6 @@ app.UseExceptionHandler(e =>
     });
 });
 
+// app.UseMiddleware<AuthMiddleware>();
+if (!app.Environment.IsDevelopment()) app.Urls.Add("http://0.0.0.0:" + builder.Configuration.GetValue<int>("PORT"));
 app.Run();

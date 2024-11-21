@@ -338,6 +338,33 @@ public partial class SupabaseContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_user_user_id_fkey");
         });
+        
+        modelBuilder.Entity<TaskComment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("task_comment_pkey");
+
+            entity.ToTable("task_comment");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Comment)
+                .HasColumnType("character varying")
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.TaskId).HasColumnName("task_id");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskComments)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("task_comment_created_by_fkey");
+
+            entity.HasOne(d => d.Task).WithMany(p => p.TaskComments)
+                .HasForeignKey(d => d.TaskId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("task_comment_task_id_fkey");
+        });
 
         modelBuilder.Entity<UserMessage>(entity =>
         {

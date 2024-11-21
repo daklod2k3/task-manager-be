@@ -61,7 +61,7 @@ public class DepartmentController : Controller
         }
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public ActionResult DeleteDepartment(long id)
     {
         try
