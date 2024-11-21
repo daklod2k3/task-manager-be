@@ -1,29 +1,33 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
+using server.Helpers;
 using server.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace server.Repository;
 
 public class Repository<T> : IRepository<T> where T : class
 {
     // private readonly SupabaseContext _context;
-    protected readonly DbSet<T> _dbSet;
+    protected readonly DbSet<T> DbSet;
+    private readonly SupabaseContext _context;
 
     public Repository(SupabaseContext context)
     {
-        // _context = context;
-        _dbSet = context.Set<T>();
+        _context = context;
+        DbSet = context.Set<T>();
     }
 
     public T Add(T entity)
     {
-        return _dbSet.Add(entity).Entity;
+        return DbSet.Add(entity).Entity;
     }
 
     public bool Any(Expression<Func<T, bool>> filter)
     {
-        return _dbSet.Any(filter);
+        return DbSet.Any(filter);
     }
 
 
@@ -32,29 +36,38 @@ public class Repository<T> : IRepository<T> where T : class
         return GetQuery(filter, includeProperties).FirstOrDefault();
     }
 
-    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IEnumerable<T> GetAll( Expression<Func<T, bool>>? filter, string? includeProperties)
     {
         return GetQuery(filter, includeProperties).ToList();
     }
 
-    public virtual T GetById(int id)
+    public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
     {
-        return _dbSet.Find(id);
+        var entity = DbSet.FirstOrDefault(e=> EF.Property<long>(e, keyProperty) == long.Parse(id));
+        return entity;
     }
 
     public T Remove(T entity)
     {
-        return _dbSet.Remove(entity).Entity;
+        return DbSet.Remove(entity).Entity;
     }
 
     public T Update(T entity)
     {
-        return _dbSet.Update(entity).Entity;
+        return DbSet.Update(entity).Entity;
     }
 
-    private IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public T UpdatePatch(string id, JsonPatchDocument<T> patch)
     {
-        IQueryable<T> query = _dbSet;
+        var entity = DbSet.Find(id);
+        patch.ApplyTo(entity);
+        Save();
+        return entity;
+    }
+
+    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
+    {
+        IQueryable<T> query = DbSet;
 
         if (filter != null) query = query.Where(filter);
 
@@ -63,5 +76,10 @@ public class Repository<T> : IRepository<T> where T : class
                 query = query.Include(includeProp);
 
         return query;
+    }
+
+    public int Save()
+    {
+        return _context.SaveChanges();
     }
 }

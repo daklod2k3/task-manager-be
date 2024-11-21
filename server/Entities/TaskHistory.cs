@@ -14,5 +14,5 @@ public class TaskHistory
 
     public virtual Profile CreatedByNavigation { get; set; } = null!;
 
-    public virtual ETask ETask { get; set; } = null!;
+    public virtual TaskEntity TaskEntity { get; set; } = null!;
 }

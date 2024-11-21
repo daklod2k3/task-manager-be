@@ -14,22 +14,30 @@ namespace server.Controllers
             _taskService = taskService;
         }
         [HttpPost]
-        public IActionResult AssignTaskToUser(TaskUser[] taskUsers)
+        public IActionResult AssignTaskToUser(TaskUser taskUser)
         {
+            try
+            {
+                return new SuccessResponse<TaskUser>(_taskService.AssignTaskToUser(taskUser));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new ErrorResponse("Task is not assign to user");
+            }
 
-            return Ok(_taskService.AssignTaskToUser(taskUsers));
         }
         [HttpPut]
         public ActionResult UpdateAssignTaskToUser(TaskUser taskUser)
         {
             try
             {
-                return Ok(_taskService.UpdateAssignTaskToUser(taskUser));
+                return new SuccessResponse<TaskUser>(_taskService.UpdateAssignTaskToUser(taskUser));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
+                return new ErrorResponse("TaskUser is not update");
             }
         }
         [HttpDelete]
@@ -37,12 +45,12 @@ namespace server.Controllers
         {
             try
             {
-                return Ok(_taskService.DeleteAssignTaskToUser(id));
+                return new SuccessResponse<TaskUser>(_taskService.DeleteAssignTaskToUser(id));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not delete" });
+                return new ErrorResponse("TaskUser is not delete");
             }
         }
     }

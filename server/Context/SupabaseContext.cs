@@ -30,7 +30,7 @@ public partial class SupabaseContext : DbContext
 
     public virtual DbSet<Profile> Profiles { get; set; }
 
-    public virtual DbSet<ETask> Tasks { get; set; }
+    public virtual DbSet<TaskEntity> Tasks { get; set; }
 
     public virtual DbSet<TaskDepartment> TaskDepartments { get; set; }
 
@@ -246,7 +246,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
         });
 
-        modelBuilder.Entity<ETask>(entity =>
+        modelBuilder.Entity<TaskEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("tasks_pkey");
 
@@ -263,6 +263,10 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Priority).HasColumnName("priority");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Tasks)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("tasks_created_by_fkey");
         });
 
         modelBuilder.Entity<TaskDepartment>(entity =>
@@ -307,7 +311,7 @@ public partial class SupabaseContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_history_created_by_fkey");
 
-            entity.HasOne(d => d.ETask).WithMany(p => p.TaskHistories)
+            entity.HasOne(d => d.TaskEntity).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.TaskId)
                 .HasConstraintName("task_history_task_id_fkey");
         });
@@ -333,6 +337,33 @@ public partial class SupabaseContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_user_user_id_fkey");
+        });
+        
+        modelBuilder.Entity<TaskComment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("task_comment_pkey");
+
+            entity.ToTable("task_comment");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Comment)
+                .HasColumnType("character varying")
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.TaskId).HasColumnName("task_id");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskComments)
+                .HasForeignKey(d => d.CreatedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("task_comment_created_by_fkey");
+
+            entity.HasOne(d => d.Task).WithMany(p => p.TaskComments)
+                .HasForeignKey(d => d.TaskId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("task_comment_task_id_fkey");
         });
 
         modelBuilder.Entity<UserMessage>(entity =>

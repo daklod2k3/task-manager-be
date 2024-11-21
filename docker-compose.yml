@@ -3,4 +3,4 @@
     image: server
     build:
       context: .
-      dockerfile: server/Dockerfile
+      dockerfile: Dockerfile

@@ -14,6 +14,6 @@ public class UserService
 
     public Profile GetProfile(Guid uuid)
     {
-        return _unitOfWork.User.GetById(uuid);
+        return _unitOfWork.User.GetById(uuid.ToString());
     }
 }

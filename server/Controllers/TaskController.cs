@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
@@ -17,13 +19,14 @@ public class TaskController : Controller
         _taskService = taskService;
     }
 
-
     [HttpPost]
-    public ActionResult CreateTask(ETask eTask)
+    public ActionResult CreateTask(TaskEntity taskEntity)
     {
+        var id = AuthController.GetUserId(HttpContext);
+        taskEntity.CreatedBy = new Guid(id);
         try
         {
-            return new SuccessResponse<ETask>(_taskService.CreatTask(eTask));
+            return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
         }
         catch (Exception ex)
         {
@@ -33,11 +36,25 @@ public class TaskController : Controller
     }
 
     [HttpPut]
-    public ActionResult UpdateTask(ETask eTask)
+    public ActionResult UpdateTask(TaskEntity taskEntity)
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.UpdateTask(eTask));
+            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(taskEntity));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not update");
+        }
+    }
+
+    [HttpPatch("{id}")]
+    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
+    {
+        try
+        {
+            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(id, patchDoc));
         }
         catch (Exception ex)
         {
@@ -51,7 +68,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<ETask>(_taskService.DeleteTask(id));
+            return new SuccessResponse<TaskEntity>(_taskService.DeleteTask(id));
         }
         catch (Exception ex)
         {
@@ -60,38 +77,58 @@ public class TaskController : Controller
         }
     }
 
-    public ActionResult<IEnumerable<ETask>> GetTaskByIdUser(string userId, string? filterString)
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,
+        string? includeProperties, int? page, int? pageItem)
     {
+        Pagination pagination = null;
+        if (page != null && pageItem != null)
+            pagination = new Pagination { PageNumber = (int)page, PageSize = (int)pageItem };
         var filterResult = new ClientFilter();
+        Expression<Func<TaskEntity, bool>>? filter = null;
+
         if (!string.IsNullOrEmpty(filterString))
+        {
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var filter = CompositeFilter<ETask>.ApplyFilter(filterResult);
-        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter);
-        return new SuccessResponse<IEnumerable<ETask>>(taskList);
+            filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
+        }
+
+        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
+        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ETask>> Get(string? filter)
+    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter, string? includes, int? page, int? pageItem)
     {
         var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByFilter(filter);
+        return GetTaskByIdUser(id, filter, includes, page, pageItem);
     }
 
     [HttpGet]
-    [Route("{userId}")]
-    public ActionResult<IEnumerable<ETask>> GetById(string userId, string filter)
+    [Route("{taskId}")]
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId, string? includes)
     {
-        return GetTaskByIdUser(userId, filter);
+        var id = AuthController.GetUserId(HttpContext);
+        try
+        {
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(new Guid(id),taskId, includes));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not found");
+        }
     }
 
-    public ActionResult<IEnumerable<ETask>> GetTaskByFilter(string filterString)
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByFilter(string filterString)
     {
         var filterResult = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString))
             filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<ETask>.ApplyFilter(filterResult);
+        var compositeFilterExpression = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
 
         var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<ETask>>(taskList);
+        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 }

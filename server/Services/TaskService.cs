@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
-using LinqKit;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 
 namespace server.Services;
@@ -14,32 +16,46 @@ public class TaskService : ITaskService
         _unitOfWork = unitOfWork;
     }
 
-    public ETask CreatTask(ETask eTask)
+    public TaskEntity CreatTask(TaskEntity taskEntity)
     {
-        var result = _unitOfWork.Task.Add(eTask);
+        var result = _unitOfWork.Task.Add(taskEntity);
         _unitOfWork.Save();
         return result;
     }
 
-    public IEnumerable<ETask> GetAllTask()
+    public TaskEntity GetTask(Guid idUser,long idTask,string? includes)
     {
-        CreatTask(new ETask());
+        var query = _unitOfWork.Task.GetQuery(x => x.Id == idTask, includes)
+            .Where(t =>
+                t.CreatedBy == idUser ||
+                t.TaskUsers.Any(tu => tu.UserId == idUser) ||
+                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == idUser))
+            )
+            .Distinct();
+        return query.FirstOrDefault();
+    }
+
+    public IEnumerable<TaskEntity> GetAllTask()
+    {
         return _unitOfWork.Task.GetAll();
     }
 
-    public int AssignTaskToUser(TaskUser[] taskUsers)
+    public TaskUser AssignTaskToUser(TaskUser taskUser)
     {
-        foreach (var taskUser in taskUsers) _unitOfWork.TaskUser.Add(taskUser);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskUser.Add(taskUser);
+        _unitOfWork.Save();
+        return result;
     }
 
-    public int AssignTaskToDepartment(TaskDepartment[] taskDepartments)
+    public TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment)
     {
-        foreach (var taskDepartment in taskDepartments) _unitOfWork.TaskDepartment.Add(taskDepartment);
-        return _unitOfWork.Save();
+        var result = _unitOfWork.TaskDepartment.Add(taskDepartment);
+        _unitOfWork.Save();
+        return result; 
+
     }
 
-    public ETask DeleteTask(long id)
+    public TaskEntity DeleteTask(long id)
     {
         var task = _unitOfWork.Task.Get(x => x.Id == id);
         var result = _unitOfWork.Task.Remove(task);
@@ -47,10 +63,16 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public ETask UpdateTask(ETask eTask)
+    public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
-        var result = _unitOfWork.Task.Update(eTask);
-        return result;
+        var task = _unitOfWork.Task.Get(x => x.Id == id);
+        if (task == null) throw new Exception("not found task");
+
+        patchDoc.ApplyTo(task);
+
+        _unitOfWork.Save();
+
+        return task;
     }
 
     public TaskDepartment UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
@@ -83,21 +105,30 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<ETask> GetTaskByIdUser(Guid id, Expression<Func<ETask, bool>>? filter)
+    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter,
+        string? includeProperties, Pagination? pagination)
     {
-        if (Guid.Empty == id) return Enumerable.Empty<ETask>();
-        var tasksByUser = _unitOfWork.Task.GetAll(filter.And(t => t.TaskUsers.Any(taskUser => taskUser.UserId == id)));
-        var tasksByDepartment = _unitOfWork.Task.GetAll(filter.And(
-            t => t.TaskDepartments
-                .Any(taskDept => taskDept.Department.DepartmentUsers
-                    .Any(deptUser => deptUser.UserId == id)))
-        );
-        var result = tasksByUser.Union(tasksByDepartment).DistinctBy(t => t.Id).ToList();
-        return result;
+        if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
+        filter ??= t => true;
+        var query = _unitOfWork.Task.GetQuery(filter, includeProperties)
+            .Where(t =>
+                t.CreatedBy == id ||
+                t.TaskUsers.Any(tu => tu.UserId == id) ||
+                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == id))
+            )
+            .Distinct();
+        return query.Paginate(pagination).ToList();
     }
 
-    public IEnumerable<ETask> GetTaskByFilter(Expression<Func<ETask, bool>> filter)
+    public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> filter)
     {
         return _unitOfWork.Task.GetAll(filter);
+    }
+
+    public TaskEntity UpdateTask(TaskEntity taskEntity)
+    {
+        var result = _unitOfWork.Task.Update(taskEntity);
+        _unitOfWork.Save();
+        return result;
     }
 }
