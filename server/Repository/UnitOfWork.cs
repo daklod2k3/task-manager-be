@@ -16,6 +16,7 @@ public class UnitOfWork : IUnitOfWork
         User = new UserRepository(_context);
         Department = new DepartmentRepository(_context);
         DepartmentUser = new DepartmentUserRepository(_context);
+        Role = new RoleRepository(_context);
     }
 
     public ITaskRepository Task { get; }
@@ -24,6 +25,7 @@ public class UnitOfWork : IUnitOfWork
     public IDepartmentUser DepartmentUser { get; }
     public ITaskUserRepository TaskUser { get; }
     public IUserRepository User { get; }
+    public IRoleRepository Role { get; }
 
     public int Save()
     {

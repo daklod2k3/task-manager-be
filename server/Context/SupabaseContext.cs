@@ -231,7 +231,7 @@ public partial class SupabaseContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("notifications_user_id_fkey");
         });
-        
+
         modelBuilder.Entity<Resource>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("resources_pkey");
@@ -250,7 +250,7 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("path");
         });
 
-        
+
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("permissions_pkey");
@@ -277,7 +277,7 @@ public partial class SupabaseContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("permissions_role_id_fkey");
         });
-        
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("roles_pkey");
@@ -305,6 +305,9 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Avt).HasColumnName("avt");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.HasOne(d => d.Role).WithMany(p => p.Profiles)
+                .HasForeignKey(d => d.RoleId).HasConstraintName("profiles_role_id_fkey");
         });
 
         modelBuilder.Entity<TaskEntity>(entity =>
