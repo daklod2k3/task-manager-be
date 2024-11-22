@@ -16,11 +16,14 @@ public class UnitOfWork : IUnitOfWork
         User = new UserRepository(_context);
         Department = new DepartmentRepository(_context);
         DepartmentUser = new DepartmentUserRepository(_context);
+        FileRepository = new FileRepository(_context);
     }
+
+    public IFileRepository FileRepository { get; }
 
     public ITaskRepository Task { get; }
     public ITaskDepartmentRepository TaskDepartment { get; }
-    public IDepartment Department {  get; }
+    public IDepartment Department { get; }
     public IDepartmentUser DepartmentUser { get; }
     public ITaskUserRepository TaskUser { get; }
     public IUserRepository User { get; }

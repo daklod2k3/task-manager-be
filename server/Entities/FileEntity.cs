@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class Files
+public class FileEntity
 {
     public long Id { get; set; }
 
@@ -13,9 +10,8 @@ public partial class Files
 
     public string Path { get; set; } = null!;
 
-    public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
-
     public virtual Profile? CreatedByNavigation { get; set; }
-
+    public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
     public virtual ICollection<UserMessage> UserMessages { get; set; } = new List<UserMessage>();
+    public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
 }

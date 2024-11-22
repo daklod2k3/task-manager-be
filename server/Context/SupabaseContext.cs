@@ -24,7 +24,7 @@ public partial class SupabaseContext : DbContext
 
     public virtual DbSet<DepartmentUser> DepartmentUsers { get; set; }
 
-    public virtual DbSet<Files> Files { get; set; }
+    public virtual DbSet<FileEntity> Files { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -190,7 +190,7 @@ public partial class SupabaseContext : DbContext
                 .HasConstraintName("department_user_user_id_fkey");
         });
 
-        modelBuilder.Entity<Files>(entity =>
+        modelBuilder.Entity<FileEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("files_pkey");
 
@@ -264,9 +264,14 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Priority).HasColumnName("priority");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e=> e.FileId).HasColumnName("file_id");
+            
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Tasks)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("tasks_created_by_fkey");
+            entity.HasOne(e => e.File).WithMany(p => p.Tasks)
+                .HasForeignKey(d => d.FileId)
+                .HasConstraintName("tasks_file_id_fkey");
         });
 
         modelBuilder.Entity<TaskDepartment>(entity =>
