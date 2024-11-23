@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -83,7 +82,7 @@ public class TaskCommentController : Controller
             return new ErrorResponse(ex.ToString());
         }
     }
-    
+
     [HttpDelete]
     public ActionResult Delete(TaskComment body)
     {
@@ -99,14 +98,16 @@ public class TaskCommentController : Controller
             return new ErrorResponse(ex.ToString());
         }
     }
-    
-    
+
+
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get(string? filterString, string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString,
+        string? includes, int? page, int? pageItem)
     {
         var filter = new ClientFilter();
-        if (!String.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        return new SuccessResponse<IEnumerable<TaskComment>>(_repository.GetAll(CompositeFilter<TaskComment>.ApplyFilter(filter), includes));
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<TaskComment>>(
+            _repository.GetAll(CompositeFilter<TaskComment>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]

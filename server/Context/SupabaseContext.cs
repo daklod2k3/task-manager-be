@@ -338,7 +338,7 @@ public partial class SupabaseContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_user_user_id_fkey");
         });
-        
+
         modelBuilder.Entity<TaskComment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("task_comment_pkey");
@@ -355,7 +355,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
 
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskComments)
+            entity.HasOne(d => d.User).WithMany(p => p.TaskComments)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("task_comment_created_by_fkey");

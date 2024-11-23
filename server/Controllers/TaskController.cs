@@ -63,7 +63,7 @@ public class TaskController : Controller
         }
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public ActionResult DeleteTask(long id)
     {
         try
