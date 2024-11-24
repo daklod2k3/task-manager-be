@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using server.Entities;
-using System.Linq.Expressions;
 
-namespace server.Interfaces;
-public interface IDepartmentUserService
+using server.Entities;
+using Microsoft.AspNetCore.JsonPatch;
+namespace server.Interfaces
 {
-    public DepartmentUser CreatDepartmentUser(DepartmentUser DepartmentUser);
-    public DepartmentUser UpdateDepartmentUser(DepartmentUser DepartmentUser);
-    public DepartmentUser DeleteDepartmentUser(long idDepartmentUser);
-    public DepartmentUser UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc);
-    public DepartmentUser GetDepartmentUser(long id);
-    public IEnumerable<DepartmentUser> GetDepartmentUserByFilter(Expression<Func<DepartmentUser, bool>> compositeFilterExpression);
+    public interface IDepartmentUserService
+    {
+        IEnumerable<DepartmentUser> GetAll();
+        DepartmentUser GetById(long id);
+        DepartmentUser Create(DepartmentUser departmentUser);
+        DepartmentUser Update(DepartmentUser departmentUser);
+        DepartmentUser UpdatePatch(long id, Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<DepartmentUser> patch);
+        DepartmentUser Delete(long id);
+    }
 
 }

@@ -1,72 +1,73 @@
-﻿using System.Linq.Expressions;
-using LinqKit;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
+
+
 using server.Entities;
 using server.Interfaces;
-
-namespace server.Services;
-
-public class DepartmentUserService : IDepartmentUserService
+using Microsoft.AspNetCore.JsonPatch;
+namespace server.Services
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public DepartmentUserService(IUnitOfWork unitOfWork)
+    public class DepartmentUserService : IDepartmentUserService
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IDepartmentUser _repository;
 
-    public DepartmentUser CreatDepartmentUser(DepartmentUser departmentUser)
-    {
-        var result = _unitOfWork.DepartmentUser.Add(departmentUser);
-        _unitOfWork.Save();
-        return result;
-    }
-
-    public DepartmentUser GetDepartmentUser(long id)
-    {
-        return _unitOfWork.DepartmentUser.Get(x => x.Id == id);
-    }
-
-    public IEnumerable<DepartmentUser> GetAllDepartmentUser()
-    {
-        //CreatDepartmentUser(new DepartmentUser());
-        return _unitOfWork.DepartmentUser.GetAll();
-    }
-
-    public DepartmentUser UpdateDepartmentUser(DepartmentUser departmentUser)
-    {
-        var result = _unitOfWork.DepartmentUser.Update(departmentUser);
-        _unitOfWork.Save();
-        return result;
-    }
-
-    public DepartmentUser UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
-    {
-
-        var departmentUser = _unitOfWork.DepartmentUser.Get(x => x.Id == id);
-        if (departmentUser == null)
+        public DepartmentUserService(IDepartmentUser repository)
         {
-            throw new Exception("not found department");
+            _repository = repository;
         }
 
-        patchDoc.ApplyTo(departmentUser);
+        public IEnumerable<DepartmentUser> GetAll()
+        {
+            return _repository.GetAll();
+        }
 
-        _unitOfWork.Save();
+        public DepartmentUser GetById(long id)
+        {
+            return _repository.Get(x => x.Id == id) ?? throw new KeyNotFoundException("DepartmentUser not found");
+        }
 
-        return departmentUser;
-    }
+        public DepartmentUser Create(DepartmentUser departmentUser)
+        {
+            departmentUser.CreatedAt = DateTime.UtcNow;
+            var created = _repository.Add(departmentUser);
+            _repository.Save();
+            return created;
+        }
 
-    public DepartmentUser DeleteDepartmentUser(long id)
-    {
-        var departmentUser = _unitOfWork.DepartmentUser.Get(x => x.Id == id);
-        var result = _unitOfWork.DepartmentUser.Remove(departmentUser);
-        _unitOfWork.Save();
-        return result;
-    }
+        public DepartmentUser Update(DepartmentUser departmentUser)
+        {
+            var updated = _repository.Update(departmentUser);
+            _repository.Save();
+            return updated;
+        }
 
-    public IEnumerable<DepartmentUser> GetDepartmentUserByFilter(Expression<Func<DepartmentUser, bool>> filter)
-    {
-        return _unitOfWork.DepartmentUser.GetAll(filter);
+        public DepartmentUser Delete(long id)
+        {
+            var departmentUser = _repository.GetById(id.ToString());
+            if (departmentUser == null)
+            {
+                throw new KeyNotFoundException("DepartmentUser not found");
+            }
+
+            _repository.Remove(departmentUser);
+            _repository.Save(); // Đảm bảo thay đổi được lưu
+            return departmentUser;
+        }
+
+
+        public DepartmentUser UpdatePatch(long id, JsonPatchDocument<DepartmentUser> patch)
+        {
+            var departmentUser = _repository.GetById(id.ToString());
+            if (departmentUser == null)
+            {
+                throw new KeyNotFoundException("DepartmentUser not found");
+            }
+
+            // Áp dụng patch
+            _repository.UpdatePatch(id.ToString(), patch);
+
+            return departmentUser;  // Trả về DepartmentUser sau khi cập nhật
+        }
+
+
     }
 }
+

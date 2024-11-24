@@ -1,110 +1,82 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using server.Entities;
-using server.Helpers;
-using server.Interfaces;
 using server.Services;
+using server.Interfaces;
 
-namespace server.Controllers;
-
-[ApiController]
-[Route("[controller]")]
-public class DepartmentUserController : Controller
+namespace server.Controllers
 {
-    private readonly IDepartmentUserService _departmentUserService;
-
-    public DepartmentUserController(IDepartmentUserService departmentUserService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DepartmentUserController : ControllerBase
     {
-        _departmentUserService = departmentUserService;
-    }
+        private readonly IDepartmentUserService _service;
 
-    [HttpPost]
-    public ActionResult CreateDepartmentUser(DepartmentUser departmentUser)
-    {
-        try
+        public DepartmentUserController(IDepartmentUserService service)
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.CreatDepartmentUser(departmentUser));
+            _service = service;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not create");
-        }
-    }
 
-    [HttpPut]
-    public ActionResult UpdateDepartmentUser(DepartmentUser departmentUser)
-    {
-        try
+        [HttpGet]
+        public ActionResult<IEnumerable<DepartmentUser>> Get()
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUser(departmentUser));
+            return Ok(_service.GetAll());
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not update");
-        }
-    }
 
-    [HttpPatch("{id}")]
-    public ActionResult UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
-    {
-        try
+        [HttpGet("{id}")]
+        public ActionResult<DepartmentUser> GetById(long id)
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUserPatch(id, patchDoc));
+            return Ok(_service.GetById(id));
         }
-        catch (Exception ex)
+
+        [HttpPost]
+        public ActionResult<DepartmentUser> Create(DepartmentUser departmentUser)
         {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUser is not update");
+            var created = _service.Create(departmentUser);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
-    }
 
-    [HttpDelete]
-    public ActionResult DeleteDepartmentUser(long id)
-    {
-        try
+        [HttpPut("{id}")]
+        public ActionResult<DepartmentUser> Update(long id, DepartmentUser departmentUser)
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.DeleteDepartmentUser(id));
+            // Tìm DepartmentUser trước khi cập nhật
+            var existingDepartmentUser = _service.GetById(id);
+            if (existingDepartmentUser == null)
+            {
+                return NotFound(); // Trả về lỗi 404 nếu không tìm thấy
+            }
+
+            // Cập nhật thông tin
+            departmentUser.Id = id; // Đảm bảo ID là id từ URL
+            var updated = _service.Update(departmentUser); // Gọi phương thức Update từ service
+
+            return Ok(updated);
         }
-        catch (Exception ex)
+
+
+        [HttpPatch("{id}")]
+        public ActionResult<DepartmentUser> UpdatePatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
         {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUser is not delete");
+            // Áp dụng patch
+            var updated = _service.UpdatePatch(id, patchDoc);
+
+            // Kiểm tra nếu không cập nhật được, trả về lỗi 404
+            if (updated == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updated);
         }
-    }
 
-    public ActionResult<IEnumerable<DepartmentUser>> GetDepartmentUserByFilter(string filterString)
-    {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<DepartmentUser>.ApplyFilter(filterResult);
 
-        var DepartmetnUserList = _departmentUserService.GetDepartmentUserByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<DepartmentUser>>(DepartmetnUserList);
-    }
-
-    [HttpGet]
-    public ActionResult<IEnumerable<DepartmentUser>> Get(string? filter)
-    {
-        //var id = AuthController.GetUserId(HttpContext);
-        return GetDepartmentUserByFilter(filter);
-    }
-
-    [HttpGet]
-    [Route("{departmentId}")]
-    public ActionResult<IEnumerable<DepartmentUser>> GetDepartmentUserById(long departmentId)
-    {
-        try
+        [HttpDelete("{id}")]
+        public IActionResult Delete(long id)
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.GetDepartmentUser(departmentId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUserr is not get");
+            _service.Delete(id);
+            return NoContent();
+
         }
     }
 }
