@@ -124,8 +124,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
-//builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-//builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 
 var app = builder.Build();
 

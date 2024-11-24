@@ -67,6 +67,6 @@ public class DepartmentService : IDepartmentService
 
     public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter)
     {
-        return _unitOfWork.Department.GetAll(filter, "DepartmentUsers");
+        return _unitOfWork.Department.GetAll(filter, "DepartmentUsers,TaskDepartments");
     }
 }

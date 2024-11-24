@@ -43,7 +43,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
     {
-        var entity = DbSet.FirstOrDefault(e=> EF.Property<long>(e, keyProperty) == long.Parse(id));
+        var entity = DbSet.FirstOrDefault(e=> EF.Property<long>(e, keyProperty).ToString() == id);
         return entity;
     }
 
