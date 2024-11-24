@@ -125,6 +125,7 @@ builder.Services.AddScoped<IUnitNotification, UnitNotification>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+builder.Services.AddScoped<IChannelService, ChannelService>();
 
 var app = builder.Build();
 
