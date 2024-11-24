@@ -26,11 +26,7 @@ var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
 
 // Add services to the container.
-builder.Services.AddControllers(options =>
-    {
-        options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
-
-    })
+builder.Services.AddControllers(options => { options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter()); })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -109,6 +105,7 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
 dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
 dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
+dataSourceBuilder.MapEnum<EDepartmentOwnerType>("EDepartmentOwnerType");
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<SupabaseContext>(options =>
     options.UseNpgsql(dataSource));
