@@ -2,17 +2,16 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
-using server.Helpers;
 using server.Interfaces;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace server.Repository;
 
 public class Repository<T> : IRepository<T> where T : class
 {
+    private readonly SupabaseContext _context;
+
     // private readonly SupabaseContext _context;
     protected readonly DbSet<T> DbSet;
-    private readonly SupabaseContext _context;
 
     public Repository(SupabaseContext context)
     {
@@ -36,14 +35,14 @@ public class Repository<T> : IRepository<T> where T : class
         return GetQuery(filter, includeProperties).FirstOrDefault();
     }
 
-    public IEnumerable<T> GetAll( Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
     {
         return GetQuery(filter, includeProperties).ToList();
     }
 
     public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
     {
-        var entity = DbSet.FirstOrDefault(e=> EF.Property<long>(e, keyProperty).ToString() == id);
+        var entity = DbSet.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
         return entity;
     }
 
