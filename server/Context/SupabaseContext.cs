@@ -178,6 +178,7 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DepartmentId).HasColumnName("department_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OwnerType).HasColumnName("owner_type");
 
             entity.HasOne(d => d.Department).WithMany(p => p.DepartmentUsers)
                 .HasForeignKey(d => d.DepartmentId)

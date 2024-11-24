@@ -1,4 +1,5 @@
 ﻿using server.Context;
+using server.Entities;
 using server.Interfaces;
 
 namespace server.Repository;
@@ -24,6 +25,8 @@ public class UnitOfWork : IUnitOfWork
     public IDepartmentUser DepartmentUser { get; }
     public ITaskUserRepository TaskUser { get; }
     public IUserRepository User { get; }
+    //public IDepartmentRepository Department {  get; }
+    //public IDepartmentUserRepository DepartmentUser { get; }
 
     public int Save()
     {
