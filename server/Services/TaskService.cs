@@ -23,16 +23,9 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public TaskEntity GetTask(Guid idUser,long idTask,string? includes)
+    public TaskEntity GetTask(long idTask,string? includes)
     {
-        var query = _unitOfWork.Task.GetQuery(x => x.Id == idTask, includes)
-            .Where(t =>
-                t.CreatedBy == idUser ||
-                t.TaskUsers.Any(tu => tu.UserId == idUser) ||
-                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == idUser))
-            )
-            .Distinct();
-        return query.FirstOrDefault();
+        return _unitOfWork.Task.Get(x => x.Id == idTask, includes);
     }
 
     public IEnumerable<TaskEntity> GetAllTask()
@@ -105,18 +98,11 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter,
+    public IEnumerable<TaskEntity> GetAllTask(Expression<Func<TaskEntity, bool>>? filter,
         string? includeProperties, Pagination? pagination)
     {
-        if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
-        var query = _unitOfWork.Task.GetQuery(filter, includeProperties)
-            .Where(t =>
-                t.CreatedBy == id ||
-                t.TaskUsers.Any(tu => tu.UserId == id) ||
-                t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == id))
-            )
-            .Distinct();
+        var query = _unitOfWork.Task.GetQuery(filter, includeProperties);
         return query.Paginate(pagination).ToList();
     }
 

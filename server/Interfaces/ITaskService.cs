@@ -10,7 +10,7 @@ public interface ITaskService
 {
     IEnumerable<TaskEntity> GetAllTask();
     TaskEntity CreatTask(TaskEntity taskEntity);
-    public TaskEntity GetTask(Guid idUser, long id, string? includes);
+    public TaskEntity GetTask(long id, string? includes);
     TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment);
     TaskUser AssignTaskToUser(TaskUser taskUser);
     TaskEntity DeleteTask(long idTask);
@@ -20,6 +20,6 @@ public interface ITaskService
     TaskDepartment DeleteAssignTaskToDepartment(long id);
     TaskUser UpdateAssignTaskToUser(TaskUser taskUser);
     TaskUser DeleteAssignTaskToUser(long id);
-    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? compositeFilterExpression, string? includeProperties, Pagination? pagination = null);
+    public IEnumerable<TaskEntity> GetAllTask(Expression<Func<TaskEntity, bool>>? compositeFilterExpression, string? includeProperties, Pagination? pagination = null);
     public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> compositeFilterExpression);
 }

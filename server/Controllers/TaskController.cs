@@ -77,9 +77,9 @@ public class TaskController : Controller
         }
     }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,
-        string? includeProperties, int? page, int? pageItem)
+    [HttpGet]
+    public ActionResult<IEnumerable<TaskEntity>> GetAllTask([FromQuery(Name = "filter")] string? filterString,
+        [FromQuery(Name = "includes")] string? includeProperties, int? page, int? pageItem)
     {
         Pagination pagination = null;
         if (page != null && pageItem != null)
@@ -93,25 +93,17 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-        var taskList = _taskService.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
+        var taskList = _taskService.GetAllTask(filter, includeProperties, pagination);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
-    }
-
-    [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get(string? filter, string? includes, int? page, int? pageItem)
-    {
-        var id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(id, filter, includes, page, pageItem);
     }
 
     [HttpGet]
     [Route("{taskId}")]
     public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId, string? includes)
     {
-        var id = AuthController.GetUserId(HttpContext);
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.GetTask(new Guid(id),taskId, includes));
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId, includes));
         }
         catch (Exception ex)
         {
