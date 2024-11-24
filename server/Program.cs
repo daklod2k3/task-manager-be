@@ -18,7 +18,7 @@ using server.Repository;
 using server.Services;
 using Supabase;
 
-Env.Load("../server/Env");
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 var bytes = Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtSecret"]!);
