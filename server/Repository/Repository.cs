@@ -42,8 +42,9 @@ public class Repository<T> : IRepository<T> where T : class
                      (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             query = query.Include(includeProperty);
 
-        if (orderBy != null)
-            return orderBy(query).ToList();
+        // if (orderBy != null)
+        Console.WriteLine("tesst");
+        // return query.OrderBy(x => EF.Property<object>(x, "Status")).ToList();
         return query.ToList();
     }
 
