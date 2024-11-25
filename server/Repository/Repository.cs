@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Interfaces;
+using Sprache;
 
 namespace server.Repository;
 
@@ -32,12 +33,12 @@ public class Repository<T> : IRepository<T> where T : class
 
     public T Get(Expression<Func<T, bool>>? filter, string? includeProperties)
     {
-        return GetQuery(filter, includeProperties).FirstOrDefault();
+        return GetQuery(filter,null, includeProperties).FirstOrDefault();
     }
 
-    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties)
     {
-        return GetQuery(filter, includeProperties).ToList();
+        return GetQuery(filter, orderBy, includeProperties).ToList();
     }
 
     public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
@@ -64,7 +65,7 @@ public class Repository<T> : IRepository<T> where T : class
         return entity;
     }
 
-    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties)
     {
         IQueryable<T> query = DbSet;
 
@@ -73,8 +74,22 @@ public class Repository<T> : IRepository<T> where T : class
         if (!string.IsNullOrEmpty(includeProperties))
             foreach (var includeProp in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 query = query.Include(includeProp);
-
-        return query;
+        if (orderBy == null)
+        {
+            return query;
+        }
+        string[] parts = orderBy.Split('_');
+        if (parts.Length == 2 && parts[1] == "desc")
+        {
+            return query.OrderByDescending(x => EF.Property<object>(x, parts[0]));
+        }
+        else
+        {
+            return query.OrderBy(x => EF.Property<object>(x, parts[0]));
+        }
+          
+            
+        
     }
 
     public int Save()

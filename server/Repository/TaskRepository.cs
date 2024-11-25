@@ -11,12 +11,12 @@ public class TaskRepository : Repository<TaskEntity>, ITaskRepository
     public TaskRepository(SupabaseContext context) : base(context)
     {
     }
-    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter,
+    public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter,string? orderBy,
         string? includeProperties, Pagination? pagination)
     {
         if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
-        var query = GetQuery(filter, includeProperties)
+        var query = GetQuery(filter, orderBy, includeProperties)
             .Where(t => t.TaskUsers.Any(tu => tu.UserId == id))
             .Distinct();
         return query.Paginate(pagination).ToList();

@@ -6,9 +6,9 @@ namespace server.Interfaces;
 
 public interface IRepository<T> where T : class
 {
-    IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string includeProperties = null);
+    IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? orderBy = null, string includeProperties = null);
     T Get(Expression<Func<T, bool>>? filter, string includeProperties = null);
-    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties = null);
+    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? orderBy = null, string? includeProperties = null);
     T GetById(string id, string? includeProperties = "*", string? keyProperty = "Id");
     T Add(T entity);
     bool Any(Expression<Func<T, bool>> filter);

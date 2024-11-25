@@ -46,7 +46,7 @@ public class UserController : Controller
         return new SuccessResponse<Profile>( user );
     }
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,
+    public ActionResult<IEnumerable<TaskEntity>> GetTaskByIdUser(string userId, string? filterString,string? orderBy,
         string? includeProperties, int? page, int? pageItem)
     {
         Pagination pagination = null;
@@ -61,13 +61,13 @@ public class UserController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-        var taskList = _unitOfWork.Task.GetTaskByIdUser(new Guid(userId), filter, includeProperties, pagination);
+        var taskList = _unitOfWork.Task.GetTaskByIdUser(new Guid(userId), filter, orderBy, includeProperties, pagination);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
     [HttpGet("task")]
-    public ActionResult<IEnumerable<TaskEntity>> GetTask(string? filter, string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<TaskEntity>> GetTask(string? filter,string? orderBy, string? includes, int? page, int? pageItem)
     {
         var user_id = AuthController.GetUserId(HttpContext);
-        return GetTaskByIdUser(user_id, filter, includes, page, pageItem);
+        return GetTaskByIdUser(user_id, filter, orderBy, includes, page, pageItem);
     }
 }

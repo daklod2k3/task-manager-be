@@ -79,7 +79,7 @@ public class TaskController : Controller
 
     [HttpGet]
     public ActionResult<IEnumerable<TaskEntity>> GetAllTask([FromQuery(Name = "filter")] string? filterString,
-        [FromQuery(Name = "includes")] string? includeProperties, int? page, int? pageItem)
+        string? orderBy, [FromQuery(Name = "includes")] string? includeProperties, int? page, int? pageItem)
     {
         Pagination pagination = null;
         if (page != null && pageItem != null)
@@ -93,7 +93,7 @@ public class TaskController : Controller
             filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
         }
 
-        var taskList = _taskService.GetAllTask(filter, includeProperties, pagination);
+        var taskList = _taskService.GetAllTask(filter,orderBy, includeProperties, pagination);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
     }
 

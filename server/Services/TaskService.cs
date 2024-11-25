@@ -98,11 +98,11 @@ public class TaskService : ITaskService
         return result;
     }
 
-    public IEnumerable<TaskEntity> GetAllTask(Expression<Func<TaskEntity, bool>>? filter,
+    public IEnumerable<TaskEntity> GetAllTask(Expression<Func<TaskEntity, bool>>? filter, string? orderBy,
         string? includeProperties, Pagination? pagination)
     {
         filter ??= t => true;
-        var query = _unitOfWork.Task.GetQuery(filter, includeProperties);
+        var query = _unitOfWork.Task.GetQuery(filter, orderBy, includeProperties);
         return query.Paginate(pagination).ToList();
     }
 
