@@ -106,6 +106,7 @@ var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetCon
 dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
 dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
 dataSourceBuilder.MapEnum<EDepartmentOwnerType>("EDepartmentOwnerType");
+dataSourceBuilder.MapEnum<ETaskHistoryType>("ETaskHistoryType");
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<SupabaseContext>(options =>
     options.UseNpgsql(dataSource));
@@ -142,7 +143,7 @@ app.UseExceptionHandler(e =>
         var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
         if (contextFeature == null) return;
         var json = JsonSerializer.Serialize(new ErrorResponse(contextFeature.Error.Message)
-        { Status = HttpStatusCode.InternalServerError });
+            { Status = HttpStatusCode.InternalServerError });
         Console.WriteLine(context.Response.StatusCode);
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsync(json);

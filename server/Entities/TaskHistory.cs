@@ -11,6 +11,7 @@ public class TaskHistory
     public Guid CreatedBy { get; set; }
 
     public string Description { get; set; } = null!;
+    public ETaskHistoryType Type { get; set; }
 
     public virtual Profile CreatedByNavigation { get; set; } = null!;
 
