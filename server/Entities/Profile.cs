@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace server.Entities;
 
@@ -13,6 +14,7 @@ public class Profile
     public string? Avt { get; set; }
 
     public long RoleId { get; set; }
+
 
     public virtual Role Role { get; set; } = null!;
 
@@ -39,4 +41,6 @@ public class Profile
     [JsonIgnore] public virtual ICollection<UserMessage> UserMessageFroms { get; set; } = new List<UserMessage>();
 
     [JsonIgnore] public virtual ICollection<UserMessage> UserMessageTos { get; set; } = new List<UserMessage>();
+
+    [NotMapped] public string RoleName => Role?.Name;
 }

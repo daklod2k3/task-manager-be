@@ -48,9 +48,12 @@ public class Repository<T> : IRepository<T> where T : class
         return query.ToList();
     }
 
-    public virtual T GetById(object id, string? includeProperties = "*", string? keyProperty = "id")
+    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
     {
-        var entity = dbSet.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
+        var query = dbSet.AsQueryable();
+        if (includeProperties != null) query = query.Include(includeProperties);
+        var entity = query
+            .FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
         return entity;
     }
 
