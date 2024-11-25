@@ -178,6 +178,7 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DepartmentId).HasColumnName("department_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OwnerType).HasColumnName("owner_type");
 
             entity.HasOne(d => d.Department).WithMany(p => p.DepartmentUsers)
                 .HasForeignKey(d => d.DepartmentId)
@@ -369,6 +370,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
+            entity.Property(e => e.Type).HasColumnName("type");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.CreatedBy)
