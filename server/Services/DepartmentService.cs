@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 
 namespace server.Services;
@@ -22,9 +24,15 @@ public class DepartmentService : IDepartmentService
         return result;
     }
 
-    public Department GetDepartment(long id)
+    public Department GetDepartment(long id,string? includes)
     {
-        return _unitOfWork.Department.GetById(id);
+        var query = _unitOfWork.Department.GetQuery(x => x.Id == id, includes).Distinct();
+        return query.FirstOrDefault();
+    }
+
+    public IEnumerable<Department> GetAllDepartment(string? includes)
+    {
+        return _unitOfWork.Department.Get(includeProperties: includes);
     }
 
     public Department UpdateDepartment(Department department)
@@ -54,14 +62,21 @@ public class DepartmentService : IDepartmentService
         return result;
     }
 
-    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter)
+    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>>? filter)
     {
-        return _unitOfWork.Department.Get(filter, includeProperties: "DepartmentUsers,TaskDepartments");
+        return _unitOfWork.Department.Get(filter);
     }
 
-    public IEnumerable<Department> GetAllDepartment()
+    public IEnumerable<Department> GetDepartmentAll(Expression<Func<Department, bool>>? filter,
+        string? includeProperties)
     {
-        CreatDepartment(new Department());
-        return _unitOfWork.Department.Get();
+        var query = _unitOfWork.Department.GetQuery(filter, includeProperties).Distinct();
+        return query;
+    }
+
+    public Department GetDepartmentById(long id, Expression<Func<Department, bool>>? filter,
+        string? includeProperties)
+    {
+        return _unitOfWork.Department.GetById(id, includeProperties);
     }
 }
