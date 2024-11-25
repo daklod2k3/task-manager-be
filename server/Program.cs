@@ -101,7 +101,7 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
     };
 });
 
-// ORM builder
+//ORM builder
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
 dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
 dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
@@ -117,12 +117,15 @@ var supabase = new Client(supabaseUrl, supabaseAnonKey);
 supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
 builder.Services.AddSingleton(supabase);
 
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+
+builder.Services.AddScoped<IDepartmentUser, DepartmentUserRepository>();
 builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+
 
 var app = builder.Build();
 
@@ -133,6 +136,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 app.MapControllers().RequireAuthorization();
 app.UseExceptionHandler(e =>
@@ -142,13 +146,14 @@ app.UseExceptionHandler(e =>
         var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
         if (contextFeature == null) return;
         var json = JsonSerializer.Serialize(new ErrorResponse(contextFeature.Error.Message)
-        { Status = HttpStatusCode.InternalServerError });
+            { Status = HttpStatusCode.InternalServerError });
         Console.WriteLine(context.Response.StatusCode);
+        // if (context.Response.StatusCode != 0)
+        //     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsync(json);
     });
 });
-
 // app.UseMiddleware<AuthMiddleware>();
 if (!app.Environment.IsDevelopment()) app.Urls.Add("http://0.0.0.0:" + builder.Configuration.GetValue<int>("PORT"));
 app.Run();
