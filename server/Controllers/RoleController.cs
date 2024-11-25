@@ -9,25 +9,23 @@ namespace server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TaskCommentController : Controller
+public class RoleController : Controller
 {
-    private readonly IRepository<TaskComment> _repository;
+    private readonly IRepository<Role> _repository;
 
-    public TaskCommentController(IRepository<TaskComment> taskCommentRepository)
+    public RoleController(IUnitOfWork unitOfWork)
     {
-        _repository = taskCommentRepository;
+        _repository = unitOfWork.Role;
     }
 
     [HttpPost]
-    public ActionResult Create(TaskComment comment)
+    public ActionResult Create(Role role)
     {
-        var id = AuthController.GetUserId(HttpContext);
-        comment.CreatedBy = new Guid(id);
         try
         {
-            var entity = _repository.Add(comment);
+            var entity = _repository.Add(role);
             _repository.Save();
-            return new SuccessResponse<TaskComment>(entity);
+            return new SuccessResponse<Role>(entity);
         }
         catch (Exception ex)
         {
@@ -37,13 +35,13 @@ public class TaskCommentController : Controller
     }
 
     [HttpPut]
-    public ActionResult Update(TaskComment body)
+    public ActionResult Update(Role body)
     {
         try
         {
-            var comment = _repository.Update(body);
+            var role = _repository.Update(body);
             _repository.Save();
-            return new SuccessResponse<TaskComment>(comment);
+            return new SuccessResponse<Role>(role);
         }
         catch (Exception ex)
         {
@@ -53,11 +51,11 @@ public class TaskCommentController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskComment> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Role> patchDoc)
     {
         try
         {
-            return new SuccessResponse<TaskComment>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<Role>(_repository.UpdatePatch(id.ToString(), patchDoc));
         }
         catch (Exception ex)
         {
@@ -84,13 +82,13 @@ public class TaskCommentController : Controller
     }
 
     [HttpDelete]
-    public ActionResult Delete(TaskComment body)
+    public ActionResult Delete(Role body)
     {
         try
         {
             _repository.Remove(body);
             _repository.Save();
-            return new SuccessResponse<TaskComment>(body);
+            return new SuccessResponse<Role>(body);
         }
         catch (Exception ex)
         {
@@ -106,17 +104,17 @@ public class TaskCommentController : Controller
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        return new SuccessResponse<IEnumerable<TaskComment>>(
-            _repository.Get(CompositeFilter<TaskComment>.ApplyFilter(filter), includeProperties: includes));
+        return new SuccessResponse<IEnumerable<Role>>(
+            _repository.Get(CompositeFilter<Role>.ApplyFilter(filter), includeProperties: includes));
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<IEnumerable<TaskComment>> GetId(long id, string? includes)
+    public ActionResult<IEnumerable<Role>> GetId(long id, string? includes)
     {
         try
         {
-            return new SuccessResponse<TaskComment>(_repository.GetById(id.ToString(), includes ?? "*"));
+            return new SuccessResponse<Role>(_repository.GetById(id.ToString(), includes ?? "*"));
         }
         catch (Exception ex)
         {

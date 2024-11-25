@@ -8,5 +8,6 @@ public interface IUnitOfWork
     IDepartmentUser DepartmentUser { get; }
     ITaskUserRepository TaskUser { get; }
     IUserRepository User { get; }
+    IRoleRepository Role { get; }
     int Save();
 }
