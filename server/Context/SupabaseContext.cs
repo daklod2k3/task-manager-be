@@ -306,6 +306,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
+            entity.Property(e => e.Type).HasColumnName("type");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.CreatedBy)
