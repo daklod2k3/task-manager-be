@@ -22,7 +22,6 @@ public class TaskCompleteController : Controller
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
     }
     
-    [AllowAnonymous]
     [HttpPost]
     [Route("{taskId}")]
     public async Task<IActionResult> MarkComplete(string taskId, [FromForm] IFormFile file)
