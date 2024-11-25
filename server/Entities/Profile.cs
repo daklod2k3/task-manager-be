@@ -30,7 +30,7 @@ public class Profile
 
     public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 
-    [JsonIgnore] public virtual ICollection<Files> Files { get; set; } = new List<Files>();
+    [JsonIgnore] public virtual ICollection<FileEntity> Files { get; set; } = new List<FileEntity>();
 
     [JsonIgnore] public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 

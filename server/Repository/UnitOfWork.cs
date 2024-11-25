@@ -17,7 +17,10 @@ public class UnitOfWork : IUnitOfWork
         Department = new DepartmentRepository(_context);
         DepartmentUser = new DepartmentUserRepository(_context);
         Role = new RoleRepository(_context);
+        FileRepository = new FileRepository(_context);
     }
+
+    public IFileRepository FileRepository { get; }
 
     public ITaskRepository Task { get; }
     public ITaskDepartmentRepository TaskDepartment { get; }

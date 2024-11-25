@@ -9,5 +9,6 @@ public interface IUnitOfWork
     ITaskUserRepository TaskUser { get; }
     IUserRepository User { get; }
     IRoleRepository Role { get; }
+    IFileRepository FileRepository { get; }
     int Save();
 }
