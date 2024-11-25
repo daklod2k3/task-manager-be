@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
@@ -20,7 +21,8 @@ public class TaskCompleteController : Controller
         _unitOfWork = unitOfWork;
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
     }
-
+    
+    [AllowAnonymous]
     [HttpPost]
     [Route("{taskId}")]
     public async Task<IActionResult> MarkComplete(string taskId, [FromForm] IFormFile file)
@@ -47,7 +49,7 @@ public class TaskCompleteController : Controller
             });
             _unitOfWork.Save();
             var task = _tasks.GetById(taskId);
-            task.Status = ETaskStatus.Done;
+            task.Status = ETaskStatus.In_preview;
             task.FileId = fileEntity.Id;
             _unitOfWork.Save();
 
