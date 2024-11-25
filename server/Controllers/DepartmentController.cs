@@ -1,6 +1,8 @@
+using Azure;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Graph.Models;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
@@ -54,7 +56,7 @@ public class DepartmentController : Controller
     {
         try
         {
-            return new SuccessResponse<Department>(_departmentService.UpdateDepartmentPatch(id, patchDoc));
+            return new SuccessResponse<Department>(_departmentService.UpdateDepartment(id, patchDoc));
         }
         catch (Exception ex)
         {
@@ -78,60 +80,45 @@ public class DepartmentController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<Department>> GetDepartmentByFilter(string filterString)
-    {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<Department>.ApplyFilter(filterResult);
-
-        var DepartmetnList = _departmentService.GetDepartmentByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<Department>>(DepartmetnList);
-    }
-
-    [ApiExplorerSettings(IgnoreApi = true)]
     public ActionResult<IEnumerable<Department>> GetDepartment(string? filterString, string? includeProperties)
     {
-        var filterResult = new ClientFilter();
         Expression<Func<Department, bool>>? filter = null;
 
         if (!string.IsNullOrEmpty(filterString))
         {
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+            var filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+
             filter = CompositeFilter<Department>.ApplyFilter(filterResult);
         }
 
-        var DepartmetnList = _departmentService.GetDepartmentAll(filter, includeProperties);
-        return new SuccessResponse<IEnumerable<Department>>(DepartmetnList);
+        var departmentList = _departmentService.GetAllDepartment(filter, includeProperties);
+        return new SuccessResponse<IEnumerable<Department>>(departmentList);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Department>> Get(string? includeProperties)
+    public ActionResult<IEnumerable<Department>> Get(string? filter, string? includes)
+    {
+        return GetDepartment(filter, includes);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult<Department> GetDepartmentById(long id, string? includes)
     {
         try
         {
-            var departments = _departmentService.GetAllDepartment(includeProperties);
-            return new SuccessResponse<IEnumerable<Department>>(departments);
+            var department = _departmentService.GetDepartment(id, includes);
+            if (department == null)
+            {
+                return new ErrorResponse("Department not found");
+            }
+
+            return new SuccessResponse<Department>(department);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Failed to retrieve departments");
-        }
-    }
-
-    [HttpGet]
-    [Route("{departmentId}")]
-    public ActionResult<IEnumerable<Department>> GetDepartmentById(long departmentId, string? includes)
-    {
-        try
-        {
-            return new SuccessResponse<Department>(_departmentService.GetDepartment(departmentId, includes));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("department is not get");
+            return new ErrorResponse("Failed to get department");
         }
     }
 }

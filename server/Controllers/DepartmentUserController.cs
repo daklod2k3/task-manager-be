@@ -24,7 +24,7 @@ public class DepartmentUserController : Controller
     {
         try
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.CreatDepartmentUser(departmentUser));
+            return new SuccessResponse<DepartmentUser>(_departmentUserService.CreateDepartmentUser(departmentUser));
         }
         catch (Exception ex)
         {
@@ -61,7 +61,7 @@ public class DepartmentUserController : Controller
         }
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public ActionResult DeleteDepartmentUser(long id)
     {
         try

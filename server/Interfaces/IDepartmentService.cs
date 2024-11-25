@@ -7,14 +7,11 @@ using System.Linq.Expressions;
 namespace server.Interfaces;
     public interface IDepartmentService
     {
-    IEnumerable<Department> GetAllDepartment(string? includeProperties);
+    public IEnumerable<Department> GetAllDepartment(Expression<Func<Department, bool>>? filter, string? includes);
     Department CreatDepartment(Department department);
-    public Department GetDepartment(long id, string? includes);
+    public Department GetDepartment(long idDepartment, string? includes);
     Department DeleteDepartment(long idDepartment);
+    Department UpdateDepartment(long idDepartment, [FromBody] JsonPatchDocument<Department> patchDoc);
     Department UpdateDepartment(Department department);
-    Department UpdateDepartmentPatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc);
-    public IEnumerable<Department> GetDepartmentAll(Expression<Func<Department, bool>> compositeFilterExpression, string? includeProperties);
     public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> compositeFilterExpression);
-    public Department GetDepartmentById(long id, Expression<Func<Department, bool>>? compositeFilterExpression, string? includeProperties);
-
-    }
+}

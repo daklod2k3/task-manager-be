@@ -16,7 +16,7 @@ public class DepartmentUserService : IDepartmentUserService
         _unitOfWork = unitOfWork;
     }
 
-    public DepartmentUser CreatDepartmentUser(DepartmentUser departmentUser)
+    public DepartmentUser CreateDepartmentUser(DepartmentUser departmentUser)
     {
         var result = _unitOfWork.DepartmentUser.Add(departmentUser);
         _unitOfWork.Save();
@@ -30,7 +30,6 @@ public class DepartmentUserService : IDepartmentUserService
 
     public IEnumerable<DepartmentUser> GetAllDepartmentUser()
     {
-        //CreatDepartmentUser(new DepartmentUser());
         return _unitOfWork.DepartmentUser.Get();
     }
 

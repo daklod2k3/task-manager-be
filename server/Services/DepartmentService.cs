@@ -24,34 +24,21 @@ public class DepartmentService : IDepartmentService
         return result;
     }
 
-    public Department GetDepartment(long id,string? includes)
+    public Department GetDepartment(long idDepartment, string? includes)
     {
-        var query = _unitOfWork.Department.GetQuery(x => x.Id == id, includes).Distinct();
+        var query = _unitOfWork.Department.GetQuery(x => x.Id == idDepartment, includes);
+
         return query.FirstOrDefault();
     }
 
-    public IEnumerable<Department> GetAllDepartment(string? includes)
+    public IEnumerable<Department> GetAllDepartment(Expression<Func<Department, bool>>? filter, string? includeProperties)
     {
-        return _unitOfWork.Department.Get(includeProperties: includes);
-    }
+        filter ??= d => true;
 
-    public Department UpdateDepartment(Department department)
-    {
-        var result = _unitOfWork.Department.Update(department);
-        _unitOfWork.Save();
-        return result;
-    }
+        var query = _unitOfWork.Department.GetQuery(filter, includeProperties)
+            .Distinct();
 
-    public Department UpdateDepartmentPatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
-    {
-        var department = _unitOfWork.Department.GetById(id);
-        if (department == null) throw new Exception("not found department");
-
-        patchDoc.ApplyTo(department);
-
-        _unitOfWork.Save();
-
-        return department;
+        return query.ToList();
     }
 
     public Department DeleteDepartment(long id)
@@ -62,21 +49,27 @@ public class DepartmentService : IDepartmentService
         return result;
     }
 
-    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>>? filter)
+    public Department UpdateDepartment(long idDepartment, [FromBody] JsonPatchDocument<Department> patchDoc)
+    {
+        var department = _unitOfWork.Department.GetById(idDepartment);
+        if (department == null) throw new Exception("not found department");
+
+        patchDoc.ApplyTo(department);
+
+        _unitOfWork.Save();
+
+        return department;
+    }
+
+    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter)
     {
         return _unitOfWork.Department.Get(filter);
     }
 
-    public IEnumerable<Department> GetDepartmentAll(Expression<Func<Department, bool>>? filter,
-        string? includeProperties)
+    public Department UpdateDepartment(Department department)
     {
-        var query = _unitOfWork.Department.GetQuery(filter, includeProperties).Distinct();
-        return query;
-    }
-
-    public Department GetDepartmentById(long id, Expression<Func<Department, bool>>? filter,
-        string? includeProperties)
-    {
-        return _unitOfWork.Department.GetById(id, includeProperties);
+        var result = _unitOfWork.Department.Update(department);
+        _unitOfWork.Save();
+        return result;
     }
 }

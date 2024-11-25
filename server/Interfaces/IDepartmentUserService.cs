@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace server.Interfaces;
 public interface IDepartmentUserService
 {
-    public DepartmentUser CreatDepartmentUser(DepartmentUser DepartmentUser);
+    public DepartmentUser CreateDepartmentUser(DepartmentUser DepartmentUser);
     public DepartmentUser UpdateDepartmentUser(DepartmentUser DepartmentUser);
     public DepartmentUser DeleteDepartmentUser(long idDepartmentUser);
     public DepartmentUser UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc);
