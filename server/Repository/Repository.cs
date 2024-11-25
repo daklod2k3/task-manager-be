@@ -29,7 +29,6 @@ public class Repository<T> : IRepository<T> where T : class
         return dbSet.Any(filter);
     }
 
-
     public virtual IEnumerable<T> Get(
         Expression<Func<T, bool>> filter = null,
         Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
@@ -48,12 +47,13 @@ public class Repository<T> : IRepository<T> where T : class
         return query.ToList();
     }
 
-    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
+    public virtual T GetById(object id, string? includeProperties = "", string? keyProperty = "id")
     {
-        var query = dbSet.AsQueryable();
-        if (includeProperties != null) query = query.Include(includeProperties);
-        var entity = query
-            .FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
+        IQueryable<T> query = dbSet;
+        foreach (var includeProperty in includeProperties.Split
+                     (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            query = query.Include(includeProperty);
+        var entity = query.FirstOrDefault(e => EF.Property<string>(e, keyProperty).ToString() == id.ToString());
         return entity;
     }
 

@@ -101,8 +101,8 @@ public class TaskCommentController : Controller
 
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString,
-        string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
@@ -112,11 +112,11 @@ public class TaskCommentController : Controller
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<IEnumerable<TaskComment>> GetId(long id, string? includes)
+    public ActionResult<IEnumerable<TaskComment>> GetId(long id, string? includes = "")
     {
         try
         {
-            return new SuccessResponse<TaskComment>(_repository.GetById(id.ToString(), includes ?? "*"));
+            return new SuccessResponse<TaskComment>(_repository.GetById(id.ToString(), includes));
         }
         catch (Exception ex)
         {

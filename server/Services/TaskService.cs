@@ -66,6 +66,7 @@ public class TaskService : ITaskService
     public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
         var task = _unitOfWork.Task.GetById(id);
+        // TaskEntity task = null;
         if (task == null) throw new Exception("not found task");
 
         patchDoc.ApplyTo(task);
