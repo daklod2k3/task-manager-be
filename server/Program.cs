@@ -99,6 +99,18 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
             if (context.Token is not null) return Task.CompletedTask;
             var cookie = context.Request.Cookies[cookieAuthName];
             if (cookie is null) return Task.CompletedTask;
+            if (cookie.Contains("base64-"))
+            {
+                cookie = cookie.Replace("base64-", "");
+                var padding = cookie.Length % 4;
+                if (padding > 0) cookie += new string('=', 4 - padding); // Add padding if necessary
+                cookie = Encoding.UTF8.GetString(Convert.FromBase64String(cookie));
+                // var token = cookie;
+                // context.Token = token;
+                // return Task.CompletedTask;
+            }
+
+
             try
             {
                 var token = JObject.Parse(cookie)["access_token"];
