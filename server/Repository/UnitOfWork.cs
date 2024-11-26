@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
         Channel = new ChannelRepository(_context);
         ChannelUser = new ChannelUserRepository(_context);
         UserMessage = new UserMessageRepository(_context);
+        ChannelMessage = new ChannelMessageRepository(_context);
         Role = new RoleRepository(_context);
         FileRepository = new FileRepository(_context);
     }
@@ -36,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
     public IChannelRepository Channel { get; }
     public IChannelUserRepository ChannelUser { get; }
     public IUserMessageRepository UserMessage { get; }
+    public IChannelMessageRepository ChannelMessage { get; }
     public IRoleRepository Role { get; }
 
     public int Save()

@@ -11,6 +11,7 @@ public interface IUnitOfWork
     IChannelRepository Channel { get; }
     IChannelUserRepository ChannelUser { get; }
     IUserMessageRepository UserMessage { get; }
+    IChannelMessageRepository ChannelMessage { get; }
     IRoleRepository Role { get; }
     IFileRepository FileRepository { get; }
     int Save();

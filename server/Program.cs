@@ -129,6 +129,7 @@ builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IChannelUserService, ChannelUserService>();
 builder.Services.AddScoped<IUserMessageService, UserMessageService>();
+builder.Services.AddScoped<IChannelMessageService, ChannelMessageService>();
 
 var app = builder.Build();
 
