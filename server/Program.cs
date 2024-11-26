@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Linq;
 using Npgsql;
 using server.Context;
 using server.Controllers;
@@ -95,7 +96,19 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
     {
         OnMessageReceived = context =>
         {
-            context.Token = context.Request.Cookies[cookieAuthName];
+            if (context.Token is not null) return Task.CompletedTask;
+            var cookie = context.Request.Cookies[cookieAuthName];
+            if (cookie is null) return Task.CompletedTask;
+            try
+            {
+                var token = JObject.Parse(cookie)["access_token"];
+                context.Token = token.ToString();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Cookie token value parse error!");
+            }
+
             return Task.CompletedTask;
         }
     };
