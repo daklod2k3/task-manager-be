@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using LinqKit;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using server.Entities;
@@ -25,13 +24,7 @@ public class DepartmentService : IDepartmentService
 
     public Department GetDepartment(long id)
     {
-        return _unitOfWork.Department.Get(x => x.Id == id);
-    }
-
-    public IEnumerable<Department> GetAllDepartment()
-    {
-        CreatDepartment(new Department());
-        return _unitOfWork.Department.GetAll();
+        return _unitOfWork.Department.GetById(id);
     }
 
     public Department UpdateDepartment(Department department)
@@ -43,12 +36,8 @@ public class DepartmentService : IDepartmentService
 
     public Department UpdateDepartmentPatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
     {
-
-        var department = _unitOfWork.Department.Get(x => x.Id == id);
-        if (department == null)
-        {
-            throw new Exception("not found department");
-        }
+        var department = _unitOfWork.Department.GetById(id);
+        if (department == null) throw new Exception("not found department");
 
         patchDoc.ApplyTo(department);
 
@@ -59,7 +48,7 @@ public class DepartmentService : IDepartmentService
 
     public Department DeleteDepartment(long id)
     {
-        var department = _unitOfWork.Department.Get(x => x.Id == id);
+        var department = _unitOfWork.Department.GetById(id);
         var result = _unitOfWork.Department.Remove(department);
         _unitOfWork.Save();
         return result;
@@ -67,6 +56,12 @@ public class DepartmentService : IDepartmentService
 
     public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter)
     {
-        return _unitOfWork.Department.GetAll(filter, "DepartmentUsers,TaskDepartments");
+        return _unitOfWork.Department.Get(filter, includeProperties: "DepartmentUsers,TaskDepartments");
+    }
+
+    public IEnumerable<Department> GetAllDepartment()
+    {
+        CreatDepartment(new Department());
+        return _unitOfWork.Department.Get();
     }
 }

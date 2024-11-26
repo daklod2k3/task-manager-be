@@ -24,7 +24,7 @@ public partial class SupabaseContext : DbContext
 
     public virtual DbSet<DepartmentUser> DepartmentUsers { get; set; }
 
-    public virtual DbSet<Files> Files { get; set; }
+    public virtual DbSet<FileEntity> Files { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -191,7 +191,7 @@ public partial class SupabaseContext : DbContext
                 .HasConstraintName("department_user_user_id_fkey");
         });
 
-        modelBuilder.Entity<Files>(entity =>
+        modelBuilder.Entity<FileEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("files_pkey");
 
@@ -233,6 +233,67 @@ public partial class SupabaseContext : DbContext
                 .HasConstraintName("notifications_user_id_fkey");
         });
 
+        modelBuilder.Entity<Resource>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("resources_pkey");
+
+            entity.ToTable("resources");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+            entity.Property(e => e.Path)
+                .HasColumnType("character varying")
+                .HasColumnName("path");
+        });
+
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("permissions_pkey");
+
+            entity.ToTable("permissions");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Create).HasColumnName("create");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Delete).HasColumnName("delete");
+            entity.Property(e => e.ResourceId).HasColumnName("resource_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.Update).HasColumnName("update");
+            entity.Property(e => e.View).HasColumnName("view");
+
+            entity.HasOne(d => d.Resource).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.ResourceId)
+                .HasConstraintName("permissions_resource_id_fkey");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("permissions_role_id_fkey");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("roles_pkey");
+
+            entity.ToTable("roles");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<Profile>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("profiles_pkey");
@@ -245,6 +306,9 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Avt).HasColumnName("avt");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.HasOne(d => d.Role).WithMany(p => p.Profiles)
+                .HasForeignKey(d => d.RoleId).HasConstraintName("profiles_role_id_fkey");
         });
 
         modelBuilder.Entity<TaskEntity>(entity =>
@@ -265,9 +329,14 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Priority).HasColumnName("priority");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e=> e.FileId).HasColumnName("file_id");
+            
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Tasks)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("tasks_created_by_fkey");
+            entity.HasOne(e => e.File).WithMany(p => p.Tasks)
+                .HasForeignKey(d => d.FileId)
+                .HasConstraintName("tasks_file_id_fkey");
         });
 
         modelBuilder.Entity<TaskDepartment>(entity =>
@@ -306,6 +375,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
+            entity.Property(e => e.Type).HasColumnName("type");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.CreatedBy)

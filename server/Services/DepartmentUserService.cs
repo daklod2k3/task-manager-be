@@ -25,13 +25,13 @@ public class DepartmentUserService : IDepartmentUserService
 
     public DepartmentUser GetDepartmentUser(long id)
     {
-        return _unitOfWork.DepartmentUser.Get(x => x.Id == id);
+        return _unitOfWork.DepartmentUser.GetById(id);
     }
 
     public IEnumerable<DepartmentUser> GetAllDepartmentUser()
     {
         //CreatDepartmentUser(new DepartmentUser());
-        return _unitOfWork.DepartmentUser.GetAll();
+        return _unitOfWork.DepartmentUser.Get();
     }
 
     public DepartmentUser UpdateDepartmentUser(DepartmentUser departmentUser)
@@ -44,7 +44,7 @@ public class DepartmentUserService : IDepartmentUserService
     public DepartmentUser UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
     {
 
-        var departmentUser = _unitOfWork.DepartmentUser.Get(x => x.Id == id);
+        var departmentUser = _unitOfWork.DepartmentUser.GetById(id);
         if (departmentUser == null)
         {
             throw new Exception("not found department");
@@ -59,7 +59,7 @@ public class DepartmentUserService : IDepartmentUserService
 
     public DepartmentUser DeleteDepartmentUser(long id)
     {
-        var departmentUser = _unitOfWork.DepartmentUser.Get(x => x.Id == id);
+        var departmentUser = _unitOfWork.DepartmentUser.GetById(id);
         var result = _unitOfWork.DepartmentUser.Remove(departmentUser);
         _unitOfWork.Save();
         return result;
@@ -67,6 +67,6 @@ public class DepartmentUserService : IDepartmentUserService
 
     public IEnumerable<DepartmentUser> GetDepartmentUserByFilter(Expression<Func<DepartmentUser, bool>> filter)
     {
-        return _unitOfWork.DepartmentUser.GetAll(filter);
+        return _unitOfWork.DepartmentUser.Get(filter);
     }
 }

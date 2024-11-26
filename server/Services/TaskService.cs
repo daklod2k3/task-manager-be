@@ -37,7 +37,7 @@ public class TaskService : ITaskService
 
     public IEnumerable<TaskEntity> GetAllTask()
     {
-        return _unitOfWork.Task.GetAll();
+        return _unitOfWork.Task.Get();
     }
 
     public TaskUser AssignTaskToUser(TaskUser taskUser)
@@ -57,7 +57,7 @@ public class TaskService : ITaskService
 
     public TaskEntity DeleteTask(long id)
     {
-        var task = _unitOfWork.Task.Get(x => x.Id == id);
+        var task = _unitOfWork.Task.GetById(id);
         var result = _unitOfWork.Task.Remove(task);
         _unitOfWork.Save();
         return result;
@@ -65,7 +65,8 @@ public class TaskService : ITaskService
 
     public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
-        var task = _unitOfWork.Task.Get(x => x.Id == id);
+        var task = _unitOfWork.Task.GetById(id);
+        // TaskEntity task = null;
         if (task == null) throw new Exception("not found task");
 
         patchDoc.ApplyTo(task);
@@ -84,7 +85,7 @@ public class TaskService : ITaskService
 
     public TaskDepartment DeleteAssignTaskToDepartment(long id)
     {
-        var taskDepartment = _unitOfWork.TaskDepartment.Get(x => x.Id == id);
+        var taskDepartment = _unitOfWork.TaskDepartment.GetById(id);
         var result = _unitOfWork.TaskDepartment.Remove(taskDepartment);
         _unitOfWork.Save();
         return result;
@@ -99,7 +100,7 @@ public class TaskService : ITaskService
 
     public TaskUser DeleteAssignTaskToUser(long id)
     {
-        var taskUser = _unitOfWork.TaskUser.Get(x => x.Id == id);
+        var taskUser = _unitOfWork.TaskUser.GetById(id);
         var result = _unitOfWork.TaskUser.Remove(taskUser);
         _unitOfWork.Save();
         return result;
@@ -122,7 +123,7 @@ public class TaskService : ITaskService
 
     public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> filter)
     {
-        return _unitOfWork.Task.GetAll(filter);
+        return _unitOfWork.Task.Get(filter);
     }
 
     public TaskEntity UpdateTask(TaskEntity taskEntity)

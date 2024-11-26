@@ -8,57 +8,69 @@ namespace server.Repository;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    private readonly SupabaseContext _context;
+    internal SupabaseContext context;
 
+    internal DbSet<T> dbSet;
     // private readonly SupabaseContext _context;
-    protected readonly DbSet<T> DbSet;
 
     public Repository(SupabaseContext context)
     {
-        _context = context;
-        DbSet = context.Set<T>();
+        this.context = context;
+        dbSet = context.Set<T>();
     }
 
     public T Add(T entity)
     {
-        return DbSet.Add(entity).Entity;
+        return dbSet.Add(entity).Entity;
     }
 
     public bool Any(Expression<Func<T, bool>> filter)
     {
-        return DbSet.Any(filter);
+        return dbSet.Any(filter);
     }
 
-
-    public T Get(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public virtual IEnumerable<T> Get(
+        Expression<Func<T, bool>> filter = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+        string includeProperties = "")
     {
-        return GetQuery(filter, includeProperties).FirstOrDefault();
+        IQueryable<T> query = dbSet;
+
+        if (filter != null) query = query.Where(filter);
+
+        foreach (var includeProperty in includeProperties.Split
+                     (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            query = query.Include(includeProperty);
+
+        // if (orderBy != null)
+        Console.WriteLine("tesst");
+        // return query.OrderBy(x => EF.Property<object>(x, "Status")).ToList();
+        return query.ToList();
     }
 
-    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public virtual T GetById(object id, string? includeProperties = "", string? keyProperty = "id")
     {
-        return GetQuery(filter, includeProperties).ToList();
-    }
-
-    public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
-    {
-        var entity = DbSet.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
+        IQueryable<T> query = dbSet;
+        foreach (var includeProperty in includeProperties.Split
+                     (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            query = query.Include(includeProperty);
+        var entity = query.FirstOrDefault(e => EF.Property<string>(e, keyProperty).ToString() == id.ToString());
         return entity;
     }
 
     public T Remove(T entity)
     {
-        return DbSet.Remove(entity).Entity;
+        return dbSet.Remove(entity).Entity;
     }
 
     public T Update(T entity)
     {
-        return DbSet.Update(entity).Entity;
+        return dbSet.Update(entity).Entity;
     }
 
     public T UpdatePatch(string id, JsonPatchDocument<T> patch)
     {
-        var entity = DbSet.Find(id);
+        var entity = dbSet.Find(id);
         patch.ApplyTo(entity);
         Save();
         return entity;
@@ -66,7 +78,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties)
     {
-        IQueryable<T> query = DbSet;
+        IQueryable<T> query = dbSet;
 
         if (filter != null) query = query.Where(filter);
 
@@ -79,6 +91,11 @@ public class Repository<T> : IRepository<T> where T : class
 
     public int Save()
     {
-        return _context.SaveChanges();
+        return context.SaveChanges();
+    }
+
+    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties)
+    {
+        return GetQuery(filter, includeProperties).ToList();
     }
 }
