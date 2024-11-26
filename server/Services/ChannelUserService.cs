@@ -15,9 +15,9 @@ public class ChannelUserService : IChannelUserService
         _unitOfWork = unitOfWork;
     }
 
-    public ChannelUser CreateChannelUser(ChannelUser department)
+    public ChannelUser CreateChannelUser(ChannelUser channeluser)
     {
-        var result = _unitOfWork.ChannelUser.Add(department);
+        var result = _unitOfWork.ChannelUser.Add(channeluser);
         _unitOfWork.Save();
         return result;
     }
@@ -27,23 +27,23 @@ public class ChannelUserService : IChannelUserService
         return _unitOfWork.ChannelUser.GetById(id);
     }
 
-    public ChannelUser UpdateChannelUser(ChannelUser department)
+    public ChannelUser UpdateChannelUser(ChannelUser channeluser)
     {
-        var result = _unitOfWork.ChannelUser.Update(department);
+        var result = _unitOfWork.ChannelUser.Update(channeluser);
         _unitOfWork.Save();
         return result;
     }
 
     public ChannelUser UpdateChannelUserPatch(long id, [FromBody] JsonPatchDocument<ChannelUser> patchDoc)
     {
-        var department = _unitOfWork.ChannelUser.GetById(id);
-        if (department == null) throw new Exception("not found department");
+        var channeluser = _unitOfWork.ChannelUser.GetById(id);
+        if (channeluser == null) throw new Exception("not found channeluser");
 
-        patchDoc.ApplyTo(department);
+        patchDoc.ApplyTo(channeluser);
 
         _unitOfWork.Save();
 
-        return department;
+        return channeluser;
     }
 
     public ChannelUser DeleteChannelUser(long id)

@@ -127,6 +127,8 @@ builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.AddScoped<IChannelUserService, ChannelUserService>();
+builder.Services.AddScoped<IUserMessageService, UserMessageService>();
 
 var app = builder.Build();
 
