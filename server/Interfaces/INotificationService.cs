@@ -14,7 +14,7 @@ public interface INotificationService
     Notification UpdateNotification(Notification notification);
     Notification PatchNotification(long id, [FromBody] JsonPatchDocument<Notification> notification);
     public Notification GetNotificationById(Guid id);
-    public IEnumerable<Notification> GetNotificationByFilter(Expression<Func<Notification, bool>>? compositeFilterExpression);
+    public IEnumerable<Notification> GetNotificationByFilter(Expression<Func<Notification, bool>> compositeFilterExpression);
 
 
 
