@@ -86,18 +86,19 @@ public class ChannelController : Controller
         var id = AuthController.GetUserId(HttpContext);
         try
         {
-            var channel = _channelService.GetChannelById(Id);
-            if (channel == null)
-            {
-                return new ErrorResponse("Channel is not found");
-            }
-            return new SuccessResponse<Channel>(channel);
+            return new SuccessResponse<Channel>(_channelService.GetChannelById(Id));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
             return new ErrorResponse("Channel is not found");
         }
+    }
+
+    [HttpGet]
+    public ActionResult<IEnumerable<Channel>> Get(string? filter)
+    {
+        return GetChannelByFilter(filter);
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]

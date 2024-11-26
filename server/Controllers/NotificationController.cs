@@ -32,20 +32,17 @@ public class NotificationController : Controller
     }
 
     [HttpGet("{id}")]
-    public ActionResult<IEnumerable<Notification>> Get(string id, string filter)
+    public ActionResult<IEnumerable<Notification>> Get(string id)
     {
-        return GetNotificationById(id,filter);
-    }
-
-    public ActionResult<IEnumerable<Notification>> GetNotificationById(string id,string filterString)
-    {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<Notification>.ApplyFilter(filterResult);
-
-        var notiList = _notificationService.GetNotificationById(new Guid(id),compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<Notification>>(notiList);
+        try
+        {
+            return new SuccessResponse<Notification>(_notificationService.GetNotificationById(new Guid(id)));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("notification is not get");
+        }
     }
 
 
@@ -64,64 +61,6 @@ public class NotificationController : Controller
         }
     }
 
-
-//     // lấy tất cả notifications dựa theo token của user
-//     [HttpGet("{accessToken}")]
-//     public ActionResult<IEnumerable<Notification>> Get(string accessToken)
-// {
-//     // Check if the access token is provided in the header
-//     if (Request.Headers.TryGetValue("Authorization", out var authHeaderValue))
-//     {
-//         // Extract the token from the header
-//         var authHeader = authHeaderValue.FirstOrDefault();
-//         if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-//         {
-//             // Remove the "Bearer " prefix
-//             var token = authHeader.Substring(7);
-
-//             // Validate the access token
-//             var tokenHandler = new JwtSecurityTokenHandler();
-//             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
-//             try
-//             {
-//                 var tokenValidationParameters = new TokenValidationParameters
-//                 {
-//                     ValidateIssuerSigningKey = true,
-//                     IssuerSigningKey = new SymmetricSecurityKey(key),
-//                     ValidateIssuer = false,
-//                     ValidateAudience = false,
-//                     ClockSkew = TimeSpan.Zero
-//                 };
-
-//                 var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-//                 var jwtToken = (JwtSecurityToken)securityToken;
-//                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-
-//                 if (userIdClaim != null)
-//                 {
-//                     int userId = int.Parse(userIdClaim.Value);
-//                     return _context.Notifications.Where(n => n.UserId.Equals(userId)).ToList();
-//                 }
-//                 else
-//                 {
-//                     return BadRequest("Invalid access token");
-//                 }
-//             }
-//             catch (Exception)
-//             {
-//                 return BadRequest("Invalid access token");
-//             }
-//         }
-//         else
-//         {
-//             return BadRequest("Access token not found in header");
-//         }
-//     }
-//     else
-//     {
-//         return BadRequest("Access token not found in header");
-//     }
-// }
 
 
 //gửi entity lên server, server trả về entity read = true

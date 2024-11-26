@@ -13,8 +13,7 @@ public interface INotificationService
     Notification DeleteNotification(long id);
     Notification UpdateNotification(Notification notification);
     Notification PatchNotification(long id, [FromBody] JsonPatchDocument<Notification> notification);
-
-    public IEnumerable<Notification> GetNotificationById(Guid id, Expression<Func<Notification, bool>>? compositeFilterExpression);
+    public Notification GetNotificationById(Guid id);
     public IEnumerable<Notification> GetNotificationByFilter(Expression<Func<Notification, bool>>? compositeFilterExpression);
 
 

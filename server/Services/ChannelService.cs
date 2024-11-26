@@ -25,12 +25,13 @@ public class ChannelService : IChannelService
 
     public IEnumerable<Channel> GetAllChannels()
     {
-        return _unitOfWork.Channel.GetAll();
+        CreateChannel(new Channel());
+        return _unitOfWork.Channel.Get();
     }
 
     public Channel DeleteChannel(long id)
     {
-        var Channel = _unitOfWork.Channel.Get(x => x.Id == id);
+        var Channel = _unitOfWork.Channel.GetById(id);
         var result = _unitOfWork.Channel.Remove(Channel);
         _unitOfWork.Save();
         return result;
@@ -44,27 +45,25 @@ public class ChannelService : IChannelService
 
     public Channel PatchChannel(long id,[FromBody] JsonPatchDocument<Channel> Channel)
     {
-        var noti = _unitOfWork.Channel.Get(x => x.Id == id);
-        if (noti == null) throw new Exception("Channel not found");
+        var channel = _unitOfWork.Channel.GetById(id);
+        if (channel == null) throw new Exception("Channel not found");
 
-        Channel.ApplyTo(noti);
+        Channel.ApplyTo(channel);
 
         _unitOfWork.Save();
 
-        return noti;
+        return channel;
     }
 
 
-    public Channel? GetChannelById(long id)
+    public Channel GetChannelById(long id)
     {
-        if (0L == id) return null;
-        var result = _unitOfWork.Channel.Get(t => t.Id == id);
-        return result;
+        return _unitOfWork.Channel.GetById(id);
     }
 
     public IEnumerable<Channel> GetChannelByFilter(Expression<Func<Channel, bool>> filter)
     {
-        return _unitOfWork.Channel.GetAll(filter);
+        return _unitOfWork.Channel.Get(filter, includeProperties: "ChannelMessages,ChannelUsers");
     }
 
     

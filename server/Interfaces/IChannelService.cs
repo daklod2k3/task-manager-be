@@ -12,8 +12,8 @@ public interface IChannelService
 
     Channel DeleteChannel(long id);
     Channel UpdateChannel(Channel channel);
-    Channel PatchChannel(long id, [FromBody] JsonPatchDocument<Channel> channel);
-    public Channel? GetChannelById(long id);
+    Channel PatchChannel(long id, [FromBody] JsonPatchDocument<Channel> Channel);
+    public Channel GetChannelById(long id);
     public IEnumerable<Channel> GetChannelByFilter(Expression<Func<Channel, bool>>? compositeFilterExpression);
 
 

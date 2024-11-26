@@ -17,6 +17,7 @@ public class UnitOfWork : IUnitOfWork
         Department = new DepartmentRepository(_context);
         DepartmentUser = new DepartmentUserRepository(_context);
         Channel = new ChannelRepository(_context);
+        ChannelUser = new ChannelUserRepository(_context);
         Role = new RoleRepository(_context);
         FileRepository = new FileRepository(_context);
     }
@@ -32,6 +33,7 @@ public class UnitOfWork : IUnitOfWork
     //public IDepartmentRepository Department {  get; }
     //public IDepartmentUserRepository DepartmentUser { get; }
     public IChannelRepository Channel { get; }
+    public IChannelUserRepository ChannelUser { get; }
     public IRoleRepository Role { get; }
 
     public int Save()
