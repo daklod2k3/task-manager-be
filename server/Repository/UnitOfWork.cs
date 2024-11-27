@@ -21,6 +21,8 @@ public class UnitOfWork : IUnitOfWork
         UserMessage = new UserMessageRepository(_context);
         ChannelMessage = new ChannelMessageRepository(_context);
         Role = new RoleRepository(_context);
+        Permission = new PermissionRepository(_context);
+        Resource = new ResourceRepository(_context);
         FileRepository = new FileRepository(_context);
     }
 
@@ -39,6 +41,8 @@ public class UnitOfWork : IUnitOfWork
     public IUserMessageRepository UserMessage { get; }
     public IChannelMessageRepository ChannelMessage { get; }
     public IRoleRepository Role { get; }
+    public IPermissionRepository Permission { get; }
+    public IResourceRepository Resource { get; }
 
     public int Save()
     {

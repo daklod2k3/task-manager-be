@@ -13,6 +13,8 @@ public interface IUnitOfWork
     IUserMessageRepository UserMessage { get; }
     IChannelMessageRepository ChannelMessage { get; }
     IRoleRepository Role { get; }
+    IPermissionRepository Permission { get; }
+    IResourceRepository Resource { get; }
     IFileRepository FileRepository { get; }
     int Save();
 }

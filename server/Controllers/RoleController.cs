@@ -99,7 +99,7 @@ public class RoleController : Controller
 
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString,
+    public ActionResult<IEnumerable<Role>> Get([FromQuery(Name = "filter")] string? filterString,
         string? includes, int? page, int? pageItem)
     {
         var filter = new ClientFilter();

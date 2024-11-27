@@ -49,7 +49,7 @@ public class Repository<T> : IRepository<T> where T : class
         return query.ToList();
     }
 
-    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
+    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "Id")
     {
         IQueryable<T> query = dbSet;
         if (includeProperties != null)

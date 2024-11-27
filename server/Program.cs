@@ -164,7 +164,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 app.MapControllers().RequireAuthorization();
 app.UseExceptionHandler(e =>
@@ -180,7 +179,7 @@ app.UseExceptionHandler(e =>
         await context.Response.WriteAsync(json);
     });
 });
-
+app.UseMiddleware<RoleBasedAccessMiddleware>();
 // app.UseMiddleware<AuthMiddleware>();
 if (!app.Environment.IsDevelopment()) app.Urls.Add("http://0.0.0.0:" + builder.Configuration.GetValue<int>("PORT"));
 app.Run();
