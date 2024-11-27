@@ -21,7 +21,7 @@ public class UserController : Controller
 
     // GET
     [HttpGet]
-    public ActionResult GetUserAuthorized([FromQuery] string? includes = null)
+    public ActionResult GetUserAuthorized([FromQuery] string? includes = "")
     {
         var user_id = AuthController.GetUserId(HttpContext);
 
@@ -29,7 +29,7 @@ public class UserController : Controller
     }
 
     [HttpGet("{user_id}")]
-    public ActionResult GetProfile(string user_id, string? includes = null)
+    public ActionResult GetProfile(string user_id, string? includes = "")
     {
         if (user_id == null)
             return new ErrorResponse("no user found");
