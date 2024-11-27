@@ -37,7 +37,8 @@ public class Repository<T> : IRepository<T> where T : class
         IQueryable<T> query = dbSet;
 
         if (filter != null) query = query.Where(filter);
-
+        
+        if (includeProperties != null)
         foreach (var includeProperty in includeProperties.Split
                      (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             query = query.Include(includeProperty);
@@ -51,6 +52,7 @@ public class Repository<T> : IRepository<T> where T : class
     public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
     {
         IQueryable<T> query = dbSet;
+        if (includeProperties != null)
         foreach (var includeProperty in includeProperties.Split
                      (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             query = query.Include(includeProperty);
