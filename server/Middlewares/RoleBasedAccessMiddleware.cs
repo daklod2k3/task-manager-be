@@ -71,7 +71,7 @@ public class RoleBasedAccessMiddleware
                 { Status = HttpStatusCode.Unauthorized }));
             return;
         }
-
+        //bypass if Admin
         if (role_name == "Admin"){
             await _next(context);
             return;
@@ -115,6 +115,8 @@ public class RoleBasedAccessMiddleware
                 { Status = HttpStatusCode.Unauthorized }));
             return;
         }
+
+        //
         
         // If everything is fine, continue processing the request
         await _next(context);
