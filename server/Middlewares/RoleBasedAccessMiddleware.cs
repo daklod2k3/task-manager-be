@@ -72,6 +72,11 @@ public class RoleBasedAccessMiddleware
             return;
         }
 
+        if (role_name == "Admin"){
+            await _next(context);
+            return;
+        }
+
         //var perm = _unitOfWork.Role.GetById(role_id).Permissions;
         var endpoint = context.Request.Path.Value;
         var method = context.Request.Method;
