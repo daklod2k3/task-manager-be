@@ -77,15 +77,24 @@ public class RoleBasedAccessMiddleware
         var method = context.Request.Method;
         Console.WriteLine($"Endpoint: {endpoint}, Method: {method}");
         //Console.WriteLine($"Permissions: {string.Join(", ", perm)}");
-        
+        Console.WriteLine(role_id);
         var perms = _unitOfWork.Permission.GetQuery(p => p.RoleId == role_id,"Resource");
         //var resource = _unitOfWork.Resource.GetById(perms.First().ResourceId);
+        
+        if(perms.Count() == 0){
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse("Unauthorized")
+                { Status = HttpStatusCode.Unauthorized }));
+            return;
+        }
         foreach (var permission in perms)
         {
+            
             var resource = permission.Resource;
             Console.WriteLine($"Resource Path: {resource.Path}, Method: {method}");
             if(resource.Path == endpoint){
                 if(permission.View && method == "GET"){
+                    //Console.WriteLine($"Resource Path: {permission.Resource.Path}, Method: {method}");
                     break;
                 }
                 if(permission.Create && permission.Update && permission.Delete && (method == "POST" || method == "PUT" || method == "DELETE")){
@@ -101,7 +110,7 @@ public class RoleBasedAccessMiddleware
                 { Status = HttpStatusCode.Unauthorized }));
             return;
         }
-
+        
         // If everything is fine, continue processing the request
         await _next(context);
     }
