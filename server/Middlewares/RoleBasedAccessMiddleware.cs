@@ -96,6 +96,10 @@ public class RoleBasedAccessMiddleware
                     { Status = HttpStatusCode.Unauthorized }));
                 return;
             }
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse("Unauthorized")
+                { Status = HttpStatusCode.Unauthorized }));
+            return;
         }
 
         // If everything is fine, continue processing the request
