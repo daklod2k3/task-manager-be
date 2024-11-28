@@ -31,6 +31,13 @@ public class RoleBasedAccessMiddleware
         //     {
         //         Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
         //     }
+        if (!context.User.Identity.IsAuthenticated && (context.Request.Path == "/auth/login" || 
+            context.Request.Path == "/auth/register"))
+        {
+            await _next(context);
+            return;
+        }
+
         if (!context.User.Identity.IsAuthenticated && 
             context.Request.Path != "/auth/login" && 
             context.Request.Path != "/auth/register")
