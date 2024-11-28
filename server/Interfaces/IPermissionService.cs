@@ -9,6 +9,7 @@ namespace server.Interfaces;
 public interface IPermissionService
 {
     IEnumerable<Permission> GetAllPermission();
+    IEnumerable<Permission> GetPermissionByFilter(Expression<Func<Permission, bool>> filter);
     Permission CreatePermission(Permission permission);
     public Permission GetPermission(long id);
     Permission DeletePermission(long idPermission);

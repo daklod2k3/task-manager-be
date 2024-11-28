@@ -11,6 +11,7 @@ using server.Entities;
 using server.Interfaces;
 using server.Context;
 using server.Repository;
+using System.Runtime.ExceptionServices;
 
 public class RoleBasedAccessMiddleware
 {
@@ -71,19 +72,31 @@ public class RoleBasedAccessMiddleware
             return;
         }
 
-        var perm = _unitOfWork.Role.GetById(role_id).Permissions;
+        //var perm = _unitOfWork.Role.GetById(role_id).Permissions;
         var endpoint = context.Request.Path.Value;
         var method = context.Request.Method;
         Console.WriteLine($"Endpoint: {endpoint}, Method: {method}");
-        Console.WriteLine($"Permissions: {string.Join(", ", perm)}");
+        //Console.WriteLine($"Permissions: {string.Join(", ", perm)}");
         
-        // if (!perm.Any(s => s.endpoint == endpoint && s.method == method))
-        // {
-        //     context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        //     await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse("Unauthorized")
-        //         { Status = HttpStatusCode.Unauthorized }));
-        //     return;
-        // }
+        var perms = _unitOfWork.Permission.GetQuery(p => p.RoleId == role_id,"Resource");
+        //var resource = _unitOfWork.Resource.GetById(perms.First().ResourceId);
+        foreach (var permission in perms)
+        {
+            var resource = permission.Resource;
+            Console.WriteLine($"Resource Path: {resource.Path}, Method: {method}");
+            if(resource.Path == endpoint){
+                if(permission.View && method == "GET"){
+                    break;
+                }
+                if(permission.Create && permission.Update && permission.Delete && (method == "POST" || method == "PUT" || method == "DELETE")){
+                    break;
+                }
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponse("Unauthorized")
+                    { Status = HttpStatusCode.Unauthorized }));
+                return;
+            }
+        }
 
         // If everything is fine, continue processing the request
         await _next(context);

@@ -56,7 +56,12 @@ public class PermissionService : IPermissionService
 
     public IEnumerable<Permission> GetAllPermission()
     {
-        CreatePermission(new Permission());
         return _unitOfWork.Permission.Get();
     }
+
+    public IEnumerable<Permission> GetPermissionByFilter(Expression<Func<Permission, bool>> filter)
+    {
+        return _unitOfWork.Permission.Get(filter);
+    }
+
 }

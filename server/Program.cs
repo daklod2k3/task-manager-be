@@ -155,6 +155,8 @@ builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IChannelUserService, ChannelUserService>();
 builder.Services.AddScoped<IUserMessageService, UserMessageService>();
 builder.Services.AddScoped<IChannelMessageService, ChannelMessageService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IResourceService, ResourceService>();
 
 var app = builder.Build();
 
