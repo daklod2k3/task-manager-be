@@ -36,15 +36,7 @@ public class TaskController: Controller
     {
         var id = AuthController.GetUserId(HttpContext);
         taskEntity.CreatedBy = new Guid(id);
-        try
-        {
-            return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Add(taskEntity));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not create");
-        }
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Add(taskEntity));
     }
 
     [HttpPut]
@@ -53,15 +45,7 @@ public class TaskController: Controller
         var id = AuthController.GetUserId(HttpContext);
         if(taskEntity.CreatedBy != new Guid(id))
             return new ErrorResponse("You can't update this task");
-        try
-        {
-            return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Update(taskEntity));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not update");
-        }
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Update(taskEntity));
     }
 
     [HttpPatch("{id}")]
@@ -71,15 +55,7 @@ public class TaskController: Controller
         var taskEntity = _unitOfWork.Task.GetById(id);
         if(taskEntity.CreatedBy != new Guid(iduser))
             return new ErrorResponse("You can't update this task");
-        try
-        {
-            return new SuccessResponse<TaskEntity>(_unitOfWork.Task.UpdatePatch(id.ToString(), patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not update");
-        }
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.UpdatePatch(id.ToString(), patchDoc));
     }
 
     [HttpDelete("{id}")]
@@ -89,14 +65,6 @@ public class TaskController: Controller
         var taskEntity = _unitOfWork.Task.GetById(id);
         if(taskEntity.CreatedBy != new Guid(iduser))
             return new ErrorResponse("You can't update this task");
-        try
-        {
-            return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Remove(taskEntity));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not delete");
-        }
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Remove(taskEntity));
     }
 }

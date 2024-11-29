@@ -61,7 +61,6 @@ public class DepartmentService : IDepartmentService
 
     public IEnumerable<Department> GetAllDepartment()
     {
-        CreatDepartment(new Department());
         return _unitOfWork.Department.Get();
     }
 }
