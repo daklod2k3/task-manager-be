@@ -43,28 +43,40 @@ public class TaskController: Controller
     public ActionResult UpdateTask(TaskEntity taskEntity)
     {
         var id = AuthController.GetUserId(HttpContext);
-        if(taskEntity.CreatedBy != new Guid(id))
-            return new ErrorResponse("You can't update this task");
+        var task = GetTask(taskEntity.Id);
+        if(task == default){
+            return new ErrorResponse("Task is not found");
+        }
+        if( task.CreatedBy != new Guid(id) && (task.DueDate != taskEntity.DueDate || 
+        task.Description != taskEntity.Description  || 
+        task.Title != taskEntity.Title || 
+        task.Status != taskEntity.Status ||
+        task.Priority != taskEntity.Priority ||
+        task.CreatedBy != taskEntity.CreatedBy)){
+            return new ErrorResponse("You can't change this");
+        }
         return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Update(taskEntity));
     }
 
-    [HttpPatch("{id}")]
-    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
-    {
-        var iduser = AuthController.GetUserId(HttpContext);
-        var taskEntity = _unitOfWork.Task.GetById(id);
-        if(taskEntity.CreatedBy != new Guid(iduser))
-            return new ErrorResponse("You can't update this task");
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.UpdatePatch(id.ToString(), patchDoc));
+    public TaskEntity GetTask(long id){
+        var iduser = new Guid(AuthController.GetUserId(HttpContext));
+        var taskList = _unitOfWork.Task.Get(t =>
+            t.CreatedBy == iduser ||
+            t.TaskUsers.Any(tu => tu.UserId == iduser) ||
+            t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == iduser)));
+        return taskList.FirstOrDefault(t => t.Id == id);
     }
 
     [HttpDelete("{id}")]
     public ActionResult DeleteTask(long id)
     {
-        var iduser = AuthController.GetUserId(HttpContext);
-        var taskEntity = _unitOfWork.Task.GetById(id);
-        if(taskEntity.CreatedBy != new Guid(iduser))
-            return new ErrorResponse("You can't update this task");
+        var taskEntity = GetTask(id);
+        if(taskEntity == default){
+            return new ErrorResponse("Task is not found");
+        }
+        if(taskEntity.CreatedBy != new Guid(AuthController.GetUserId(HttpContext))){
+            return new ErrorResponse("You can't delete this");
+        }
         return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Remove(taskEntity));
     }
 }
