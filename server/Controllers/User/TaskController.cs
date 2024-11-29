@@ -55,6 +55,9 @@ public class TaskController: Controller
         task.CreatedBy != taskEntity.CreatedBy)){
             return new ErrorResponse("You can't change this");
         }
+        taskEntity.TaskDepartments = null;
+        taskEntity.TaskUsers = null;
+        taskEntity.TaskComments = null;
         return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Update(taskEntity));
     }
 
