@@ -1,17 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using server.Entities;
+using server.Services;
 
 namespace server.Context;
 
 public partial class SupabaseContext : DbContext
 {
+    // private readonly AuthenticationStateProvider _authenticationStateProvider;
+    private readonly ICurrentUserService _currentUserService;
+
     public SupabaseContext()
     {
     }
 
-    public SupabaseContext(DbContextOptions<SupabaseContext> options)
+    public SupabaseContext(DbContextOptions<SupabaseContext> options, ICurrentUserService currentUserService)
         : base(options)
     {
+        _currentUserService = currentUserService;
     }
 
     public virtual DbSet<Channel> Channels { get; set; }
@@ -329,8 +336,8 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Priority).HasColumnName("priority");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
-            entity.Property(e=> e.FileId).HasColumnName("file_id");
-            
+            entity.Property(e => e.FileId).HasColumnName("file_id");
+
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Tasks)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("tasks_created_by_fkey");
@@ -472,4 +479,98 @@ public partial class SupabaseContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public override int SaveChanges()
+    {
+        DetectHistoryChange();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = new())
+    {
+        DetectHistoryChange();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    
+    
+    private async Task<string> getUserIdAuth()
+    {
+        try
+        {
+            return _currentUserService.UserId;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine("dbcontext can't get auth user: " + e);
+        }
+
+        return null;
+    }
+
+    private async void DetectHistoryChange()
+    {
+        var taskEntries = ChangeTracker.Entries<TaskEntity>();
+        foreach (var entry in taskEntries) CreateTaskHistoryFromTaskUpdate(entry);
+        var taskUsersEntries = ChangeTracker.Entries<TaskUser>();
+        foreach (var entry in taskUsersEntries) CreateTaskHistoryUserAssign(entry);
+        var taskDepartmentsEntries = ChangeTracker.Entries<TaskDepartment>();
+        foreach (var entry in taskDepartmentsEntries) CreateTaskHistoryDepartmentAssign(entry);
+    }
+
+    private async void CreateTaskHistoryFromTaskUpdate(EntityEntry<TaskEntity> entry)
+    {
+        // Debug.WriteLine(entry.Property("Priority").CurrentValue);
+        // Debug.WriteLine(entry.Property("Priority").OriginalValue);
+        var history = new List<TaskHistory>();
+        var user_id = await getUserIdAuth();
+        if (entry.State != EntityState.Modified) return;
+        if (!entry.Property("Status").OriginalValue?.Equals(entry.Property("Status").CurrentValue) ??
+            !entry.Property("Status").CurrentValue?.Equals(entry.Property("Status").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "changed task **Status** from **" + entry.Property("Status").OriginalValue + "** to **" +
+                              entry.Property("Status").CurrentValue + "**"
+            });
+        if (entry.OriginalValues.GetValue<ETaskPriority?>("Priority") != (entry.CurrentValues.GetValue<ETaskPriority?>("Priority")))
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "changed task **Priority** from **" + entry.Property("Priority").OriginalValue +
+                              "** to **" +
+                              entry.Property("Priority").CurrentValue + "**"
+            });
+        if (!entry.Property("DueDate").OriginalValue?.Equals(entry.Property("DueDate").CurrentValue) ??
+            !entry.Property("DueDate").CurrentValue?.Equals(entry.Property("DueDate").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "set task **Due Date** from **" + (entry.Property("DueDate").OriginalValue ?? "none") +
+                              "** to **" +
+                              entry.Property("DueDate").CurrentValue + "**"
+            });
+        if (!entry.Property("Title").OriginalValue?.Equals(entry.Property("Title").CurrentValue) ??
+            !entry.Property("Title").CurrentValue?.Equals(entry.Property("Title").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "change task name from **" + entry.Property("Title").OriginalValue + "** to **" +
+                              entry.Property("Title").CurrentValue + "**"
+            });
+        TaskHistories.AddRange(history);
+    }
+
+    private void CreateTaskHistoryUserAssign(EntityEntry<TaskUser> entry)
+    {
+    }
+
+    private void CreateTaskHistoryDepartmentAssign(EntityEntry<TaskDepartment> entry)
+    {
+    }
 }

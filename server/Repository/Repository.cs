@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Communications.Common;
 using server.Context;
 using server.Interfaces;
 
@@ -67,7 +68,9 @@ public class Repository<T> : IRepository<T> where T : class
 
     public T Update(T entity)
     {
-        return dbSet.Update(entity).Entity;
+        var origin = dbSet.Find(entity.GetPropertyUsingReflection("Id"));
+        context.Entry(origin).CurrentValues.SetValues(entity);
+        return origin;
     }
 
     public T UpdatePatch(string id, JsonPatchDocument<T> patch)

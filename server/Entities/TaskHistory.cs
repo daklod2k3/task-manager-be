@@ -4,7 +4,7 @@ public class TaskHistory
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public long TaskId { get; set; }
 
