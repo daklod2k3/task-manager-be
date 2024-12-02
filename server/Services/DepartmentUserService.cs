@@ -54,7 +54,7 @@ public class DepartmentUserService : IDepartmentUserService
         _unitOfWork.Save();
 
         return departmentUser;
-    }
+    } 
 
     public DepartmentUser DeleteDepartmentUser(long id)
     {

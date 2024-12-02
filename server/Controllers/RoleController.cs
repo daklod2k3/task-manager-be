@@ -51,16 +51,16 @@ public class RoleController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Role> patchDoc)
+    public ActionResult UpdatePatch(string id, [FromBody] JsonPatchDocument<Role> patchDoc)
     {
         try
         {
-            return new SuccessResponse<Role>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<Role>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not update");
+            return new ErrorResponse("role is not update");
         }
     }
 

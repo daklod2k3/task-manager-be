@@ -8,5 +8,6 @@ public class RoleRepository : Repository<Role>, IRoleRepository
 {
     public RoleRepository(SupabaseContext context) : base(context)
     {
+
     }
 }
