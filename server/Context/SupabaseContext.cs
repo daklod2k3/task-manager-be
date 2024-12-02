@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using server.Entities;
 using server.Services;
@@ -384,7 +383,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.TaskId).HasColumnName("task_id");
             entity.Property(e => e.Type).HasColumnName("type");
 
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskHistories)
+            entity.HasOne(d => d.User).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_history_created_by_fkey");
@@ -493,8 +492,7 @@ public partial class SupabaseContext : DbContext
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    
-    
+
     private async Task<string> getUserIdAuth()
     {
         try
@@ -535,7 +533,8 @@ public partial class SupabaseContext : DbContext
                 Description = "changed task **Status** from **" + entry.Property("Status").OriginalValue + "** to **" +
                               entry.Property("Status").CurrentValue + "**"
             });
-        if (entry.OriginalValues.GetValue<ETaskPriority?>("Priority") != (entry.CurrentValues.GetValue<ETaskPriority?>("Priority")))
+        if (entry.OriginalValues.GetValue<ETaskPriority?>("Priority") !=
+            entry.CurrentValues.GetValue<ETaskPriority?>("Priority"))
             history.Add(new TaskHistory
             {
                 TaskId = entry.Entity.Id,

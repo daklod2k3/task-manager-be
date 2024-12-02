@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
@@ -21,10 +20,10 @@ public class TaskCompleteController : Controller
         _unitOfWork = unitOfWork;
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
     }
-    
-    [HttpPost]
-    [Route("{taskId}")]
-    public async Task<IActionResult> MarkComplete(string taskId, [FromForm] IFormFile file)
+
+    [HttpPost("preview/{taskId}")]
+   
+    public async Task<IActionResult> MarkPreview(string taskId, [FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0) return new ErrorResponse("No file uploaded.");
 
@@ -60,5 +59,16 @@ public class TaskCompleteController : Controller
             // Handle errors
             return new ErrorResponse("File upload failed." + ex.Message);
         }
+    }
+
+    [HttpPost("complete/{taskId}")]
+    public async Task<IActionResult> MarkComplete(string taskId)
+    {
+        var task = _tasks.GetById(taskId);
+        if (task is null) return new ErrorResponse("No task found.");
+        if (task.FileId is null) return new ErrorResponse("Preview file not found.");
+        task.Status = ETaskStatus.Done;
+        _unitOfWork.Save();
+        return new SuccessResponse<TaskEntity>(task);
     }
 }
