@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Linq;
 using Npgsql;
 using server.Context;
 using server.Controllers;
@@ -95,7 +96,31 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
     {
         OnMessageReceived = context =>
         {
-            context.Token = context.Request.Cookies[cookieAuthName];
+            if (context.Token is not null) return Task.CompletedTask;
+            var cookie = context.Request.Cookies[cookieAuthName];
+            if (cookie is null) return Task.CompletedTask;
+            if (cookie.Contains("base64-"))
+            {
+                cookie = cookie.Replace("base64-", "");
+                var padding = cookie.Length % 4;
+                if (padding > 0) cookie += new string('=', 4 - padding); // Add padding if necessary
+                cookie = Encoding.UTF8.GetString(Convert.FromBase64String(cookie));
+                // var token = cookie;
+                // context.Token = token;
+                // return Task.CompletedTask;
+            }
+
+
+            try
+            {
+                var token = JObject.Parse(cookie)["access_token"];
+                context.Token = token.ToString();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Cookie token value parse error!");
+            }
+
             return Task.CompletedTask;
         }
     };
@@ -122,8 +147,11 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
+builder.Services.AddScoped<IRepository<TaskHistory>, TaskHistoryRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 

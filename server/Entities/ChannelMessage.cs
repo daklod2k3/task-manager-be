@@ -4,7 +4,7 @@ public class ChannelMessage
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid? CreatedBy { get; set; }
 

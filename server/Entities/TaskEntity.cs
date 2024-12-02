@@ -6,7 +6,7 @@ public class TaskEntity
 {
     public long Id { get; set; }
 
-    public DateTime? CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string Title { get; set; } = null!;
 
@@ -19,9 +19,9 @@ public class TaskEntity
     public ETaskStatus? Status { get; set; } = ETaskStatus.To_do;
 
     public Guid? CreatedBy { get; set; }
-    public long? FileId { get; set; }
+    public long? FileId { get; set; } = null;
 
-    public virtual FileEntity File { get; set; } = null;
+    public virtual FileEntity? File { get; set; } = null;
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 
     public virtual ICollection<TaskHistory> TaskHistories { get; set; } = new List<TaskHistory>();

@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Communications.Common;
 using server.Context;
 using server.Interfaces;
 
@@ -37,7 +38,8 @@ public class Repository<T> : IRepository<T> where T : class
         IQueryable<T> query = dbSet;
 
         if (filter != null) query = query.Where(filter);
-
+        
+        if (includeProperties != null)
         foreach (var includeProperty in includeProperties.Split
                      (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             query = query.Include(includeProperty);
@@ -48,9 +50,10 @@ public class Repository<T> : IRepository<T> where T : class
         return query.ToList();
     }
 
-    public virtual T GetById(object id, string? includeProperties = "", string? keyProperty = "id")
+    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
     {
         IQueryable<T> query = dbSet;
+        if (includeProperties != null)
         foreach (var includeProperty in includeProperties.Split
                      (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             query = query.Include(includeProperty);
@@ -65,7 +68,9 @@ public class Repository<T> : IRepository<T> where T : class
 
     public T Update(T entity)
     {
-        return dbSet.Update(entity).Entity;
+        var origin = dbSet.Find(entity.GetPropertyUsingReflection("Id"));
+        context.Entry(origin).CurrentValues.SetValues(entity);
+        return origin;
     }
 
     public T UpdatePatch(object id, JsonPatchDocument<T> patch)

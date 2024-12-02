@@ -10,7 +10,7 @@ public interface IRepository<T> where T : class
         Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
         string includeProperties = "");
 
-    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? includeProperties = null);
+    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string includeProperties = "");
     T GetById(object id, string? includeProperties = "", string? keyProperty = "Id");
     T Add(T entity);
     bool Any(Expression<Func<T, bool>> filter);

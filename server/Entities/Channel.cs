@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class Channel
+public class Channel
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string Name { get; set; } = null!;
 

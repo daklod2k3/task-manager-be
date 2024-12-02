@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class Notification
+public class Notification
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid UserId { get; set; }
 
