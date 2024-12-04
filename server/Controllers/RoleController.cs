@@ -51,16 +51,16 @@ public class RoleController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(string id, [FromBody] JsonPatchDocument<Role> patchDoc)
+    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Role> patchDoc)
     {
         try
         {
-            return new SuccessResponse<Role>(_repository.UpdatePatch(id, patchDoc));
+            return new SuccessResponse<Role>(_repository.UpdatePatch(id.ToString(), patchDoc));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("role is not update");
+            return new ErrorResponse("Task is not update");
         }
     }
 
@@ -69,10 +69,10 @@ public class RoleController : Controller
     {
         try
         {
-            var entity = _repository.GetById(id.ToString());
+            var entity = _repository.GetById(id);
             _repository.Remove(entity);
             _repository.Save();
-            return new SuccessResponse<TaskComment>(null);
+            return new SuccessResponse<Role>(entity);
         }
         catch (Exception ex)
         {
@@ -114,7 +114,7 @@ public class RoleController : Controller
     {
         try
         {
-            return new SuccessResponse<Role>(_repository.GetById(id.ToString(), includes ?? "*"));
+            return new SuccessResponse<Role>(_repository.GetById(id.ToString(), includes));
         }
         catch (Exception ex)
         {

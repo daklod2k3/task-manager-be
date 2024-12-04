@@ -16,6 +16,6 @@ public interface IRepository<T> where T : class
     bool Any(Expression<Func<T, bool>> filter);
     T Remove(T entity);
     T Update(T entity);
-    T UpdatePatch(string id, JsonPatchDocument<T> patch);
+    T UpdatePatch(object id, JsonPatchDocument<T> patch);
     int Save();
 }
