@@ -54,8 +54,6 @@ public class DefaultRequirePermissionFilter : IAuthorizationFilter
         catch (Exception e)
         {
             Console.WriteLine(e);
-            context.Result = new ForbidResult();
-            throw;
         }
         // Default permission: "ControllerName.ActionName"
 
