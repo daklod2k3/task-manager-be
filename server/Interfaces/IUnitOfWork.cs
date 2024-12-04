@@ -10,5 +10,6 @@ public interface IUnitOfWork
     IUserRepository User { get; }
     IRoleRepository Role { get; }
     IFileRepository FileRepository { get; }
+    IResourceRepository Resoucre { get; }
     int Save();
 }

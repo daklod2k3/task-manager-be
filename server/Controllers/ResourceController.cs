@@ -9,23 +9,23 @@ namespace server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class RoleController : Controller
+public class ResourceController : Controller
 {
-    private readonly IRepository<Role> _repository;
+    private readonly IRepository<Resource> _repository;
 
-    public RoleController(IUnitOfWork unitOfWork)
+    public ResourceController(IUnitOfWork unitOfWork)
     {
-        _repository = unitOfWork.Role;
+        _repository = unitOfWork.Resoucre;
     }
 
     [HttpPost]
-    public ActionResult Create(Role role)
+    public ActionResult Create(Resource resource)
     {
         try
         {
-            var entity = _repository.Add(role);
+            var entity = _repository.Add(resource);
             _repository.Save();
-            return new SuccessResponse<Role>(entity);
+            return new SuccessResponse<Resource>(entity);
         }
         catch (Exception ex)
         {
@@ -35,13 +35,13 @@ public class RoleController : Controller
     }
 
     [HttpPut]
-    public ActionResult Update(Role body)
+    public ActionResult Update(Resource body)
     {
         try
         {
-            var role = _repository.Update(body);
+            var resoucre = _repository.Update(body);
             _repository.Save();
-            return new SuccessResponse<Role>(role);
+            return new SuccessResponse<Resource>(resoucre);
         }
         catch (Exception ex)
         {
@@ -51,9 +51,9 @@ public class RoleController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Role> patchDoc)
+    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Resource> patchDoc)
     {
-        return new SuccessResponse<Role>(_repository.UpdatePatch(id, patchDoc));
+        return new SuccessResponse<Resource>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
@@ -64,7 +64,7 @@ public class RoleController : Controller
             var entity = _repository.GetById(id);
             _repository.Remove(entity);
             _repository.Save();
-            return new SuccessResponse<Role>(entity);
+            return new SuccessResponse<Resource>(entity);
         }
         catch (Exception ex)
         {
@@ -74,13 +74,13 @@ public class RoleController : Controller
     }
 
     [HttpDelete]
-    public ActionResult Delete(Role body)
+    public ActionResult Delete(Resource body)
     {
         try
         {
             _repository.Remove(body);
             _repository.Save();
-            return new SuccessResponse<Role>(body);
+            return new SuccessResponse<Resource>(body);
         }
         catch (Exception ex)
         {
@@ -96,17 +96,17 @@ public class RoleController : Controller
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        return new SuccessResponse<IEnumerable<Role>>(
-            _repository.Get(CompositeFilter<Role>.ApplyFilter(filter), includeProperties: includes));
+        return new SuccessResponse<IEnumerable<Resource>>(
+            _repository.Get(CompositeFilter<Resource>.ApplyFilter(filter), includeProperties: includes));
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<IEnumerable<Role>> GetId(long id, string? includes)
+    public ActionResult<IEnumerable<Resource>> GetId(long id, string? includes)
     {
         try
         {
-            return new SuccessResponse<Role>(_repository.GetById(id.ToString(), includes));
+            return new SuccessResponse<Resource>(_repository.GetById(id.ToString(), includes));
         }
         catch (Exception ex)
         {

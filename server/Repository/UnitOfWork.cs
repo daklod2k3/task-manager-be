@@ -18,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
         DepartmentUser = new DepartmentUserRepository(_context);
         Role = new RoleRepository(_context);
         FileRepository = new FileRepository(_context);
+        Resoucre = new ResourceRepository(_context);
     }
 
     public IFileRepository FileRepository { get; }
@@ -29,6 +30,7 @@ public class UnitOfWork : IUnitOfWork
     public ITaskUserRepository TaskUser { get; }
     public IUserRepository User { get; }
     public IRoleRepository Role { get; }
+    public IResourceRepository Resoucre { get; }
 
     public int Save()
     {

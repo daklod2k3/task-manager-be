@@ -75,7 +75,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public T UpdatePatch(object id, JsonPatchDocument<T> patch)
     {
-        var entity = GetById(id);
+        var entity = dbSet.Find(id);
         patch.ApplyTo(entity);
         Save();
         return entity;
