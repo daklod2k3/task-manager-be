@@ -75,6 +75,7 @@ public class DepartmentUserController : Controller
         }
     }
 
+    [ApiExplorerSettings(IgnoreApi = true)]
     public ActionResult<IEnumerable<DepartmentUser>> GetDepartmentUserByFilter(string filterString)
     {
         var filterResult = new ClientFilter();

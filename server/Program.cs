@@ -149,6 +149,7 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUnitNotification, UnitNotification>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
+builder.Services.AddScoped<IRepository<TaskHistory>, TaskHistoryRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
@@ -157,6 +158,8 @@ builder.Services.AddScoped<IUserMessageService, UserMessageService>();
 builder.Services.AddScoped<IChannelMessageService, ChannelMessageService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 

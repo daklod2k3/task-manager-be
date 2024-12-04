@@ -4,7 +4,7 @@ public class UserMessage
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid FromId { get; set; }
 

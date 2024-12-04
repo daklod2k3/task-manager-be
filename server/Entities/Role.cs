@@ -4,7 +4,7 @@ public class Role
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string? Name { get; set; }
 
