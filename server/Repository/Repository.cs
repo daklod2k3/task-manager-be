@@ -38,11 +38,11 @@ public class Repository<T> : IRepository<T> where T : class
         IQueryable<T> query = dbSet;
 
         if (filter != null) query = query.Where(filter);
-        
+
         if (includeProperties != null)
-        foreach (var includeProperty in includeProperties.Split
-                     (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            query = query.Include(includeProperty);
+            foreach (var includeProperty in includeProperties.Split
+                         (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                query = query.Include(includeProperty);
 
         // if (orderBy != null)
         Console.WriteLine("tesst");
@@ -54,10 +54,10 @@ public class Repository<T> : IRepository<T> where T : class
     {
         IQueryable<T> query = dbSet;
         if (includeProperties != null)
-        foreach (var includeProperty in includeProperties.Split
-                     (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            query = query.Include(includeProperty);
-        var entity = query.FirstOrDefault(e => EF.Property<string>(e, keyProperty).ToString() == id.ToString());
+            foreach (var includeProperty in includeProperties.Split
+                         (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                query = query.Include(includeProperty);
+        var entity = query.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id.ToString());
         return entity;
     }
 
@@ -73,7 +73,7 @@ public class Repository<T> : IRepository<T> where T : class
         return origin;
     }
 
-    public T UpdatePatch(string id, JsonPatchDocument<T> patch)
+    public T UpdatePatch(object id, JsonPatchDocument<T> patch)
     {
         var entity = dbSet.Find(id);
         patch.ApplyTo(entity);
