@@ -275,14 +275,14 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Update).HasColumnName("update");
             entity.Property(e => e.View).HasColumnName("view");
 
-            entity.HasOne(d => d.Resource).WithMany(p => p.Permissions)
-                .HasForeignKey(d => d.ResourceId)
-                .HasConstraintName("permissions_resource_id_fkey");
+            //entity.HasOne(d => d.Resource).WithMany(p => p.Permissions)
+            //    .HasForeignKey(d => d.ResourceId)
+            //    .HasConstraintName("permissions_resource_id_fkey");
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Permissions)
-                .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("permissions_role_id_fkey");
+            //entity.HasOne(d => d.Role).WithMany(p => p.Permissions)
+            //    .HasForeignKey(d => d.RoleId)
+            //    .OnDelete(DeleteBehavior.Cascade)
+            //    .HasConstraintName("permissions_role_id_fkey");
         });
 
         modelBuilder.Entity<Role>(entity =>

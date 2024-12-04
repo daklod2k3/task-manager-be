@@ -11,5 +11,6 @@ public interface IUnitOfWork
     IRoleRepository Role { get; }
     IFileRepository FileRepository { get; }
     IResourceRepository Resoucre { get; }
+    IPermissionRepository Permission{ get; }
     int Save();
 }
