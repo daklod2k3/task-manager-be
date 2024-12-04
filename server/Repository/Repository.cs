@@ -50,14 +50,14 @@ public class Repository<T> : IRepository<T> where T : class
         return query.ToList();
     }
 
-    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "id")
+    public virtual T GetById(object id, string includeProperties = "", string? keyProperty = "Id")
     {
         IQueryable<T> query = dbSet;
         if (includeProperties != null)
             foreach (var includeProperty in includeProperties.Split
                          (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 query = query.Include(includeProperty);
-        var entity = query.First(e => EF.Property<long>(e, keyProperty).ToString() == id.ToString());
+        var entity = query.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id.ToString());
         return entity;
     }
 
