@@ -1,82 +1,77 @@
-
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
-using server.Services;
+using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers
+namespace server.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class DepartmentUserController : Controller
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DepartmentUserController : ControllerBase
+    private readonly IRepository<DepartmentUser> _repository;
+
+    public DepartmentUserController(IUnitOfWork unitOfWork)
     {
-        private readonly IDepartmentUserService _service;
+        _repository = unitOfWork.DepartmentUsers;
+    }
 
-        public DepartmentUserController(IDepartmentUserService service)
-        {
-            _service = service;
-        }
+    [HttpPost]
+    public ActionResult Create(DepartmentUser body)
+    {
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
+    }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<DepartmentUser>> Get()
-        {
-            return Ok(_service.GetAll());
-        }
+    [HttpPut]
+    public ActionResult Update(DepartmentUser body)
+    {
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
+    }
 
-        [HttpGet("{id}")]
-        public ActionResult<DepartmentUser> GetById(long id)
-        {
-            return Ok(_service.GetById(id));
-        }
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
+    {
+        return new SuccessResponse<DepartmentUser>(_repository.UpdatePatch(id.ToString(), patchDoc));
+    }
 
-        [HttpPost]
-        public ActionResult<DepartmentUser> Create(DepartmentUser departmentUser)
-        {
-            var created = _service.Create(departmentUser);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
+    }
 
-        [HttpPut("{id}")]
-        public ActionResult<DepartmentUser> Update(long id, DepartmentUser departmentUser)
-        {
-            // Tìm DepartmentUser trước khi cập nhật
-            var existingDepartmentUser = _service.GetById(id);
-            if (existingDepartmentUser == null)
-            {
-                return NotFound(); // Trả về lỗi 404 nếu không tìm thấy
-            }
-
-            // Cập nhật thông tin
-            departmentUser.Id = id; // Đảm bảo ID là id từ URL
-            var updated = _service.Update(departmentUser); // Gọi phương thức Update từ service
-
-            return Ok(updated);
-        }
-
-
-        [HttpPatch("{id}")]
-        public ActionResult<DepartmentUser> UpdatePatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
-        {
-            // Áp dụng patch
-            var updated = _service.UpdatePatch(id, patchDoc);
-
-            // Kiểm tra nếu không cập nhật được, trả về lỗi 404
-            if (updated == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updated);
-        }
+    [HttpDelete]
+    public ActionResult Delete(DepartmentUser body)
+    {
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(body);
+    }
 
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
-        {
-            _service.Delete(id);
-            return NoContent();
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<DepartmentUser>>(
+            _repository.Get(CompositeFilter<DepartmentUser>.ApplyFilter(filter), includeProperties: includes));
+    }
 
-        }
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
+    {
+        return new SuccessResponse<DepartmentUser>(_repository.GetById(id.ToString(), includes));
     }
 }

@@ -1,70 +1,78 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
-using System.Collections.Generic;
 
-namespace server.Controllers
+namespace server.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class ChannelController : Controller
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class ChannelController : ControllerBase
+    private readonly IRepository<Channel> _repository;
+
+    public ChannelController(IUnitOfWork unitOfWork)
     {
-        private readonly IChannelService _service;
+        _repository = unitOfWork.Channels;
+    }
 
-        public ChannelController(IChannelService service)
-        {
-            _service = service;
-        }
+    [HttpPost]
+    public ActionResult Create(Channel body)
+    {
+        body.CreatedBy = new Guid(AuthController.GetUserId(HttpContext));
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<Channel>(entity);
+    }
 
-        // Lấy danh sách Channel của User hiện tại
-        [HttpGet]
-        public ActionResult<IEnumerable<Channel>> Get()
-        {
-            var userId = Guid.NewGuid(); // Thay thế bằng userId từ authentication context
-            var channels = _service.GetAll(userId);
-            return Ok(channels);
-        }
+    [HttpPut]
+    public ActionResult Update(Channel body)
+    {
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<Channel>(entity);
+    }
 
-        // Lấy chi tiết Channel của id cung cấp
-        [HttpGet("{id}")]
-        public ActionResult<Channel> GetById(long id)
-        {
-            var channel = _service.GetById(id);
-            return Ok(channel);
-        }
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Channel> patchDoc)
+    {
+        return new SuccessResponse<Channel>(_repository.UpdatePatch(id.ToString(), patchDoc));
+    }
 
-        // Tạo Channel mới
-        [HttpPost]
-        public ActionResult<Channel> Create([FromBody] Channel channel)
-        {
-            var createdChannel = _service.Create(channel);
-            return CreatedAtAction(nameof(GetById), new { id = createdChannel.Id }, createdChannel);
-        }
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Channel>(entity);
+    }
 
-        // Cập nhật Channel
-        [HttpPut("{id}")]
-        public ActionResult<Channel> Update(long id, [FromBody] Channel channel)
-        {
-            channel.Id = id; // Đảm bảo id được giữ nguyên
-            var updatedChannel = _service.Update(channel);
-            return Ok(updatedChannel);
-        }
+    [HttpDelete]
+    public ActionResult Delete(Channel body)
+    {
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<Channel>(body);
+    }
 
-        // Cập nhật Channel với Json Patch
-        [HttpPatch("{id}")]
-        public ActionResult<Channel> UpdatePatch(long id, [FromBody] JsonPatchDocument<Channel> patchDoc)
-        {
-            var updatedChannel = _service.UpdatePatch(id, patchDoc);
-            return Ok(updatedChannel);
-        }
 
-        // Xoá Channel
-        [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
-        {
-            _service.Delete(id);
-            return NoContent();
-        }
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<Channel>>(
+            _repository.Get(CompositeFilter<Channel>.ApplyFilter(filter), includeProperties: includes));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
+    {
+        return new SuccessResponse<Channel>(_repository.GetById(id.ToString(), includes));
     }
 }

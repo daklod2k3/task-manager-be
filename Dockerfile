@@ -10,7 +10,6 @@ ENV SUPABASE_PUB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 ENV SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kb3lsYWR4ZGNwZnRvdm9hbGFzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNjQ3MTE1NywiZXhwIjoyMDQyMDQ3MTU3fQ.wc4QVvO4Q0iB-rh1gu6SfdOps69w6UR-3NrqaKB1C1c"
 ENV SUPABASE_URL="https://ndoyladxdcpftovoalas.supabase.co"
 
-
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src

@@ -1,17 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using server.Entities;
+using server.Services;
 
 namespace server.Context;
 
 public partial class SupabaseContext : DbContext
 {
+    // private readonly AuthenticationStateProvider _authenticationStateProvider;
+    private readonly ICurrentUserService _currentUserService;
+
     public SupabaseContext()
     {
     }
 
-    public SupabaseContext(DbContextOptions<SupabaseContext> options)
+    public SupabaseContext(DbContextOptions<SupabaseContext> options, ICurrentUserService currentUserService)
         : base(options)
     {
+        _currentUserService = currentUserService;
     }
 
     public virtual DbSet<Channel> Channels { get; set; }
@@ -24,7 +30,7 @@ public partial class SupabaseContext : DbContext
 
     public virtual DbSet<DepartmentUser> DepartmentUsers { get; set; }
 
-    public virtual DbSet<Files> Files { get; set; }
+    public virtual DbSet<FileEntity> Files { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -39,6 +45,9 @@ public partial class SupabaseContext : DbContext
     public virtual DbSet<TaskUser> TaskUsers { get; set; }
 
     public virtual DbSet<UserMessage> UserMessages { get; set; }
+    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Permission> Permissions { get; set; }
+    public virtual DbSet<Resource> Resources { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -191,7 +200,7 @@ public partial class SupabaseContext : DbContext
                 .HasConstraintName("department_user_user_id_fkey");
         });
 
-        modelBuilder.Entity<Files>(entity =>
+        modelBuilder.Entity<FileEntity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("files_pkey");
 
@@ -233,6 +242,67 @@ public partial class SupabaseContext : DbContext
                 .HasConstraintName("notifications_user_id_fkey");
         });
 
+        modelBuilder.Entity<Resource>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("resources_pkey");
+
+            entity.ToTable("resources");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+            entity.Property(e => e.Path)
+                .HasColumnType("character varying")
+                .HasColumnName("path");
+        });
+
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("permissions_pkey");
+
+            entity.ToTable("permissions");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Create).HasColumnName("create");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Delete).HasColumnName("delete");
+            entity.Property(e => e.ResourceId).HasColumnName("resource_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.Update).HasColumnName("update");
+            entity.Property(e => e.View).HasColumnName("view");
+
+            entity.HasOne(d => d.Resource).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.ResourceId)
+                .HasConstraintName("permissions_resource_id_fkey");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("permissions_role_id_fkey");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("roles_pkey");
+
+            entity.ToTable("roles");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<Profile>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("profiles_pkey");
@@ -245,6 +315,9 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Avt).HasColumnName("avt");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.HasOne(d => d.Role).WithMany(p => p.Profiles)
+                .HasForeignKey(d => d.RoleId).HasConstraintName("profiles_role_id_fkey");
         });
 
         modelBuilder.Entity<TaskEntity>(entity =>
@@ -265,9 +338,14 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Priority).HasColumnName("priority");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.FileId).HasColumnName("file_id");
+
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Tasks)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("tasks_created_by_fkey");
+            entity.HasOne(e => e.File).WithMany(p => p.Tasks)
+                .HasForeignKey(d => d.FileId)
+                .HasConstraintName("tasks_file_id_fkey");
         });
 
         modelBuilder.Entity<TaskDepartment>(entity =>
@@ -306,8 +384,9 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
+            entity.Property(e => e.Type).HasColumnName("type");
 
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.TaskHistories)
+            entity.HasOne(d => d.User).WithMany(p => p.TaskHistories)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_history_created_by_fkey");
@@ -402,4 +481,98 @@ public partial class SupabaseContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public override int SaveChanges()
+    {
+        DetectHistoryChange();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = new())
+    {
+        DetectHistoryChange();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+
+    private async Task<string> getUserIdAuth()
+    {
+        try
+        {
+            return _currentUserService.UserId;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine("dbcontext can't get auth user: " + e);
+        }
+
+        return null;
+    }
+
+    private async void DetectHistoryChange()
+    {
+        var taskEntries = ChangeTracker.Entries<TaskEntity>();
+        foreach (var entry in taskEntries) CreateTaskHistoryFromTaskUpdate(entry);
+        var taskUsersEntries = ChangeTracker.Entries<TaskUser>();
+        foreach (var entry in taskUsersEntries) CreateTaskHistoryUserAssign(entry);
+        var taskDepartmentsEntries = ChangeTracker.Entries<TaskDepartment>();
+        foreach (var entry in taskDepartmentsEntries) CreateTaskHistoryDepartmentAssign(entry);
+    }
+
+    private async void CreateTaskHistoryFromTaskUpdate(EntityEntry<TaskEntity> entry)
+    {
+        // Debug.WriteLine(entry.Property("Priority").CurrentValue);
+        // Debug.WriteLine(entry.Property("Priority").OriginalValue);
+        var history = new List<TaskHistory>();
+        var user_id = await getUserIdAuth();
+        if (entry.State != EntityState.Modified) return;
+        if (!entry.Property("Status").OriginalValue?.Equals(entry.Property("Status").CurrentValue) ??
+            !entry.Property("Status").CurrentValue?.Equals(entry.Property("Status").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "changed task **Status** from **" + entry.Property("Status").OriginalValue + "** to **" +
+                              entry.Property("Status").CurrentValue + "**"
+            });
+        if (entry.OriginalValues.GetValue<ETaskPriority?>("Priority") !=
+            entry.CurrentValues.GetValue<ETaskPriority?>("Priority"))
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "changed task **Priority** from **" + entry.Property("Priority").OriginalValue +
+                              "** to **" +
+                              entry.Property("Priority").CurrentValue + "**"
+            });
+        if (!entry.Property("DueDate").OriginalValue?.Equals(entry.Property("DueDate").CurrentValue) ??
+            !entry.Property("DueDate").CurrentValue?.Equals(entry.Property("DueDate").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "set task **Due Date** from **" + (entry.Property("DueDate").OriginalValue ?? "none") +
+                              "** to **" +
+                              entry.Property("DueDate").CurrentValue + "**"
+            });
+        if (!entry.Property("Title").OriginalValue?.Equals(entry.Property("Title").CurrentValue) ??
+            !entry.Property("Title").CurrentValue?.Equals(entry.Property("Title").OriginalValue) ?? false)
+            history.Add(new TaskHistory
+            {
+                TaskId = entry.Entity.Id,
+                CreatedBy = new Guid(user_id),
+                Description = "change task name from **" + entry.Property("Title").OriginalValue + "** to **" +
+                              entry.Property("Title").CurrentValue + "**"
+            });
+        TaskHistories.AddRange(history);
+    }
+
+    private void CreateTaskHistoryUserAssign(EntityEntry<TaskUser> entry)
+    {
+    }
+
+    private void CreateTaskHistoryDepartmentAssign(EntityEntry<TaskDepartment> entry)
+    {
+    }
 }

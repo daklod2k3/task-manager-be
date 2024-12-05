@@ -1,99 +1,99 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Communications.Common;
 using server.Context;
+using server.Helpers;
 using server.Interfaces;
-using Sprache;
 
 namespace server.Repository;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    private readonly SupabaseContext _context;
-
     // private readonly SupabaseContext _context;
-    protected readonly DbSet<T> DbSet;
+    public const int DefaultPageSize = 50;
+    public const int DefaultPageNumber = 1;
+    internal SupabaseContext context;
+
+    internal DbSet<T> dbSet;
 
     public Repository(SupabaseContext context)
     {
-        _context = context;
-        DbSet = context.Set<T>();
+        this.context = context;
+        dbSet = context.Set<T>();
     }
 
     public T Add(T entity)
     {
-        return DbSet.Add(entity).Entity;
+        return dbSet.Add(entity).Entity;
     }
 
     public bool Any(Expression<Func<T, bool>> filter)
     {
-        return DbSet.Any(filter);
+        return dbSet.Any(filter);
     }
 
-
-    public T Get(Expression<Func<T, bool>>? filter, string? includeProperties)
+    public T GetById(object id, string includeProperties = "", string? keyProperty = "Id")
     {
-        return GetQuery(filter,null, includeProperties).FirstOrDefault();
-    }
-
-    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties)
-    {
-        return GetQuery(filter, orderBy, includeProperties).ToList();
-    }
-
-    public virtual T GetById(string id, string? includeProperties = "*", string? keyProperty = "id")
-    {
-        var entity = DbSet.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id);
+        IQueryable<T> query = dbSet;
+        if (includeProperties != null)
+            foreach (var includeProperty in includeProperties.Split
+                         (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                query = query.Include(includeProperty);
+        var entity = query.FirstOrDefault(e => EF.Property<long>(e, keyProperty).ToString() == id.ToString());
         return entity;
     }
 
     public T Remove(T entity)
     {
-        return DbSet.Remove(entity).Entity;
+        return dbSet.Remove(entity).Entity;
     }
 
     public T Update(T entity)
     {
-        return DbSet.Update(entity).Entity;
+        var origin = dbSet.Find(entity.GetPropertyUsingReflection("Id"));
+        context.Entry(origin).CurrentValues.SetValues(entity);
+        return origin;
     }
 
-    public T UpdatePatch(string id, JsonPatchDocument<T> patch)
+    public T UpdatePatch(object id, JsonPatchDocument<T> patch)
     {
-        var entity = DbSet.Find(id);
+        var entity = dbSet.Find(id);
         patch.ApplyTo(entity);
         Save();
         return entity;
     }
 
-    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties)
+    public int Save()
     {
-        IQueryable<T> query = DbSet;
+        return context.SaveChanges();
+    }
+
+    public IEnumerable<T> Get(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties,
+        int? page, int? pageSize)
+    {
+        return GetQuery(filter, orderBy, includeProperties, page, pageSize).ToList();
+    }
+
+    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties,
+        int? page, int? pageSize)
+    {
+        IQueryable<T> query = dbSet;
 
         if (filter != null) query = query.Where(filter);
 
         if (!string.IsNullOrEmpty(includeProperties))
             foreach (var includeProp in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 query = query.Include(includeProp);
-        if (orderBy == null)
+        if (!string.IsNullOrEmpty(orderBy))
         {
-            return query;
+            var parts = orderBy.Split('_');
+            if (parts.Length == 2 && parts[1] == "desc")
+                query = query.OrderByDescending(x => EF.Property<object>(x, parts[0]));
+            else
+                query = query.OrderBy(x => EF.Property<object>(x, parts[0]));
         }
-        string[] parts = orderBy.Split('_');
-        if (parts.Length == 2 && parts[1] == "desc")
-        {
-            return query.OrderByDescending(x => EF.Property<object>(x, parts[0]));
-        }
-        else
-        {
-            return query.OrderBy(x => EF.Property<object>(x, parts[0]));
-        }
-          
-            
-        
-    }
 
-    public int Save()
-    {
-        return _context.SaveChanges();
+        return query.Paginate(page, pageSize);
     }
 }

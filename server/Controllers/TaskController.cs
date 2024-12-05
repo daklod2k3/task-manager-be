@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -12,49 +11,53 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class TaskController : Controller
 {
-    private readonly ITaskService _taskService;
+    private readonly IRepository<TaskEntity> _repository;
 
-    public TaskController(ITaskService taskService)
+    public TaskController(IUnitOfWork unitOfWork)
     {
-        _taskService = taskService;
+        _repository = unitOfWork.Tasks;
     }
 
     [HttpPost]
-    public ActionResult CreateTask(TaskEntity taskEntity)
+    public ActionResult Create(TaskEntity comment)
     {
         var id = AuthController.GetUserId(HttpContext);
-        taskEntity.CreatedBy = new Guid(id);
+        comment.CreatedBy = new Guid(id);
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.CreatTask(taskEntity));
+            var entity = _repository.Add(comment);
+            _repository.Save();
+            return new SuccessResponse<TaskEntity>(entity);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not create");
+            return new ErrorResponse(ex.ToString());
         }
     }
 
     [HttpPut]
-    public ActionResult UpdateTask(TaskEntity taskEntity)
+    public ActionResult Update(TaskEntity body)
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(taskEntity));
+            var comment = _repository.Update(body);
+            _repository.Save();
+            return new SuccessResponse<TaskEntity>(comment);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not update");
+            return new ErrorResponse(ex.ToString());
         }
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.UpdateTask(id, patchDoc));
+            return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id.ToString(), patchDoc));
         }
         catch (Exception ex)
         {
@@ -64,63 +67,61 @@ public class TaskController : Controller
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteTask(long id)
+    public ActionResult DeleteId(long id)
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.DeleteTask(id));
+            var entity = _repository.GetById(id.ToString());
+            _repository.Remove(entity);
+            _repository.Save();
+            return new SuccessResponse<TaskEntity>(null);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not delete");
+            return new ErrorResponse(ex.ToString());
         }
     }
 
-    [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> GetAllTask([FromQuery(Name = "filter")] string? filterString,
-        string? orderBy, [FromQuery(Name = "includes")] string? includeProperties, int? page, int? pageItem)
-    {
-        Pagination pagination = null;
-        if (page != null && pageItem != null)
-            pagination = new Pagination { PageNumber = (int)page, PageSize = (int)pageItem };
-        var filterResult = new ClientFilter();
-        Expression<Func<TaskEntity, bool>>? filter = null;
-
-        if (!string.IsNullOrEmpty(filterString))
-        {
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-            filter = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
-        }
-
-        var taskList = _taskService.GetAllTask(filter,orderBy, includeProperties, pagination);
-        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
-    }
-
-    [HttpGet]
-    [Route("{taskId}")]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskById(long taskId, string? includes)
+    [HttpDelete]
+    public ActionResult Delete(TaskEntity body)
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.GetTask(taskId, includes));
+            _repository.Remove(body);
+            _repository.Save();
+            return new SuccessResponse<TaskEntity>(body);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Task is not found");
+            return new ErrorResponse(ex.ToString());
         }
     }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<TaskEntity>> GetTaskByFilter(string filterString)
-    {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<TaskEntity>.ApplyFilter(filterResult);
 
-        var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
+    [HttpGet]
+    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageSize, string? includes = "", string? orderBy = null)
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<TaskEntity>>(
+            _repository.Get(CompositeFilter<TaskEntity>.ApplyFilter(filter), includes, orderBy, page, pageSize));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult<IEnumerable<TaskEntity>> GetId(long id, string? includes = "")
+    {
+        try
+        {
+            return new SuccessResponse<TaskEntity>(_repository.GetById(id.ToString(), includes));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
     }
 }
