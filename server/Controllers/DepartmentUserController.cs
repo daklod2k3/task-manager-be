@@ -20,18 +20,27 @@ public class DepartmentUserController : Controller
     }
 
     [HttpPost]
-    public ActionResult CreateDepartmentUser(DepartmentUser departmentUser)
+    public ActionResult CreateDepartmentUsers(List<DepartmentUser> departmentUsers)
     {
         try
         {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.CreateDepartmentUser(departmentUser));
+            var createdUsers = new List<DepartmentUser>();
+
+            foreach (var departmentUser in departmentUsers)
+            {
+                var createdUser = _departmentUserService.CreateDepartmentUser(departmentUser);
+                createdUsers.Add(createdUser);
+            }
+
+            return new SuccessResponse<IEnumerable<DepartmentUser>>(createdUsers);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not create");
+            return new ErrorResponse("One or more DepartmentUsers could not be created");
         }
     }
+
 
     [HttpPut]
     public ActionResult UpdateDepartmentUser(DepartmentUser departmentUser)
