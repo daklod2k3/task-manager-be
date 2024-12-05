@@ -18,14 +18,14 @@ public class TaskService : ITaskService
 
     public TaskEntity CreatTask(TaskEntity taskEntity)
     {
-        var result = _unitOfWork.Task.Add(taskEntity);
+        var result = _unitOfWork.Tasks.Add(taskEntity);
         _unitOfWork.Save();
         return result;
     }
 
-    public TaskEntity GetTask(Guid idUser,long idTask,string? includes)
+    public TaskEntity GetTask(Guid idUser, long idTask, string? includes)
     {
-        var query = _unitOfWork.Task.GetQuery(x => x.Id == idTask, includes)
+        var query = _unitOfWork.Tasks.GetQuery(x => x.Id == idTask, includes)
             .Where(t =>
                 t.CreatedBy == idUser ||
                 t.TaskUsers.Any(tu => tu.UserId == idUser) ||
@@ -37,35 +37,34 @@ public class TaskService : ITaskService
 
     public IEnumerable<TaskEntity> GetAllTask()
     {
-        return _unitOfWork.Task.Get();
+        return _unitOfWork.Tasks.Get();
     }
 
     public TaskUser AssignTaskToUser(TaskUser taskUser)
     {
-        var result = _unitOfWork.TaskUser.Add(taskUser);
+        var result = _unitOfWork.TaskUsers.Add(taskUser);
         _unitOfWork.Save();
         return result;
     }
 
     public TaskDepartment AssignTaskToDepartment(TaskDepartment taskDepartment)
     {
-        var result = _unitOfWork.TaskDepartment.Add(taskDepartment);
+        var result = _unitOfWork.TaskDepartments.Add(taskDepartment);
         _unitOfWork.Save();
-        return result; 
-
+        return result;
     }
 
     public TaskEntity DeleteTask(long id)
     {
-        var task = _unitOfWork.Task.GetById(id);
-        var result = _unitOfWork.Task.Remove(task);
+        var task = _unitOfWork.Tasks.GetById(id);
+        var result = _unitOfWork.Tasks.Remove(task);
         _unitOfWork.Save();
         return result;
     }
 
     public TaskEntity UpdateTask(long id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
-        var task = _unitOfWork.Task.GetById(id);
+        var task = _unitOfWork.Tasks.GetById(id);
         // TaskEntity task = null;
         if (task == null) throw new Exception("not found task");
 
@@ -78,30 +77,30 @@ public class TaskService : ITaskService
 
     public TaskDepartment UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
     {
-        var result = _unitOfWork.TaskDepartment.Update(taskDepartment);
+        var result = _unitOfWork.TaskDepartments.Update(taskDepartment);
         _unitOfWork.Save();
         return result;
     }
 
     public TaskDepartment DeleteAssignTaskToDepartment(long id)
     {
-        var taskDepartment = _unitOfWork.TaskDepartment.GetById(id);
-        var result = _unitOfWork.TaskDepartment.Remove(taskDepartment);
+        var taskDepartment = _unitOfWork.TaskDepartments.GetById(id);
+        var result = _unitOfWork.TaskDepartments.Remove(taskDepartment);
         _unitOfWork.Save();
         return result;
     }
 
     public TaskUser UpdateAssignTaskToUser(TaskUser taskUser)
     {
-        var result = _unitOfWork.TaskUser.Update(taskUser);
+        var result = _unitOfWork.TaskUsers.Update(taskUser);
         _unitOfWork.Save();
         return result;
     }
 
     public TaskUser DeleteAssignTaskToUser(long id)
     {
-        var taskUser = _unitOfWork.TaskUser.GetById(id);
-        var result = _unitOfWork.TaskUser.Remove(taskUser);
+        var taskUser = _unitOfWork.TaskUsers.GetById(id);
+        var result = _unitOfWork.TaskUsers.Remove(taskUser);
         _unitOfWork.Save();
         return result;
     }
@@ -111,7 +110,7 @@ public class TaskService : ITaskService
     {
         if (Guid.Empty == id) return Enumerable.Empty<TaskEntity>();
         filter ??= t => true;
-        var query = _unitOfWork.Task.GetQuery(filter, includeProperties)
+        var query = _unitOfWork.Tasks.GetQuery(filter, includeProperties)
             .Where(t =>
                 t.CreatedBy == id ||
                 t.TaskUsers.Any(tu => tu.UserId == id) ||
@@ -123,12 +122,12 @@ public class TaskService : ITaskService
 
     public IEnumerable<TaskEntity> GetTaskByFilter(Expression<Func<TaskEntity, bool>> filter)
     {
-        return _unitOfWork.Task.Get(filter);
+        return _unitOfWork.Tasks.Get(filter);
     }
 
     public TaskEntity UpdateTask(TaskEntity taskEntity)
     {
-        var result = _unitOfWork.Task.Update(taskEntity);
+        var result = _unitOfWork.Tasks.Update(taskEntity);
         _unitOfWork.Save();
         return result;
     }

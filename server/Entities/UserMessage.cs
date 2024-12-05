@@ -6,7 +6,7 @@ public class UserMessage
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Guid FromId { get; set; }
+    public Guid? FromId { get; set; }
 
     public Guid ToId { get; set; }
 

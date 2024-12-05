@@ -33,38 +33,38 @@ public class DefaultRequirePermissionFilter : IAuthorizationFilter
             context.Result = new ForbidResult();
             return;
         }
+        
+        if (_dbContext.Profiles.Any(u=>u.Id == userId && u.RoleId == 0))
+            return;
 
         try
         {
-            var pathname = context.HttpContext.Request.Path.Value;
+            var pathname = context.HttpContext.Request.Path.Value.Split("/").ToList();
+            // pathname.RemoveAt(pathname.Count - 1);
+
             var actionMethod = context.HttpContext.Request.Method;
-            var requiredResource = pathname;
-            var resource = _dbContext.Resources.FirstOrDefault(r =>  requiredResource.StartsWith(r.Path));
-            if (resource != null)
+            var requiredResource = pathname.Join("/");
+            var resources = _dbContext.Resources.ToList()
+                .Where(r =>
+                    r.Path.ToLower().StartsWith(requiredResource.ToLower()) ||
+                    (requiredResource.ToLower().StartsWith(r.Path.ToLower()) && requiredResource[r.Path.Length] == '/'))
+                .Select(r => r.Id);
+            if (resources != null)
             {
                 var userPermissions = _dbContext.Roles
                     .Where(r => r.Profiles.Any(u => u.Id == userId))
                     .SelectMany(r => r.Permissions)
-                    .FirstOrDefault(p => p.ResourceId == resource.Id);
-                if (userPermissions.GetPropertyUsingReflection(PermissionMethodMap(actionMethod)).Equals(true))
-                    return;
+                    .Where(p => resources.Contains(p.ResourceId)).ToList();
+                foreach (var permission in userPermissions)
+                    if (permission.GetPropertyUsingReflection(PermissionMethodMap(actionMethod)).Equals(true))
+                        return;
             }
-
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
-        // Default permission: "ControllerName.ActionName"
-
-
-        // .SelectMany(u => u.Role.Permissions)
-        // .Where(p => p.Resource.Path.ToLower().Equals(requiredResource))
-        // .Include(p => p.Role)
-
-
-        // foreach (var per in userPermissions)
-        //     if (per.GetPropertyUsingReflection(PermissionMethodMap(actionMethod)).Equals(true))
+       
 
         context.Result = new ForbidResult();
     }

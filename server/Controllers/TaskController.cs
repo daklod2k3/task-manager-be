@@ -13,10 +13,12 @@ namespace server.Controllers;
 public class TaskController : Controller
 {
     private readonly ITaskService _taskService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TaskController(ITaskService taskService)
+    public TaskController(ITaskService taskService, IUnitOfWork unitOfWork)
     {
         _taskService = taskService;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpPost]
@@ -111,7 +113,7 @@ public class TaskController : Controller
         var id = AuthController.GetUserId(HttpContext);
         try
         {
-            return new SuccessResponse<TaskEntity>(_taskService.GetTask(new Guid(id),taskId, includes));
+            return new SuccessResponse<TaskEntity>(_taskService.GetTask(new Guid(id), taskId, includes));
         }
         catch (Exception ex)
         {
@@ -130,5 +132,16 @@ public class TaskController : Controller
 
         var taskList = _taskService.GetTaskByFilter(compositeFilterExpression);
         return new SuccessResponse<IEnumerable<TaskEntity>>(taskList);
+    }
+
+    [HttpGet("replace/{property}/{value}")]
+    public IActionResult ReplaceProperty([FromQuery] long id, [FromRoute] string property, [FromRoute] string value)
+    {
+        var jsonPatchString = "[{\"op\":\"replace\",\"path\":\"" + property + "\",\"value\":\"" + value + "\"}]";
+        var json = JsonConvert.DeserializeObject<JsonPatchDocument<TaskEntity>>(jsonPatchString);
+        var task = _unitOfWork.Tasks.GetById(id);
+        json.ApplyTo(task);
+        _unitOfWork.Save();
+        return new SuccessResponse<TaskEntity>(task);
     }
 }

@@ -21,11 +21,12 @@ public class FileController : Controller
     [Route("{file_id}")]
     public async Task<IActionResult> Index(string file_id)
     {
-        var entity = _unitOfWork.FileRepository.GetById(file_id);
+        var entity = _unitOfWork.Files.GetById(file_id);
         var file_path = Path.Combine(entity.Path, _uploadDirectory);
         if (!Directory.Exists(file_path))
             return new ErrorResponse("File does not exist");
-        var stream = new FileStream(_uploadDirectory + "/" + entity.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var stream = new FileStream(_uploadDirectory + "/" + entity.Path, FileMode.Open, FileAccess.Read,
+            FileShare.Read);
         var contentType = GetContentType(stream.Name);
 
         // Return the file as a FileResult

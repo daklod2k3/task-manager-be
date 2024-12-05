@@ -15,7 +15,7 @@ public class RoleController : Controller
 
     public RoleController(IUnitOfWork unitOfWork)
     {
-        _repository = unitOfWork.Role;
+        _repository = unitOfWork.Roles;
     }
 
     [HttpPost]
