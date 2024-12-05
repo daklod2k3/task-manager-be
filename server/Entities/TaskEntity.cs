@@ -21,7 +21,7 @@ public class TaskEntity
     public Guid? CreatedBy { get; set; }
     public long? FileId { get; set; } = null;
 
-    public virtual FileEntity? File { get; set; } = null;
+    public virtual FileEntity? File { get; set; } = null!;
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 
     public virtual ICollection<TaskHistory> TaskHistories { get; set; } = new List<TaskHistory>();

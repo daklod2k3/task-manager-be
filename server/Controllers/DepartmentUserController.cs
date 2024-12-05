@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
-using server.Services;
 
 namespace server.Controllers;
 
@@ -12,109 +11,67 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class DepartmentUserController : Controller
 {
-    private readonly IDepartmentUserService _departmentUserService;
+    private readonly IRepository<DepartmentUser> _repository;
 
-    public DepartmentUserController(IDepartmentUserService departmentUserService)
+    public DepartmentUserController(IUnitOfWork unitOfWork)
     {
-        _departmentUserService = departmentUserService;
+        _repository = unitOfWork.DepartmentUsers;
     }
 
     [HttpPost]
-    public ActionResult CreateDepartmentUsers(List<DepartmentUser> departmentUsers)
+    public ActionResult Create(DepartmentUser body)
     {
-        try
-        {
-            var createdUsers = new List<DepartmentUser>();
-
-            foreach (var departmentUser in departmentUsers)
-            {
-                var createdUser = _departmentUserService.CreateDepartmentUser(departmentUser);
-                createdUsers.Add(createdUser);
-            }
-
-            return new SuccessResponse<IEnumerable<DepartmentUser>>(createdUsers);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("One or more DepartmentUsers could not be created");
-        }
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
     }
 
-
     [HttpPut]
-    public ActionResult UpdateDepartmentUser(DepartmentUser departmentUser)
+    public ActionResult Update(DepartmentUser body)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUser(departmentUser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not update");
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateDepartmentUserPatch(long id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUserPatch(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUser is not update");
-        }
+        return new SuccessResponse<DepartmentUser>(_repository.UpdatePatch(id.ToString(), patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteDepartmentUser(long id)
+    public ActionResult DeleteId(long id)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.DeleteDepartmentUser(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUser is not delete");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
     }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<DepartmentUser>> GetDepartmentUserByFilter(string filterString)
+    [HttpDelete]
+    public ActionResult Delete(DepartmentUser body)
     {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<DepartmentUser>.ApplyFilter(filterResult);
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(body);
+    }
 
-        var DepartmetnUserList = _departmentUserService.GetDepartmentUserByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<DepartmentUser>>(DepartmetnUserList);
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<DepartmentUser>>(
+            _repository.Get(CompositeFilter<DepartmentUser>.ApplyFilter(filter), includeProperties: includes));
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<DepartmentUser>> Get(string? filter)
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
     {
-        //var id = AuthController.GetUserId(HttpContext);
-        return GetDepartmentUserByFilter(filter);
-    }
-
-    [HttpGet]
-    [Route("{departmentId}")]
-    public ActionResult<IEnumerable<DepartmentUser>> GetDepartmentUserById(long departmentId)
-    {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.GetDepartmentUser(departmentId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("departmentUserr is not get");
-        }
+        return new SuccessResponse<DepartmentUser>(_repository.GetById(id.ToString(), includes));
     }
 }

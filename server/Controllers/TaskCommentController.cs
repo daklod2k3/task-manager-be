@@ -13,9 +13,9 @@ public class TaskCommentController : Controller
 {
     private readonly IRepository<TaskComment> _repository;
 
-    public TaskCommentController(IRepository<TaskComment> taskCommentRepository)
+    public TaskCommentController(IUnitOfWork unitOfWork)
     {
-        _repository = taskCommentRepository;
+        _repository = unitOfWork.TaskComments;
     }
 
     [HttpPost]

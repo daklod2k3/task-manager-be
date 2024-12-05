@@ -6,7 +6,7 @@ public class UserMessage
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Guid FromId { get; set; }
+    public Guid? FromId { get; set; }
 
     public Guid ToId { get; set; }
 
@@ -18,7 +18,7 @@ public class UserMessage
 
     public virtual FileEntity? File { get; set; }
 
-    public virtual Profile From { get; set; } = null!;
+    public virtual Profile? From { get; set; } = null!;
 
-    public virtual Profile To { get; set; } = null!;
+    public virtual Profile? To { get; set; } = null!;
 }

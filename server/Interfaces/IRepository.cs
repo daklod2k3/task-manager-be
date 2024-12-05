@@ -5,13 +5,15 @@ namespace server.Interfaces;
 
 public interface IRepository<T> where T : class
 {
-    // IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string includeProperties = null);
-    IEnumerable<T> Get(Expression<Func<T, bool>> filter = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-        string includeProperties = "");
+    IEnumerable<T> Get(Expression<Func<T, bool>>? filter = null,
+        string? includeProperties = null, string? orderBy = null,
+        int? pag = null, int? pageSize = null);
 
-    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string includeProperties = "");
-    T GetById(object id, string? includeProperties = "", string? keyProperty = "Id");
+    IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
+        string? orderBy = null,
+        int? pag = null, int? pageSize = null);
+
+    T GetById(object id, string? includeProperties = null, string? keyProperty = "Id");
     T Add(T entity);
     bool Any(Expression<Func<T, bool>> filter);
     T Remove(T entity);

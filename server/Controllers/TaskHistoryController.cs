@@ -13,43 +13,26 @@ public class TaskHistoryController : Controller
 {
     private readonly IRepository<TaskHistory> _repository;
 
-    public TaskHistoryController(IRepository<TaskHistory> taskHistoryRepository)
+    public TaskHistoryController(IUnitOfWork unitOfWork)
     {
-        _repository = taskHistoryRepository;
+        _repository = unitOfWork.TaskHistories;
     }
 
     [HttpPost]
-    public ActionResult Create(TaskHistory comment)
+    public ActionResult Create(TaskHistory body)
     {
-        var id = AuthController.GetUserId(HttpContext);
-        comment.CreatedBy = new Guid(id);
-        try
-        {
-            var entity = _repository.Add(comment);
-            _repository.Save();
-            return new SuccessResponse<TaskHistory>(entity);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        body.CreatedBy = new Guid(AuthController.GetUserId(HttpContext));
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<TaskHistory>(entity);
     }
 
     [HttpPut]
     public ActionResult Update(TaskHistory body)
     {
-        try
-        {
-            var comment = _repository.Update(body);
-            _repository.Save();
-            return new SuccessResponse<TaskHistory>(comment);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<TaskHistory>(entity);
     }
 
     [HttpPatch("{id}")]
@@ -64,28 +47,20 @@ public class TaskHistoryController : Controller
         var entity = _repository.GetById(id.ToString());
         _repository.Remove(entity);
         _repository.Save();
-        return new SuccessResponse<TaskHistory>(null);
+        return new SuccessResponse<TaskHistory>(entity);
     }
 
     [HttpDelete]
     public ActionResult Delete(TaskHistory body)
     {
-        try
-        {
-            _repository.Remove(body);
-            _repository.Save();
-            return new SuccessResponse<TaskHistory>(body);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<TaskHistory>(body);
     }
 
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
         int? pageItem, string? includes = "")
     {
         var filter = new ClientFilter();
@@ -96,16 +71,8 @@ public class TaskHistoryController : Controller
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<IEnumerable<TaskHistory>> GetId(long id, string? includes = "")
+    public ActionResult GetId(long id, string? includes = "")
     {
-        try
-        {
-            return new SuccessResponse<TaskHistory>(_repository.GetById(id.ToString(), includes));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        return new SuccessResponse<TaskHistory>(_repository.GetById(id.ToString(), includes));
     }
 }

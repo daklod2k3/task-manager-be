@@ -1,59 +1,77 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class TaskDepartmentController : Controller
-    {
-        private readonly ITaskService _taskService;
-        
-        public TaskDepartmentController(ITaskService taskService)
-        {
-            _taskService = taskService;
-        }
-        [HttpPost]
-        public IActionResult AssignTaskToDepartment(TaskDepartment taskDepartment)
-        {
+namespace server.Controllers;
 
-            try
-            {
-                return new SuccessResponse<TaskDepartment>(_taskService.AssignTaskToDepartment(taskDepartment));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("Task is not assign to department");
-            }
-        }
-        [HttpPut]
-        public ActionResult UpdateAssignTaskToDepartment(TaskDepartment taskDepartment)
-        {
-            try
-            {
-                return new SuccessResponse<TaskDepartment>(_taskService.UpdateAssignTaskToDepartment(taskDepartment));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("TaskDepartment is not update");
-            }
-        }
-        [HttpDelete]
-        public ActionResult DeleteAssignTaskToDepartment(long id)
-        {
-            try
-            {
-                return new SuccessResponse<TaskDepartment>(_taskService.DeleteAssignTaskToDepartment(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("TaskDepartment is not delete");
-            }
-            
-        }
+[ApiController]
+[Route("[controller]")]
+public class TaskDepartmentController : Controller
+{
+    private readonly IRepository<TaskDepartment> _repository;
+
+    public TaskDepartmentController(IUnitOfWork unitOfWork)
+    {
+        _repository = unitOfWork.TaskDepartments;
+    }
+
+    [HttpPost]
+    public ActionResult Create(TaskDepartment body)
+    {
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<TaskDepartment>(entity);
+    }
+
+    [HttpPut]
+    public ActionResult Update(TaskDepartment body)
+    {
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<TaskDepartment>(entity);
+    }
+
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskDepartment> patchDoc)
+    {
+        return new SuccessResponse<TaskDepartment>(_repository.UpdatePatch(id.ToString(), patchDoc));
+    }
+
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<TaskDepartment>(entity);
+    }
+
+    [HttpDelete]
+    public ActionResult Delete(TaskDepartment body)
+    {
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<TaskDepartment>(body);
+    }
+
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<TaskDepartment>>(
+            _repository.Get(CompositeFilter<TaskDepartment>.ApplyFilter(filter), includeProperties: includes));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
+    {
+        return new SuccessResponse<TaskDepartment>(_repository.GetById(id.ToString(), includes));
     }
 }

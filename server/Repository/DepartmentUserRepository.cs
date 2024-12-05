@@ -2,12 +2,11 @@
 using server.Entities;
 using server.Interfaces;
 
-namespace server.Repository
+namespace server.Repository;
+
+public class DepartmentUserRepository : Repository<DepartmentUser>, IDepartmentUserRepository
 {
-    public class DepartmentUserRepository : Repository<DepartmentUser>, IDepartmentUser
+    public DepartmentUserRepository(SupabaseContext context) : base(context)
     {
-        public DepartmentUserRepository(SupabaseContext context) : base(context)
-        {
-        }
     }
 }

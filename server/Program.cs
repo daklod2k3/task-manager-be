@@ -15,6 +15,7 @@ using server.Controllers;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Middlewares;
 using server.Repository;
 using server.Services;
 using Supabase;
@@ -27,15 +28,20 @@ var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 
 
 // Add services to the container.
-builder.Services.AddControllers(options => { options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter()); })
-    .AddJsonOptions(options =>
+builder.Services.AddControllers(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
+        options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
+        options.Filters.Add<DefaultRequirePermissionFilter>();
+    })
+    .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+            options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        }
+    );
 //     .AddNewtonsoftJson(options =>
 // {
 //     options.SerializerSettings.ContractResolver = new DefaultContractResolver
@@ -54,6 +60,7 @@ builder.Services.AddControllers(options => { options.InputFormatters.Insert(0, M
 //     
 // });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -92,8 +99,19 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
         ValidAudience = builder.Configuration["Authentication:ValidAudience"],
         ValidIssuer = builder.Configuration["Authentication:ValidIssuer"]
     };
+
     option.Events = new JwtBearerEvents
     {
+        // OnTokenValidated = context =>
+        // {
+        //     var userId = context.Principal?.FindFirst("sub")?.Value;
+        //     if (!string.IsNullOrEmpty(userId))
+        //     {
+        //         var identity = context.Principal.Identity as ClaimsIdentity;
+        //         identity.AddClaim(new Claim(ClaimTypes.Name, userId));
+        //     }
+        //     return Task.CompletedTask;
+        // },
         OnMessageReceived = context =>
         {
             if (context.Token is not null) return Task.CompletedTask;
@@ -143,15 +161,12 @@ var supabase = new Client(supabaseUrl, supabaseAnonKey);
 supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
 builder.Services.AddSingleton(supabase);
 
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<DefaultRequirePermissionFilter>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
-builder.Services.AddScoped<IRepository<TaskHistory>, TaskHistoryRepository>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+// builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 
 var app = builder.Build();
 

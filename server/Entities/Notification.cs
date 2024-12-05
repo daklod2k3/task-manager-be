@@ -12,5 +12,5 @@ public class Notification
 
     public string Content { get; set; } = null!;
 
-    public virtual Profile User { get; set; } = null!;
+    public virtual Profile? User { get; set; } = null!;
 }

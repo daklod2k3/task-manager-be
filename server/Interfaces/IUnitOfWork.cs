@@ -2,15 +2,20 @@
 
 public interface IUnitOfWork
 {
-    ITaskRepository Task { get; }
-    ITaskDepartmentRepository TaskDepartment { get; }
-    IDepartment Department { get; }
-    IDepartmentUser DepartmentUser { get; }
-    ITaskUserRepository TaskUser { get; }
-    IUserRepository User { get; }
-    IRoleRepository Role { get; }
-    IFileRepository FileRepository { get; }
-    IResourceRepository Resoucre { get; }
-    IPermissionRepository Permission{ get; }
+    IChannelRepository Channels { get; }
+    IChannelMessageRepository ChannelMessages { get; }
+    IChannelUserRepository ChannelUsers { get; }
+    IDepartmentRepository Departments { get; }
+    IDepartmentUserRepository DepartmentUsers { get; }
+    IFileRepository Files { get; }
+    INotificationRepository Notifications { get; }
+    IRoleRepository Roles { get; }
+    ITaskCommentRepository TaskComments { get; }
+    ITaskDepartmentRepository TaskDepartments { get; }
+    ITaskRepository Tasks { get; }
+    ITaskHistoryRepository TaskHistories { get; }
+    ITaskUserRepository TaskUsers { get; }
+    IUserMessageRepository UserMessages { get; }
+    IUserRepository Users { get; }
     int Save();
 }

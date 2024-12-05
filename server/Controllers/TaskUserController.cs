@@ -1,57 +1,125 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
+using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class TaskUserController : Controller
-    {
-        private readonly ITaskService _taskService;
-        public TaskUserController(ITaskService taskService)
-        {
-            _taskService = taskService;
-        }
-        [HttpPost]
-        public IActionResult AssignTaskToUser(TaskUser taskUser)
-        {
-            try
-            {
-                return new SuccessResponse<TaskUser>(_taskService.AssignTaskToUser(taskUser));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("Task is not assign to user");
-            }
+namespace server.Controllers;
 
-        }
-        [HttpPut]
-        public ActionResult UpdateAssignTaskToUser(TaskUser taskUser)
+[ApiController]
+[Route("[controller]")]
+public class TaskUserController : Controller
+{
+    private readonly IRepository<TaskUser> _repository;
+
+    public TaskUserController(IUnitOfWork unitOfWork)
+    {
+        _repository = unitOfWork.TaskUsers;
+    }
+
+    [HttpPost]
+    public ActionResult Create(TaskUser comment)
+    {
+        try
         {
-            try
-            {
-                return new SuccessResponse<TaskUser>(_taskService.UpdateAssignTaskToUser(taskUser));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("TaskUser is not update");
-            }
+            var entity = _repository.Add(comment);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(entity);
         }
-        [HttpDelete("{id}")]
-        public ActionResult DeleteAssignTaskToUser(long id)
+        catch (Exception ex)
         {
-            try
-            {
-                return new SuccessResponse<TaskUser>(_taskService.DeleteAssignTaskToUser(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return new ErrorResponse("TaskUser is not delete");
-            }
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
+
+    [HttpPut]
+    public ActionResult Update(TaskUser body)
+    {
+        try
+        {
+            var comment = _repository.Update(body);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(comment);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
+
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
+    {
+        try
+        {
+            return new SuccessResponse<TaskUser>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not update");
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        try
+        {
+            var entity = _repository.GetById(id.ToString());
+            _repository.Remove(entity);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(entity);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
+
+    [HttpDelete]
+    public ActionResult Delete(TaskUser body)
+    {
+        try
+        {
+            _repository.Remove(body);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(body);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
+
+
+    [HttpGet]
+    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageSize, string? includes = "", string? orderBy = null)
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<TaskUser>>(
+            _repository.Get(CompositeFilter<TaskUser>.ApplyFilter(filter), includes, orderBy, page, pageSize));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult<IEnumerable<TaskUser>> GetId(long id, string? includes = "")
+    {
+        try
+        {
+            return new SuccessResponse<TaskUser>(_repository.GetById(id.ToString(), includes));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
         }
     }
 }
