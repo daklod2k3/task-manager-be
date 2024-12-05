@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using server.Entities;
 
 namespace server.Controllers;
 
@@ -34,8 +33,6 @@ public class ErrorResponse : ActionResult
 
 public class SuccessResponse<T>(T data) : ActionResult
 {
-    private Department department;
-
     [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
     public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
 
