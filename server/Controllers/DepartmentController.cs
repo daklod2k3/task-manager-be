@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Repository;
 using server.Services;
 using System.Linq.Expressions;
 
@@ -80,30 +81,49 @@ public class DepartmentController : Controller
     }
 
     [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<Department>> GetDepartment(string? filterString, string? includeProperties)
+    public ActionResult<IEnumerable<object>> GetDepartment(string? filterString, string? includeProperties, bool includeCompletionPercentage = true)
     {
-        Expression<Func<Department, bool>>? filter = null;
-
-        if (!string.IsNullOrEmpty(filterString))
+        try
         {
-            var filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+            Expression<Func<Department, bool>>? filter = null;
 
-            filter = CompositeFilter<Department>.ApplyFilter(filterResult);
+            if (!string.IsNullOrEmpty(filterString))
+            {
+                var filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+                filter = CompositeFilter<Department>.ApplyFilter(filterResult);
+            }
+
+            var departmentList = _departmentService.GetDepartmentByFilter(filter, includeProperties);
+
+            if (includeCompletionPercentage)
+            {
+                var resultWithCompletion = departmentList.Select(department => new
+                {
+                    Department = department,
+                    CompletionPercentage = _departmentService.GetTaskCompletionPercentage(department.Id)
+                });
+
+                return new SuccessResponse<IEnumerable<object>>(resultWithCompletion);
+            }
+
+            return new SuccessResponse<IEnumerable<Department>>(departmentList);
         }
-
-        var departmentList = _departmentService.GetAllDepartment(filter, includeProperties);
-        return new SuccessResponse<IEnumerable<Department>>(departmentList);
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return new ErrorResponse("Failed to retrieve departments");
+        }
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Department>> Get(string? filter, string? includes)
+    public ActionResult<IEnumerable<object>> Get(string? filter, string? includes)
     {
         return GetDepartment(filter, includes);
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<Department> GetDepartmentById(long id, string? includes)
+    public ActionResult<object> GetDepartmentById(long id, string? includes, bool includeCompletionPercentage = true)
     {
         try
         {
@@ -111,6 +131,17 @@ public class DepartmentController : Controller
             if (department == null)
             {
                 return new ErrorResponse("Department not found");
+            }
+
+            if (includeCompletionPercentage)
+            {
+                var resultWithCompletion = new
+                {
+                    Department = department,
+                    CompletionPercentage = _departmentService.GetTaskCompletionPercentage(department.Id)
+                };
+
+                return new SuccessResponse<object>(resultWithCompletion);
             }
 
             return new SuccessResponse<Department>(department);

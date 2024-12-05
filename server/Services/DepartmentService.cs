@@ -27,18 +27,7 @@ public class DepartmentService : IDepartmentService
     public Department GetDepartment(long idDepartment, string? includes)
     {
         var query = _unitOfWork.Department.GetQuery(x => x.Id == idDepartment, includes);
-
         return query.FirstOrDefault();
-    }
-
-    public IEnumerable<Department> GetAllDepartment(Expression<Func<Department, bool>>? filter, string? includeProperties)
-    {
-        filter ??= d => true;
-
-        var query = _unitOfWork.Department.GetQuery(filter, includeProperties)
-            .Distinct();
-
-        return query.ToList();
     }
 
     public Department DeleteDepartment(long id)
@@ -61,9 +50,9 @@ public class DepartmentService : IDepartmentService
         return department;
     }
 
-    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter)
+    public IEnumerable<Department> GetDepartmentByFilter(Expression<Func<Department, bool>> filter,string? includeProperties)
     {
-        return _unitOfWork.Department.Get(filter);
+        return _unitOfWork.Department.Get(filter, includeProperties: includeProperties);
     }
 
     public Department UpdateDepartment(Department department)
@@ -71,5 +60,21 @@ public class DepartmentService : IDepartmentService
         var result = _unitOfWork.Department.Update(department);
         _unitOfWork.Save();
         return result;
+    }
+
+    public double GetTaskCompletionPercentage(long departmentId)
+    {
+        var tasksInDepartment = _unitOfWork.TaskDepartment.Get(
+            td => td.DepartmentId == departmentId,
+            includeProperties: "Task"
+        );
+
+        var totalTasks = tasksInDepartment.Count();
+
+        if (totalTasks == 0) return 0;
+
+        var completedTasks = tasksInDepartment.Count(td => td.Task.Status == ETaskStatus.Done);
+
+        return (completedTasks / (double)totalTasks) * 100;
     }
 }
