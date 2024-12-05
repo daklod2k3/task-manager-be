@@ -32,6 +32,20 @@ public class RoleBasedAccessMiddleware
         //     {
         //         Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
         //     }
+        var cendpoint = context.GetEndpoint();
+        if (cendpoint != null)
+        {
+            var allowAnonymous = cendpoint.Metadata
+                .OfType<Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute>()
+                .Any();
+
+            if (allowAnonymous)
+            {
+                await _next(context);
+                return;
+            }
+        }
+
         if (!context.User.Identity.IsAuthenticated && (context.Request.Path == "/auth/login" || 
             context.Request.Path == "/auth/register"))
         {

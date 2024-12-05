@@ -61,9 +61,9 @@ public class NotificationService : INotificationService
         return result;
     }
 
-    public IEnumerable<Notification> GetNotificationByFilter(Expression<Func<Notification, bool>> filter)
+    public IEnumerable<Notification> GetNotificationByFilter(Expression<Func<Notification, bool>> filter, string includeProperties)
     {
-        return _unitnotification.Notification.Get(filter);
+        return _unitnotification.Notification.Get(filter, null, includeProperties);
     }
 
     

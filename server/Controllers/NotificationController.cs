@@ -24,11 +24,20 @@ public class NotificationController : Controller
     
 
     //lấy mọi notifications
-    [HttpGet]
-    public ActionResult<IEnumerable<Notification>> Get()
-    {
-        return _notificationService.GetAllNotifications().ToList();
+    // [HttpGet]
+    // public ActionResult<IEnumerable<Notification>> Get()
+    // {
+    //     return _notificationService.GetAllNotifications().ToList();
         
+    // }
+
+    [HttpGet]
+    public ActionResult<IEnumerable<Notification>> Get([FromQuery(Name = "filter")] string? filterString, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<Notification>>(
+            _notificationService.GetNotificationByFilter(CompositeFilter<Notification>.ApplyFilter(filter), includes));
     }
 
     [HttpGet("{id}")]
