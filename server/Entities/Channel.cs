@@ -14,5 +14,5 @@ public class Channel
 
     public virtual ICollection<ChannelUser> ChannelUsers { get; set; } = new List<ChannelUser>();
 
-    public virtual Profile CreatedByNavigation { get; set; } = null!;
+    public virtual Profile? CreatedByNavigation { get; set; } = null!;
 }

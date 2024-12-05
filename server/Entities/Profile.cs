@@ -16,7 +16,7 @@ public class Profile
     public long RoleId { get; set; }
 
 
-    public virtual Role Role { get; set; } = null!;
+    public virtual Role? Role { get; set; } = null!;
 
     [JsonIgnore] public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
 
