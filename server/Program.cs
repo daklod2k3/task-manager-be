@@ -165,6 +165,8 @@ builder.Services.AddScoped<DefaultRequirePermissionFilter>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 
 var app = builder.Build();
 
