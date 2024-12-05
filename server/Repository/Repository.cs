@@ -11,8 +11,6 @@ namespace server.Repository;
 public class Repository<T> : IRepository<T> where T : class
 {
     // private readonly SupabaseContext _context;
-    public const int DefaultPageSize = 50;
-    public const int DefaultPageNumber = 1;
     internal SupabaseContext context;
 
     internal DbSet<T> dbSet;
@@ -69,14 +67,16 @@ public class Repository<T> : IRepository<T> where T : class
         return context.SaveChanges();
     }
 
-    public IEnumerable<T> Get(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties,
-        int? page, int? pageSize)
+    public IEnumerable<T> Get(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
+        string? orderBy = null,
+        int? page = null, int? pageSize = null)
     {
-        return GetQuery(filter, orderBy, includeProperties, page, pageSize).ToList();
+        return GetQuery(filter, includeProperties, orderBy, page, pageSize).ToList();
     }
 
-    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter, string? orderBy, string? includeProperties,
-        int? page, int? pageSize)
+    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
+        string? orderBy = null,
+        int? page = null, int? pageSize = null)
     {
         IQueryable<T> query = dbSet;
 
