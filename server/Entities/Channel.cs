@@ -8,7 +8,11 @@ public class Channel
 
     public string Name { get; set; } = null!;
 
-    public Guid CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
+
+    public long? DepartmentId { get; set; } = null!;
+
+    public virtual Department Department { get; set; } = null!;
 
     public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
 
