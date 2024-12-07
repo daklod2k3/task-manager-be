@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using server.Entities;
 using server.Interfaces;
 
-namespace server.Controllers.User;
+namespace server.Controllers.AuthUser;
 
 [ApiController]
-[Route("/user/[controller]")]
+[Route("auth/user/[controller]")]
 public class DepartmentController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;

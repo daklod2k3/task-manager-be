@@ -82,17 +82,9 @@ public class Repository<T> : IRepository<T> where T : class
 
         if (filter != null) query = query.Where(filter);
 
-        if (!string.IsNullOrEmpty(includeProperties))
-            foreach (var includeProp in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                query = query.Include(includeProp);
-        if (!string.IsNullOrEmpty(orderBy))
-        {
-            var parts = orderBy.Split('_');
-            if (parts.Length == 2 && parts[1] == "desc")
-                query = query.OrderByDescending(x => EF.Property<object>(x, parts[0]));
-            else
-                query = query.OrderBy(x => EF.Property<object>(x, parts[0]));
-        }
+        query = query.GetInclude(includeProperties);
+
+        query = query.GetOrderBy(orderBy);
 
         return query.Paginate(page, pageSize);
     }

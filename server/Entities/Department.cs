@@ -1,4 +1,6 @@
-﻿namespace server.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace server.Entities;
 
 public class Department
 {
@@ -11,4 +13,7 @@ public class Department
     public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
+
+    public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
+    [NotMapped] public double CompleteTask => TaskDepartments?.Count(td => td.Task != null && td.Task.Status == ETaskStatus.Done) ?? 0;
 }

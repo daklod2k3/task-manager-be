@@ -5,10 +5,10 @@ using server.Entities;
 using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers.User;
+namespace server.Controllers.AuthUser;
 
 [ApiController]
-[Route("user/[controller]")]
+[Route("auth/user/[controller]")]
 public class TaskController : Controller
 {
     private readonly IRepository<TaskEntity> _repository;
@@ -91,7 +91,7 @@ public class TaskController : Controller
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<TaskEntity>>(
-            _repository.Get(CompositeFilter<TaskEntity>.ApplyFilter(filter), includeProperties: includes));
+            _repository.Get(CompositeFilter<TaskEntity>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]

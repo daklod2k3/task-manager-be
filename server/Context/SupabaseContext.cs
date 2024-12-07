@@ -102,7 +102,11 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Name)
                 .HasColumnType("character varying")
                 .HasColumnName("name");
+            entity.Property(e => e.DepartmentId).HasColumnName("department_id");
 
+            entity.HasOne(d => d.Department).WithMany(p => p.Channels)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("channels_department_id_fkey");
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Channels)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("channels_created_by_fkey");

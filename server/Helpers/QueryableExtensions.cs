@@ -1,4 +1,7 @@
-﻿namespace server.Helpers;
+﻿using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
+
+namespace server.Helpers;
 
 public static class QueryableExtensions
 {
@@ -10,6 +13,28 @@ public static class QueryableExtensions
         var defaultPagination = new Pagination(page, pageSize);
         var skipNumber = (defaultPagination.Page - 1) * defaultPagination.PageSize;
         return source.Skip(skipNumber).Take(defaultPagination.PageSize);
+    }
+
+    public static IQueryable<T> GetInclude<T>(this IQueryable<T> source, string? includeProperties)
+    {
+        if (!string.IsNullOrEmpty(includeProperties))
+            foreach (var includeProp in includeProperties.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                return source.Include(includeProp);
+        return source;
+    }
+
+    public static IQueryable<T> GetOrderBy<T>(this IQueryable<T> source, string? orderBy)
+    {
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            var parts = orderBy.Split('_');
+            if (parts.Length == 2 && parts[1] == "desc")
+                return source.OrderByDescending(x => EF.Property<object>(x, parts[0]));
+
+            return source.OrderBy(x => EF.Property<object>(x, parts[0]));
+        }
+
+        return source;
     }
 
     public class Pagination

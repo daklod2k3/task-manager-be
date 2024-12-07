@@ -8,7 +8,7 @@ using Client = Supabase.Client;
 namespace server.Controllers.AuthUser;
 
 [ApiController]
-[Route("[controller]")]
+[Route("auth/user")]
 public class ProfileController : Controller
 {
     private readonly Client _client;
