@@ -17,26 +17,26 @@ public class ChannelUserService : IChannelUserService
 
     public ChannelUser CreateChannelUser(ChannelUser channeluser)
     {
-        var result = _unitOfWork.ChannelUser.Add(channeluser);
+        var result = _unitOfWork.ChannelUsers.Add(channeluser);
         _unitOfWork.Save();
         return result;
     }
 
     public ChannelUser GetChannelUser(long id)
     {
-        return _unitOfWork.ChannelUser.GetById(id);
+        return _unitOfWork.ChannelUsers.GetById(id);
     }
 
     public ChannelUser UpdateChannelUser(ChannelUser channeluser)
     {
-        var result = _unitOfWork.ChannelUser.Update(channeluser);
+        var result = _unitOfWork.ChannelUsers.Update(channeluser);
         _unitOfWork.Save();
         return result;
     }
 
     public ChannelUser UpdateChannelUserPatch(long id, [FromBody] JsonPatchDocument<ChannelUser> patchDoc)
     {
-        var channeluser = _unitOfWork.ChannelUser.GetById(id);
+        var channeluser = _unitOfWork.ChannelUsers.GetById(id);
         if (channeluser == null) throw new Exception("not found channeluser");
 
         patchDoc.ApplyTo(channeluser);
@@ -48,20 +48,20 @@ public class ChannelUserService : IChannelUserService
 
     public ChannelUser DeleteChannelUser(long id)
     {
-        var channeluser = _unitOfWork.ChannelUser.GetById(id);
-        var result = _unitOfWork.ChannelUser.Remove(channeluser);
+        var channeluser = _unitOfWork.ChannelUsers.GetById(id);
+        var result = _unitOfWork.ChannelUsers.Remove(channeluser);
         _unitOfWork.Save();
         return result;
     }
 
     public IEnumerable<ChannelUser> GetChannelUserByFilter(Expression<Func<ChannelUser, bool>> filter)
     {
-        return _unitOfWork.ChannelUser.Get(filter, includeProperties: "ChannelUserUsers,TaskChannelUsers");
+        return _unitOfWork.ChannelUsers.Get(filter, includeProperties: "ChannelUserUsers,TaskChannelUsers");
     }
 
     public IEnumerable<ChannelUser> GetAllChannelUser()
     {
         CreateChannelUser(new ChannelUser());
-        return _unitOfWork.ChannelUser.Get();
+        return _unitOfWork.ChannelUsers.Get();
     }
 }

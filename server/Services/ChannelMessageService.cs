@@ -18,7 +18,7 @@ public class ChannelMessageService : IChannelMessageService
 
     public ChannelMessage CreateChannelMessage(ChannelMessage ChannelMessage)
     {
-        var result = _unitOfWork.ChannelMessage.Add(ChannelMessage);
+        var result = _unitOfWork.ChannelMessages.Add(ChannelMessage);
         _unitOfWork.Save();
         return result;
     }
@@ -26,26 +26,26 @@ public class ChannelMessageService : IChannelMessageService
     public IEnumerable<ChannelMessage> GetAllChannelMessage()
     {
         CreateChannelMessage(new ChannelMessage());
-        return _unitOfWork.ChannelMessage.Get();
+        return _unitOfWork.ChannelMessages.Get();
     }
 
     public ChannelMessage DeleteChannelMessage(long id)
     {
-        var ChannelMessage = _unitOfWork.ChannelMessage.GetById(id);
-        var result = _unitOfWork.ChannelMessage.Remove(ChannelMessage);
+        var ChannelMessage = _unitOfWork.ChannelMessages.GetById(id);
+        var result = _unitOfWork.ChannelMessages.Remove(ChannelMessage);
         _unitOfWork.Save();
         return result;
     }
 
     public ChannelMessage UpdateChannelMessage(ChannelMessage ChannelMessage)
     {
-        var result = _unitOfWork.ChannelMessage.Update(ChannelMessage);
+        var result = _unitOfWork.ChannelMessages.Update(ChannelMessage);
         return result;
     }
 
     public ChannelMessage PatchChannelMessage(long id,[FromBody] JsonPatchDocument<ChannelMessage> ChannelMessage)
     {
-        var channelmessage = _unitOfWork.ChannelMessage.GetById(id);
+        var channelmessage = _unitOfWork.ChannelMessages.GetById(id);
         if (channelmessage == null) throw new Exception("ChannelMessage not found");
 
         ChannelMessage.ApplyTo(channelmessage);
@@ -58,12 +58,12 @@ public class ChannelMessageService : IChannelMessageService
 
     public ChannelMessage GetChannelMessage(long id)
     {
-        return _unitOfWork.ChannelMessage.GetById(id);
+        return _unitOfWork.ChannelMessages.GetById(id);
     }
 
     public IEnumerable<ChannelMessage> GetChannelMessageByFilter(Expression<Func<ChannelMessage, bool>> filter)
     {
-        return _unitOfWork.ChannelMessage.Get(filter, includeProperties: "Channel");
+        return _unitOfWork.ChannelMessages.Get(filter, includeProperties: "Channel");
     }
 
     

@@ -16,14 +16,14 @@ public class TaskController: Controller
     public TaskController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        Users = _unitOfWork.User;
+        Users = _unitOfWork.Users;
     }
     
     [HttpGet]
     public ActionResult GetTasks()
     {
         Guid userId = new Guid(AuthController.GetUserId(HttpContext));
-        var taskList = _unitOfWork.Task.Get(t =>
+        var taskList = _unitOfWork.Tasks.Get(t =>
             t.CreatedBy == userId ||
             t.TaskUsers.Any(tu => tu.UserId == userId) ||
             t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == userId)));
@@ -36,7 +36,7 @@ public class TaskController: Controller
     {
         var id = AuthController.GetUserId(HttpContext);
         taskEntity.CreatedBy = new Guid(id);
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Add(taskEntity));
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Add(taskEntity));
     }
 
     [HttpPut]
@@ -58,12 +58,12 @@ public class TaskController: Controller
         taskEntity.TaskDepartments = null;
         taskEntity.TaskUsers = null;
         taskEntity.TaskComments = null;
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Update(taskEntity));
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Update(taskEntity));
     }
 
     public TaskEntity GetTask(long id){
         var iduser = new Guid(AuthController.GetUserId(HttpContext));
-        var taskList = _unitOfWork.Task.Get(t =>
+        var taskList = _unitOfWork.Tasks.Get(t =>
             t.CreatedBy == iduser ||
             t.TaskUsers.Any(tu => tu.UserId == iduser) ||
             t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == iduser)));
@@ -80,6 +80,6 @@ public class TaskController: Controller
         if(taskEntity.CreatedBy != new Guid(AuthController.GetUserId(HttpContext))){
             return new ErrorResponse("You can't delete this");
         }
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Task.Remove(taskEntity));
+        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Remove(taskEntity));
     }
 }

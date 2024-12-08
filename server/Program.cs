@@ -163,14 +163,10 @@ builder.Services.AddSingleton(supabase);
 
 builder.Services.AddScoped<DefaultRequirePermissionFilter>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUnitNotification, UnitNotification>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
 builder.Services.AddScoped<IRepository<TaskHistory>, TaskHistoryRepository>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
-builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IChannelUserService, ChannelUserService>();
 builder.Services.AddScoped<IUserMessageService, UserMessageService>();
 builder.Services.AddScoped<IChannelMessageService, ChannelMessageService>();

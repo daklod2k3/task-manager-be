@@ -17,26 +17,26 @@ public class UserMessageService : IUserMessageService
 
     public UserMessage CreatUserMessage(UserMessage usermessage)
     {
-        var result = _unitOfWork.UserMessage.Add(usermessage);
+        var result = _unitOfWork.UserMessages.Add(usermessage);
         _unitOfWork.Save();
         return result;
     }
 
     public UserMessage GetUserMessage(long id)
     {
-        return _unitOfWork.UserMessage.GetById(id);
+        return _unitOfWork.UserMessages.GetById(id);
     }
 
     public UserMessage UpdateUserMessage(UserMessage usermessage)
     {
-        var result = _unitOfWork.UserMessage.Update(usermessage);
+        var result = _unitOfWork.UserMessages.Update(usermessage);
         _unitOfWork.Save();
         return result;
     }
 
     public UserMessage UpdateUserMessagePatch(long id, [FromBody] JsonPatchDocument<UserMessage> patchDoc)
     {
-        var usermessage = _unitOfWork.UserMessage.GetById(id);
+        var usermessage = _unitOfWork.UserMessages.GetById(id);
         if (usermessage == null) throw new Exception("not found usermessage");
 
         patchDoc.ApplyTo(usermessage);
@@ -48,20 +48,20 @@ public class UserMessageService : IUserMessageService
 
     public UserMessage DeleteUserMessage(long id)
     {
-        var usermessage = _unitOfWork.UserMessage.GetById(id);
-        var result = _unitOfWork.UserMessage.Remove(usermessage);
+        var usermessage = _unitOfWork.UserMessages.GetById(id);
+        var result = _unitOfWork.UserMessages.Remove(usermessage);
         _unitOfWork.Save();
         return result;
     }
 
     public IEnumerable<UserMessage> GetUserMessageByFilter(Expression<Func<UserMessage, bool>> filter)
     {
-        return _unitOfWork.UserMessage.Get(filter, includeProperties: "From,To");
+        return _unitOfWork.UserMessages.Get(filter, includeProperties: "From,To");
     }
 
     public IEnumerable<UserMessage> GetAllUserMessage()
     {
         CreatUserMessage(new UserMessage());
-        return _unitOfWork.UserMessage.Get();
+        return _unitOfWork.UserMessages.Get();
     }
 }

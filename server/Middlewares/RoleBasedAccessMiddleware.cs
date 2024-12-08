@@ -27,7 +27,7 @@ public class RoleBasedAccessMiddleware
     public async Task InvokeAsync(HttpContext context,SupabaseContext db)
     {
         _unitOfWork = new UnitOfWork(db);
-        // var claims = context.User.Claims.Select(c => new { c.Type, c.Value });
+        // var claims = context.Users.Claims.Select(c => new { c.Type, c.Value });
         // foreach (var claim in claims)
         //     {
         //         Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
@@ -68,12 +68,12 @@ public class RoleBasedAccessMiddleware
         {
             user_id = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;  // Fallback to 'nameidentifier'
         }
-        //Console.WriteLine(_unitOfWork.User);
-        long? role_id= _unitOfWork.User.GetById(user_id,"Role")?.RoleId;
+        //Console.WriteLine(_unitOfWork.Users);
+        long? role_id= _unitOfWork.Users.GetById(user_id,"Role")?.RoleId;
         
         
 
-        var role_name = _unitOfWork.Role.GetById(role_id).Name;
+        var role_name = _unitOfWork.Roles.GetById(role_id).Name;
         Console.WriteLine(role_name);
         // Define the roles required for this request (you can get this from route data, metadata, etc.)
         var requiredRoles = GetRequiredRolesForRequest(context); // Custom logic to get required roles
@@ -91,13 +91,13 @@ public class RoleBasedAccessMiddleware
             return;
         }
 
-        //var perm = _unitOfWork.Role.GetById(role_id).Permissions;
+        //var perm = _unitOfWork.Roles.GetById(role_id).Permissions;
         var endpoint = context.Request.Path.Value;
         var method = context.Request.Method;
         Console.WriteLine($"Endpoint: {endpoint}, Method: {method}");
         //Console.WriteLine($"Permissions: {string.Join(", ", perm)}");
         Console.WriteLine(role_id);
-        var perms = _unitOfWork.Permission.GetQuery(p => p.RoleId == role_id,"Resource");
+        var perms = _unitOfWork.Permissions.GetQuery(p => p.RoleId == role_id,"Resource");
         //var resource = _unitOfWork.Resource.GetById(perms.First().ResourceId);
         
         if(perms.Count() == 0){
@@ -138,7 +138,7 @@ public class RoleBasedAccessMiddleware
 
     private List<string?> GetRequiredRolesForRequest(HttpContext context)
     {
-        var roles = _unitOfWork.Role.Get();
+        var roles = _unitOfWork.Roles.Get();
         
         return roles.Select(r => r.Name).ToList();
     }

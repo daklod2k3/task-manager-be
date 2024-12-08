@@ -17,26 +17,26 @@ public class ResourceService : IResourceService
 
     public Resource CreateResource(Resource resource)
     {
-        var result = _unitOfWork.Resource.Add(resource);
+        var result = _unitOfWork.Resources.Add(resource);
         _unitOfWork.Save();
         return result;
     }
 
     public Resource GetResource(long id)
     {
-        return _unitOfWork.Resource.GetById(id);
+        return _unitOfWork.Resources.GetById(id);
     }
 
     public Resource UpdateResource(Resource resource)
     {
-        var result = _unitOfWork.Resource.Update(resource);
+        var result = _unitOfWork.Resources.Update(resource);
         _unitOfWork.Save();
         return result;
     }
 
     public Resource UpdateResource(long id, [FromBody] JsonPatchDocument<Resource> patchDoc)
     {
-        var resource = _unitOfWork.Resource.GetById(id);
+        var resource = _unitOfWork.Resources.GetById(id);
         if (resource == null) throw new Exception("not found resource");
 
         patchDoc.ApplyTo(resource);
@@ -48,8 +48,8 @@ public class ResourceService : IResourceService
 
     public Resource DeleteResource(long id)
     {
-        var resource = _unitOfWork.Resource.GetById(id);
-        var result = _unitOfWork.Resource.Remove(resource);
+        var resource = _unitOfWork.Resources.GetById(id);
+        var result = _unitOfWork.Resources.Remove(resource);
         _unitOfWork.Save();
         return result;
     }
@@ -57,6 +57,6 @@ public class ResourceService : IResourceService
     public IEnumerable<Resource> GetAllResource()
     {
         CreateResource(new Resource());
-        return _unitOfWork.Resource.Get();
+        return _unitOfWork.Resources.Get();
     }
 }
