@@ -97,17 +97,6 @@ public class ResourceController : Controller
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        if(includes != "")
-        {
-            {
-                var query = _repository.GetQuery(
-                    CompositeFilter<Resource>.ApplyFilter(filter)
-                )
-                .Include(d => d.Permissions);
-
-                return new SuccessResponse<IEnumerable<Resource>>(query.ToList());
-            }
-        }
 
         return new SuccessResponse<IEnumerable<Resource>>(
             _repository.Get(CompositeFilter<Resource>.ApplyFilter(filter), includeProperties: includes));

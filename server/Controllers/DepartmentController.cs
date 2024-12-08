@@ -36,9 +36,9 @@ public class DepartmentController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Department> patchDoc)
+    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
     {
-        return new SuccessResponse<Department>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<Department>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]

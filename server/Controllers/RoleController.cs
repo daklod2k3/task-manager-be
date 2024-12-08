@@ -98,18 +98,6 @@ public class RoleController : Controller
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
 
-        if (includes != "")
-        {
-            {
-                var query = _repository.GetQuery(
-                    CompositeFilter<Role>.ApplyFilter(filter)
-                )
-                .Include(d => d.Permissions);
-
-                return new SuccessResponse<IEnumerable<Role>>(query.ToList());
-            }
-        }
-
         return new SuccessResponse<IEnumerable<Role>>(
             _repository.Get(CompositeFilter<Role>.ApplyFilter(filter), includeProperties: includes));
     }
