@@ -81,11 +81,12 @@ public class MessageController : Controller
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult GetId(Guid id, [FromQuery(Name = "filter")] string? filterString, string? orderBy, int? page,
+    public ActionResult GetId(Guid id, [FromQuery(Name = "filter")] string? filterString, int? page,
         int? pageSize, string? includes = "")
     {
         var user_id = new Guid(AuthController.GetUserId(HttpContext));
         return new SuccessResponse<IEnumerable<UserMessage>>(_repository
-            .GetDirectMessages(user_id, id, _repository.GetQuery(null, includes, orderBy, page, pageSize)).ToList());
+            .GetDirectMessages(user_id, id, _repository.GetQuery(null, includes, "", page, pageSize))
+            .ToList());
     }
 }

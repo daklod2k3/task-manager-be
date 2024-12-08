@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using server.Context;
 using server.Entities;
-using server.Helpers;
 using server.Interfaces;
 
 namespace server.Repository;
@@ -17,10 +16,8 @@ public class ChannelRepository : Repository<Channel>, IChannelRepository
         string? orderBy = null,
         int? page = null, int? pageSize = null)
     {
-        var query = dbSet.GetInclude(includeProperties);
-
+        var query = GetQuery(filter, includeProperties, orderBy, page, pageSize);
         return query.Where(c => c.ChannelUsers.Any(u => u.UserId == id)
-                                || c.Department.DepartmentUsers.Any(u => u.UserId == id))
-            .Intersect(GetQuery(filter, includeProperties, orderBy, page, pageSize));
+                                || c.Department.DepartmentUsers.Any(u => u.UserId == id));
     }
 }

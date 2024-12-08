@@ -125,6 +125,7 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.FileId).HasColumnName("file_id");
+            entity.Property(e => e.Content).HasColumnName("content");
 
             entity.HasOne(d => d.Channel).WithMany(p => p.ChannelMessages)
                 .HasForeignKey(d => d.ChannelId)
@@ -316,6 +317,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.Avt).HasColumnName("avt");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Name).HasColumnName("name");
