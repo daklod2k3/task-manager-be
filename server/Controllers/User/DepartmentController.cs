@@ -11,21 +11,22 @@ public class DepartmentController: Controller
 {
 
     private readonly IRepository<Profile> Users;
-    private IUnitOfWork _unitOfWork;
+    private readonly IRepository<DepartmentUser> DepartmentUsers;
+    private readonly IRepository<Department> _repository;
     
     public DepartmentController(IUnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork;
-        Users = _unitOfWork.Users;
+        _repository = unitOfWork.Departments;
+        Users = unitOfWork.Users;
+        DepartmentUsers = unitOfWork.DepartmentUsers;
     }
     
     [HttpGet]
     public ActionResult GetDepartments()
     {
         Guid userId = new Guid(AuthController.GetUserId(HttpContext));
-        var departmentList = _unitOfWork.Departments.Get(t =>
+        var departmentList = _repository.Get(t =>
             t.DepartmentUsers.Any(du => du.UserId == userId));
-       
         return new SuccessResponse<IEnumerable<Department>>(departmentList);
     }
 
@@ -33,8 +34,10 @@ public class DepartmentController: Controller
     public ActionResult CreateDepartment(Department department)
     {
         var id = AuthController.GetUserId(HttpContext);
-        var d = _unitOfWork.Departments.Add(department);
-        _unitOfWork.DepartmentUsers.Add(new DepartmentUser() { DepartmentId = d.Id, UserId = new Guid(id), OwnerType = EDepartmentOwnerType.Owner });
+        var d = _repository.Add(department);
+        DepartmentUsers.Add(new DepartmentUser() { DepartmentId = d.Id, UserId = new Guid(id), OwnerType = EDepartmentOwnerType.Owner });
+        _repository.Save();
+        DepartmentUsers.Save();
         return new SuccessResponse<Department>(d);
     }
 
@@ -42,31 +45,37 @@ public class DepartmentController: Controller
     public ActionResult UpdateDepartment(Department department)
     {
         var id = AuthController.GetUserId(HttpContext);
-        if(_unitOfWork.Departments.GetById(department.Id) == null) return new ErrorResponse("Department not found");
+        if(_repository.GetById(department.Id) == null) return new ErrorResponse("Department not found");
         if(!department.DepartmentUsers.Any(du => du.UserId == new Guid(id) && du.OwnerType == EDepartmentOwnerType.Owner))
             return new ErrorResponse("You can't update this Department");
-        return new SuccessResponse<Department>(_unitOfWork.Departments.Update(department));
+        var result = _repository.Update(department);
+        _repository.Save();
+        return new SuccessResponse<Department>(result);
     }
 
     [HttpPatch("{id}")]
     public ActionResult UpdateDepartment(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
     {
         var iduser = AuthController.GetUserId(HttpContext);
-        var department = _unitOfWork.Departments.GetById(id);
-        if(_unitOfWork.Departments.GetById(department.Id) == null) return new ErrorResponse("Department not found");
+        var department = _repository.GetById(id);
+        if(_repository.GetById(department.Id) == null) return new ErrorResponse("Department not found");
         if(!department.DepartmentUsers.Any(du => du.UserId == new Guid(iduser) && du.OwnerType == EDepartmentOwnerType.Owner))
             return new ErrorResponse("You can't update this Department");
-        return new SuccessResponse<Department>(_unitOfWork.Departments.UpdatePatch(id.ToString(), patchDoc));
+        var result = _repository.UpdatePatch(id, patchDoc);
+        _repository.Save();
+        return new SuccessResponse<Department>(result);
     }
 
     [HttpDelete("{id}")]
     public ActionResult DeleteTask(long id)
     {
         var iduser = AuthController.GetUserId(HttpContext);
-        var department = _unitOfWork.Departments.GetById(id);
-        if(_unitOfWork.Departments.GetById(department.Id) == null) return new ErrorResponse("Department not found");
+        var department = _repository.GetById(id);
+        if(_repository.GetById(department.Id) == null) return new ErrorResponse("Department not found");
         if(!department.DepartmentUsers.Any(du => du.UserId == new Guid(iduser) && du.OwnerType == EDepartmentOwnerType.Owner))
             return new ErrorResponse("You can't update this Department");
-        return new SuccessResponse<Department>(_unitOfWork.Departments.Remove(department));
+        var result = _repository.Remove(department);
+        _repository.Save();
+        return new SuccessResponse<Department>(result);
     }
 }

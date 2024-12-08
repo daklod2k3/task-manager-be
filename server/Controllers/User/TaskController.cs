@@ -11,19 +11,19 @@ public class TaskController: Controller
 {
 
     private readonly IRepository<Profile> Users;
-    private IUnitOfWork _unitOfWork;
+    private readonly IRepository<TaskEntity> _repository;
     
     public TaskController(IUnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork;
-        Users = _unitOfWork.Users;
+        _repository = unitOfWork.Tasks;
+        Users = unitOfWork.Users;
     }
     
     [HttpGet]
     public ActionResult GetTasks()
     {
         Guid userId = new Guid(AuthController.GetUserId(HttpContext));
-        var taskList = _unitOfWork.Tasks.Get(t =>
+        var taskList = _repository.Get(t =>
             t.CreatedBy == userId ||
             t.TaskUsers.Any(tu => tu.UserId == userId) ||
             t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == userId)));
@@ -36,7 +36,9 @@ public class TaskController: Controller
     {
         var id = AuthController.GetUserId(HttpContext);
         taskEntity.CreatedBy = new Guid(id);
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Add(taskEntity));
+        var result = _repository.Add(taskEntity);
+        _repository.Save();
+        return new SuccessResponse<TaskEntity>(result);
     }
 
     [HttpPut]
@@ -58,12 +60,14 @@ public class TaskController: Controller
         taskEntity.TaskDepartments = null;
         taskEntity.TaskUsers = null;
         taskEntity.TaskComments = null;
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Update(taskEntity));
+        var result = _repository.Update(taskEntity);
+        _repository.Save();
+        return new SuccessResponse<TaskEntity>(result);
     }
 
     public TaskEntity GetTask(long id){
         var iduser = new Guid(AuthController.GetUserId(HttpContext));
-        var taskList = _unitOfWork.Tasks.Get(t =>
+        var taskList = _repository.Get(t =>
             t.CreatedBy == iduser ||
             t.TaskUsers.Any(tu => tu.UserId == iduser) ||
             t.TaskDepartments.Any(td => td.Department.DepartmentUsers.Any(du => du.UserId == iduser)));
@@ -80,6 +84,8 @@ public class TaskController: Controller
         if(taskEntity.CreatedBy != new Guid(AuthController.GetUserId(HttpContext))){
             return new ErrorResponse("You can't delete this");
         }
-        return new SuccessResponse<TaskEntity>(_unitOfWork.Tasks.Remove(taskEntity));
+        var result = _repository.Remove(taskEntity);
+        _repository.Save();
+        return new SuccessResponse<TaskEntity>(result);
     }
 }
