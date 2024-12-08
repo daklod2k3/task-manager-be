@@ -316,6 +316,7 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.Avt).HasColumnName("avt");
             entity.Property(e => e.Bio).HasColumnName("bio");
             entity.Property(e => e.Name).HasColumnName("name");
