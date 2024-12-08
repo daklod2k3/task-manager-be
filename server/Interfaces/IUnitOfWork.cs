@@ -19,7 +19,7 @@ public interface IUnitOfWork
     ITaskUserRepository TaskUsers { get; }
     IUserMessageRepository UserMessages { get; }
     IUserRepository Users { get; }
-    IRepository<Resource> Resources { get; }
-    IRepository<Permission> Permissions { get; }
+    IResourceRepository Resources { get; }
+    IPermissionRepository Permissions { get; }
     int Save();
 }
