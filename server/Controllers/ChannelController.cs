@@ -38,7 +38,7 @@ public class ChannelController : Controller
     [HttpPatch("{id}")]
     public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Channel> patchDoc)
     {
-        return new SuccessResponse<Channel>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<Channel>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]

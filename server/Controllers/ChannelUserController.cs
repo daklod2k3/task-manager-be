@@ -37,7 +37,7 @@ public class ChannelUserController : Controller
     [HttpPatch("{id}")]
     public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<ChannelUser> patchDoc)
     {
-        return new SuccessResponse<ChannelUser>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<ChannelUser>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]

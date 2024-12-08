@@ -57,7 +57,7 @@ public class ChannelController : Controller
     {
         try
         {
-            return new SuccessResponse<Channel>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<Channel>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {

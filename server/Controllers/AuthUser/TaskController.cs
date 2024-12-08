@@ -55,7 +55,7 @@ public class TaskController : Controller
     [HttpPatch("{id}")]
     public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
     {
-        return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]

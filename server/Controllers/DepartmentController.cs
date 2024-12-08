@@ -35,9 +35,9 @@ public class DepartmentController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Department> patchDoc)
+    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
     {
-        return new SuccessResponse<Department>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<Department>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
@@ -65,7 +65,7 @@ public class DepartmentController : Controller
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<Department>>(
-            _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includeProperties: includes));
+            _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]

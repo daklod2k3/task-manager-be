@@ -37,7 +37,7 @@ public class UserController : Controller
     [HttpPatch("{id}")]
     public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Profile> patchDoc)
     {
-        return new SuccessResponse<Profile>(_repository.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<Profile>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
