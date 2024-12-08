@@ -20,11 +20,14 @@ public class UserMessageRepository : Repository<UserMessage>, IUserMessageReposi
     {
         var query = source ?? dbSet;
 
-        return query.GetInclude("From,To").GroupBy(m => new
-        {
-            MinId = m.FromId < m.ToId ? m.FromId : m.ToId,
-            MaxId = m.FromId > m.ToId ? m.ToId : m.FromId
-        }).Select(g => g.OrderBy(m => m.CreatedAt).First());
+        return query.GetInclude("From,To")
+            .Where(m => m.FromId == userId || m.ToId == userId)
+            .GroupBy(m => new
+            {
+                MinId = m.FromId < m.ToId ? m.FromId : m.ToId,
+                MaxId = m.FromId > m.ToId ? m.ToId : m.FromId
+            }).Select(g => g.OrderBy(m => m.CreatedAt)
+                .First());
     }
 
     public IQueryable<UserMessage> GetDirectMessages(Guid userId, Guid toId, IQueryable<UserMessage> source = null)
