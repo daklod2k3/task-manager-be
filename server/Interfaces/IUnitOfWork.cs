@@ -17,5 +17,7 @@ public interface IUnitOfWork
     ITaskUserRepository TaskUsers { get; }
     IUserMessageRepository UserMessages { get; }
     IUserRepository Users { get; }
+    IPermissionRepository Permissions { get; }
+    IResourceRepository Resources { get; }
     int Save();
 }

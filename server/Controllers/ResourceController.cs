@@ -12,88 +12,59 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class ResourceController : Controller
 {
-    private readonly IResourceService _resourceService;
+    private readonly IRepository<Resource> _repository;
 
-    public ResourceController(IResourceService resourceService)
+    public ResourceController(IUnitOfWork unitOfWork)
     {
-        _resourceService = resourceService;
+        _repository = unitOfWork.Resources;
     }
 
     [HttpPost]
     public ActionResult CreateResource(Resource resource)
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_resourceService.CreateResource(resource));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Resource is not create");
-        }
+        var entity = _repository.Add(resource);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
 
     [HttpPut]
     public ActionResult UpdateResource(Resource resource)
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_resourceService.UpdateResource(resource));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Resource is not update");
-        }
+        var entity = _repository.Update(resource);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
 
     [HttpPatch("{id}")]
     public ActionResult UpdateResource(long id, [FromBody] JsonPatchDocument<Resource> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_resourceService.UpdateResource(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("resource is not update");
-        }
+        return new SuccessResponse<Resource>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
     public ActionResult DeleteResource(long id)
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_resourceService.DeleteResource(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("resource is not delete");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Resource>> Get()
+    public ActionResult<IEnumerable<Resource>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
     {
-        return new SuccessResponse<IEnumerable<Resource>>(_resourceService.GetAllResource());
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<Resource>>(
+            _repository.Get(CompositeFilter<Resource>.ApplyFilter(filter), includeProperties: includes));
         
     }
 
     [HttpGet]
     [Route("{resourceId}")]
-    public ActionResult<IEnumerable<Resource>> GetResourceById(long resourceId)
+    public ActionResult<IEnumerable<Resource>> GetResourceById(long resourceId, string? includes = "")
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_resourceService.GetResource(resourceId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("resource is not get");
-        }
+        return new SuccessResponse<Resource>(_repository.GetById(resourceId.ToString(), includes));
     }
 }

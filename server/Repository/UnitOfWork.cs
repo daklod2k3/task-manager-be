@@ -25,6 +25,8 @@ public class UnitOfWork : IUnitOfWork
         Notifications = new NotificationRepository(_context);
         UserMessages = new UserMessageRepository(_context);
         TaskHistories = new TaskHistoryRepository(_context);
+        Permissions = new PermissionRepository(_context);
+        Resources = new ResourceRepository(_context);
     }
 
 
@@ -43,6 +45,8 @@ public class UnitOfWork : IUnitOfWork
     public ITaskUserRepository TaskUsers { get; }
     public IUserMessageRepository UserMessages { get; }
     public IUserRepository Users { get; }
+    public IPermissionRepository Permissions { get; }
+    public IResourceRepository Resources { get; }
 
     public int Save()
     {

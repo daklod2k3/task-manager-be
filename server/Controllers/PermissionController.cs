@@ -13,96 +13,59 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class PermissionController : Controller
 {
-    private readonly IPermissionService _permissionService;
+    private readonly IRepository<Permission> _repository;
 
-    public PermissionController(IPermissionService permissionService)
+    public PermissionController(IUnitOfWork unitOfWork)
     {
-        _permissionService = permissionService;
+        _repository = unitOfWork.Permissions;
     }
 
     [HttpPost]
     public ActionResult CreatePermission(Permission permission)
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_permissionService.CreatePermission(permission));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Permission is not create");
-        }
+        var entity = _repository.Add(permission);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
 
     [HttpPut]
     public ActionResult UpdatePermission(Permission permission)
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_permissionService.UpdatePermission(permission));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Permission is not update");
-        }
+        var entity = _repository.Update(permission);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
 
     [HttpPatch("{id}")]
     public ActionResult UpdatePermission(long id, [FromBody] JsonPatchDocument<Permission> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_permissionService.UpdatePermission(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("permission is not update");
-        }
+        return new SuccessResponse<Permission>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
     public ActionResult DeletePermission(long id)
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_permissionService.DeletePermission(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("permission is not delete");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Permission>> Get(string? filterString)
+    public ActionResult<IEnumerable<Permission>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
     {
-        Expression<Func<Permission, bool>>? filter = null;
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-        {
-            
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-            filter = CompositeFilter<Permission>.ApplyFilter(filterResult);
-        }
-        return new SuccessResponse<IEnumerable<Permission>>(_permissionService.GetPermissionByFilter(filter));
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<Permission>>(
+            _repository.Get(CompositeFilter<Permission>.ApplyFilter(filter), includeProperties: includes));
         
     }
 
     [HttpGet]
     [Route("{permissionId}")]
-    public ActionResult<IEnumerable<Permission>> GetPermissionById(long permissionId)
+    public ActionResult<IEnumerable<Permission>> GetPermissionById(long permissionId, string? includes = "")
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_permissionService.GetPermission(permissionId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("permission is not get");
-        }
+        return new SuccessResponse<Permission>(_repository.GetById(permissionId.ToString(), includes));
     }
 }
