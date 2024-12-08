@@ -11,6 +11,7 @@ public class ChannelMessage
     public long? FileId { get; set; }
 
     public long? ChannelId { get; set; }
+    public string Content { get; set; }
 
     public virtual Channel? Channel { get; set; }
 

@@ -1,4 +1,6 @@
-﻿namespace server.Interfaces;
+﻿using server.Entities;
+
+namespace server.Interfaces;
 
 public interface IUnitOfWork
 {
@@ -17,5 +19,7 @@ public interface IUnitOfWork
     ITaskUserRepository TaskUsers { get; }
     IUserMessageRepository UserMessages { get; }
     IUserRepository Users { get; }
+    IRepository<Resource> Resources { get; }
+    IRepository<Permission> Permissions { get; }
     int Save();
 }

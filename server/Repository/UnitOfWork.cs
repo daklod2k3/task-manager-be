@@ -1,4 +1,5 @@
 ﻿using server.Context;
+using server.Entities;
 using server.Interfaces;
 
 namespace server.Repository;
@@ -25,6 +26,8 @@ public class UnitOfWork : IUnitOfWork
         Notifications = new NotificationRepository(_context);
         UserMessages = new UserMessageRepository(_context);
         TaskHistories = new TaskHistoryRepository(_context);
+        Resources = new Repository<Resource>(_context);
+        Permissions = new Repository<Permission>(_context);
     }
 
 
@@ -43,6 +46,8 @@ public class UnitOfWork : IUnitOfWork
     public ITaskUserRepository TaskUsers { get; }
     public IUserMessageRepository UserMessages { get; }
     public IUserRepository Users { get; }
+    public IRepository<Resource> Resources { get; }
+    public IRepository<Permission> Permissions { get; }
 
     public int Save()
     {

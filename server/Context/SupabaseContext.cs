@@ -125,6 +125,7 @@ public partial class SupabaseContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.FileId).HasColumnName("file_id");
+            entity.Property(e => e.Content).HasColumnName("content");
 
             entity.HasOne(d => d.Channel).WithMany(p => p.ChannelMessages)
                 .HasForeignKey(d => d.ChannelId)

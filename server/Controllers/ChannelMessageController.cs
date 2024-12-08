@@ -37,7 +37,7 @@ public class ChannelMessageController : Controller
     [HttpPatch("{id}")]
     public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<ChannelMessage> patchDoc)
     {
-        return new SuccessResponse<ChannelMessage>(_repository.UpdatePatch(id, patchDoc));
+        return new SuccessResponse<ChannelMessage>(_repository.UpdatePatch(id.ToString(), patchDoc));
     }
 
     [HttpDelete("{id}")]
@@ -65,7 +65,7 @@ public class ChannelMessageController : Controller
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<ChannelMessage>>(
-            _repository.Get(CompositeFilter<ChannelMessage>.ApplyFilter(filter), includeProperties: includes));
+            _repository.Get(CompositeFilter<ChannelMessage>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]
