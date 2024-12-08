@@ -124,4 +124,13 @@ public class TaskController : Controller
             return new ErrorResponse(ex.ToString());
         }
     }
+
+    [HttpGet("replace/{property}/{value}")]
+    public IActionResult ReplaceProperty([FromQuery] long id, [FromRoute] string property, [FromRoute] string value)
+    {
+        var jsonPatchString = "[{\"op\":\"replace\",\"path\":\"" + property + "\",\"value\":\"" + value + "\"}]";
+        var json = JsonConvert.DeserializeObject<JsonPatchDocument<TaskEntity>>(jsonPatchString);
+        var task = _repository.UpdatePatch(id, json);
+        return new SuccessResponse<TaskEntity>(task);
+    }
 }

@@ -31,6 +31,7 @@ public class UserMessageRepository : Repository<UserMessage>, IUserMessageReposi
     {
         var query = source ?? dbSet;
         return query.GetInclude("From.Role,To.Role")
-            .Where(m => (m.FromId == userId && m.ToId == toId) || (m.ToId == userId && m.FromId == toId));
+            .Where(m => (m.FromId == userId && m.ToId == toId) || (m.ToId == userId && m.FromId == toId))
+            .GetOrderBy();
     }
 }
