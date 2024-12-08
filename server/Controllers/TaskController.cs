@@ -57,7 +57,7 @@ public class TaskController : Controller
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {

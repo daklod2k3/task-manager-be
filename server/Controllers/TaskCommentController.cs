@@ -57,7 +57,7 @@ public class TaskCommentController : Controller
     {
         try
         {
-            return new SuccessResponse<TaskComment>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<TaskComment>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {

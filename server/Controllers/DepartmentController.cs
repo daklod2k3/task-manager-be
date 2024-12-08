@@ -82,7 +82,7 @@ int? pageItem, string? includes = "")
         }
 
         return new SuccessResponse<IEnumerable<Department>>(
-            _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includeProperties: includes));
+            _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]

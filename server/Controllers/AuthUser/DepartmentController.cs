@@ -58,7 +58,7 @@ public class DepartmentController : Controller
         if (!department.DepartmentUsers.Any(du =>
                 du.UserId == new Guid(iduser) && du.OwnerType == EDepartmentOwnerType.Owner))
             return new ErrorResponse("You can't update this Department");
-        return new SuccessResponse<Department>(_unitOfWork.Departments.UpdatePatch(id.ToString(), patchDoc));
+        return new SuccessResponse<Department>(_unitOfWork.Departments.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]

@@ -55,7 +55,7 @@ public class TaskUserController : Controller
     {
         try
         {
-            return new SuccessResponse<TaskUser>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<TaskUser>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {
