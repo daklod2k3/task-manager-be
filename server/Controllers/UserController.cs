@@ -65,13 +65,13 @@ public class UserController : Controller
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<Profile>>(
-            _repository.Get(CompositeFilter<Profile>.ApplyFilter(filter), includeProperties: includes));
+            _repository.Get(CompositeFilter<Profile>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult GetId(long id, string? includes = "")
+    public ActionResult GetId(Guid id, string? includes = "")
     {
-        return new SuccessResponse<Profile>(_repository.GetById(id.ToString(), includes));
+        return new SuccessResponse<Profile>(_repository.GetById(id, includes));
     }
 }
