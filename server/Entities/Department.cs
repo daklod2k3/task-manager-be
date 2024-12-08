@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-
 namespace server.Entities;
 
 public class Department
@@ -15,5 +14,10 @@ public class Department
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
 
     public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
-    [NotMapped] public double CompleteTask => TaskDepartments?.Count(td => td.Task != null && td.Task.Status == ETaskStatus.Done) ?? 0;
+    [NotMapped] public string DepartmentOwner =>
+        DepartmentUsers?.FirstOrDefault(du => du.OwnerType == EDepartmentOwnerType.Owner)?.User?.Name ?? "no owner";
+    [NotMapped] public virtual double CompleteTask => (TaskDepartments != null && TaskDepartments.Any())
+        ? (TaskDepartments.Count(td => td.Task != null && td.Task.Status == ETaskStatus.Done) / (double)TaskDepartments.Count()) * 100
+        : 0;
+
 }

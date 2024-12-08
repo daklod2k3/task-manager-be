@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace server.Controllers;
 
@@ -60,10 +61,26 @@ public class DepartmentController : Controller
 
     [HttpGet]
     public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
-        int? pageItem, string? includes = "")
+int? pageItem, string? includes = "")
     {
         var filter = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+
+        if (!string.IsNullOrEmpty(filterString))
+            filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+
+        if (includes != "")
+        {
+            var query = _repository.GetQuery(
+                CompositeFilter<Department>.ApplyFilter(filter)
+            )
+            .Include(d => d.DepartmentUsers)
+            .ThenInclude(td => td.User)
+            .Include(d => d.TaskDepartments)
+            .ThenInclude(td => td.Task);
+
+            return new SuccessResponse<IEnumerable<Department>>(query.ToList());
+        }
+
         return new SuccessResponse<IEnumerable<Department>>(
             _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includeProperties: includes));
     }
@@ -72,6 +89,18 @@ public class DepartmentController : Controller
     [Route("{id}")]
     public ActionResult GetId(long id, string? includes = "")
     {
+        if (includes != "")
+        {
+            var query = _repository.GetQuery(
+                filter: d => d.Id == id
+            )
+            .Include(d => d.DepartmentUsers)
+            .ThenInclude(du => du.User)
+            .Include(d => d.TaskDepartments)
+            .ThenInclude(td => td.Task);
+
+            return new SuccessResponse<IEnumerable<Department>>(query);
+        }
         return new SuccessResponse<Department>(_repository.GetById(id.ToString(), includes));
     }
 }

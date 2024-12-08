@@ -15,7 +15,7 @@ public class PermissionController : Controller
 
     public PermissionController(IUnitOfWork unitOfWork)
     {
-        _repository = unitOfWork.Permission;
+        //_repository = unitOfWork.Permission;
     }
 
     [HttpPost]

@@ -17,5 +17,6 @@ public interface IUnitOfWork
     ITaskUserRepository TaskUsers { get; }
     IUserMessageRepository UserMessages { get; }
     IUserRepository Users { get; }
+    IResourceRepository Resources { get; }
     int Save();
 }

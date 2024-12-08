@@ -1,4 +1,5 @@
 ﻿using server.Context;
+using server.Entities;
 using server.Interfaces;
 
 namespace server.Repository;
@@ -17,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
         Departments = new DepartmentRepository(_context);
         DepartmentUsers = new DepartmentUserRepository(_context);
         Roles = new RoleRepository(_context);
+        Resources = new ResourceRepository(_context);
         TaskComments = new TaskCommentRepository(_context);
         Files = new FileRepository(_context);
         Channels = new ChannelRepository(_context);
@@ -43,6 +45,8 @@ public class UnitOfWork : IUnitOfWork
     public ITaskUserRepository TaskUsers { get; }
     public IUserMessageRepository UserMessages { get; }
     public IUserRepository Users { get; }
+
+    public IResourceRepository Resources { get; }
 
     public int Save()
     {
