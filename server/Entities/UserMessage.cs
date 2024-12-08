@@ -1,4 +1,6 @@
-﻿namespace server.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace server.Entities;
 
 public class UserMessage
 {
@@ -21,4 +23,6 @@ public class UserMessage
     public virtual Profile? From { get; set; } = null!;
 
     public virtual Profile? To { get; set; } = null!;
+
+    [NotMapped] public virtual Profile? SendTo { get; set; } = null!;
 }

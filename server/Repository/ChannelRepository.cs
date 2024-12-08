@@ -21,6 +21,6 @@ public class ChannelRepository : Repository<Channel>, IChannelRepository
 
         return query.Where(c => c.ChannelUsers.Any(u => u.UserId == id)
                                 || c.Department.DepartmentUsers.Any(u => u.UserId == id))
-            .Union(GetQuery(filter, includeProperties, orderBy, page, pageSize));
+            .Intersect(GetQuery(filter, includeProperties, orderBy, page, pageSize));
     }
 }
