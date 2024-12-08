@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
-using server.Services;
 
 namespace server.Controllers;
 
@@ -12,99 +11,67 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class ChannelUserController : Controller
 {
-    private readonly IChannelUserService _channeluserService;
+    private readonly IRepository<ChannelUser> _repository;
 
-    public ChannelUserController(IChannelUserService channeluserService)
+    public ChannelUserController(IUnitOfWork unitOfWork)
     {
-        _channeluserService = channeluserService;
+        _repository = unitOfWork.ChannelUsers;
     }
 
     [HttpPost]
-    public ActionResult CreateChannelUser(ChannelUser channeluser)
+    public ActionResult Create(ChannelUser body)
     {
-        try
-        {
-            return new SuccessResponse<ChannelUser>(_channeluserService.CreateChannelUser(channeluser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("ChannelUser is not create");
-        }
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelUser>(entity);
     }
 
     [HttpPut]
-    public ActionResult UpdateChannelUser(ChannelUser channeluser)
+    public ActionResult Update(ChannelUser body)
     {
-        try
-        {
-            return new SuccessResponse<ChannelUser>(_channeluserService.UpdateChannelUser(channeluser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("ChannelUser is not update");
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelUser>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateChannelUserPatch(long id, [FromBody] JsonPatchDocument<ChannelUser> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<ChannelUser> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<ChannelUser>(_channeluserService.UpdateChannelUserPatch(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channeluser is not update");
-        }
+        return new SuccessResponse<ChannelUser>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteChannelUser(long id)
+    public ActionResult DeleteId(long id)
     {
-        try
-        {
-            return new SuccessResponse<ChannelUser>(_channeluserService.DeleteChannelUser(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channeluser is not delete");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<ChannelUser>(entity);
     }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<ChannelUser>> GetChannelUserByFilter(string filterString)
+    [HttpDelete]
+    public ActionResult Delete(ChannelUser body)
     {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<ChannelUser>.ApplyFilter(filterResult);
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelUser>(body);
+    }
 
-        var DepartmetnList = _channeluserService.GetChannelUserByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<ChannelUser>>(DepartmetnList);
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<ChannelUser>>(
+            _repository.Get(CompositeFilter<ChannelUser>.ApplyFilter(filter), includeProperties: includes));
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ChannelUser>> Get(string? filter)
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
     {
-        return GetChannelUserByFilter(filter);
-    }
-
-    [HttpGet]
-    [Route("{channeluserId}")]
-    public ActionResult<IEnumerable<ChannelUser>> GetChannelUserById(long channeluserId)
-    {
-        try
-        {
-            return new SuccessResponse<ChannelUser>(_channeluserService.GetChannelUser(channeluserId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channeluser is not get");
-        }
+        return new SuccessResponse<ChannelUser>(_repository.GetById(id.ToString(), includes));
     }
 }

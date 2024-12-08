@@ -13,9 +13,9 @@ public class TaskCommentController : Controller
 {
     private readonly IRepository<TaskComment> _repository;
 
-    public TaskCommentController(IRepository<TaskComment> taskCommentRepository)
+    public TaskCommentController(IUnitOfWork unitOfWork)
     {
-        _repository = taskCommentRepository;
+        _repository = unitOfWork.TaskComments;
     }
 
     [HttpPost]
@@ -57,7 +57,7 @@ public class TaskCommentController : Controller
     {
         try
         {
-            return new SuccessResponse<TaskComment>(_repository.UpdatePatch(id.ToString(), patchDoc));
+            return new SuccessResponse<TaskComment>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {

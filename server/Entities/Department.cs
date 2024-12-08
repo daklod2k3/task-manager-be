@@ -11,4 +11,6 @@ public class Department
     public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 
     public virtual ICollection<TaskDepartment> TaskDepartments { get; set; } = new List<TaskDepartment>();
+
+    public virtual ICollection<Channel> Channels { get; set; } = new List<Channel>();
 }

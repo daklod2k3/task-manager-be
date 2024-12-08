@@ -13,7 +13,7 @@ public class TaskHistory
     public string Description { get; set; } = null!;
     public ETaskHistoryType Type { get; set; }
 
-    public virtual Profile User { get; set; } = null!;
+    public virtual Profile? User { get; set; } = null!;
 
-    public virtual TaskEntity TaskEntity { get; set; } = null!;
+    public virtual TaskEntity? TaskEntity { get; set; } = null!;
 }

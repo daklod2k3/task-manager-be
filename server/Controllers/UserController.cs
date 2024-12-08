@@ -9,36 +9,35 @@ namespace server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ChannelController : Controller
+public class UserController : Controller
 {
-    private readonly IRepository<Channel> _repository;
+    private readonly IRepository<Profile> _repository;
 
-    public ChannelController(IUnitOfWork unitOfWork)
+    public UserController(IUnitOfWork unitOfWork)
     {
-        _repository = unitOfWork.Channels;
+        _repository = unitOfWork.Users;
     }
 
     [HttpPost]
-    public ActionResult Create(Channel body)
+    public ActionResult Create(Profile body)
     {
-        body.CreatedBy = new Guid(AuthController.GetUserId(HttpContext));
         var entity = _repository.Add(body);
         _repository.Save();
-        return new SuccessResponse<Channel>(entity);
+        return new SuccessResponse<Profile>(entity);
     }
 
     [HttpPut]
-    public ActionResult Update(Channel body)
+    public ActionResult Update(Profile body)
     {
         var entity = _repository.Update(body);
         _repository.Save();
-        return new SuccessResponse<Channel>(entity);
+        return new SuccessResponse<Profile>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Channel> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Profile> patchDoc)
     {
-        return new SuccessResponse<Channel>(_repository.UpdatePatch(id, patchDoc));
+        return new SuccessResponse<Profile>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
@@ -47,15 +46,15 @@ public class ChannelController : Controller
         var entity = _repository.GetById(id.ToString());
         _repository.Remove(entity);
         _repository.Save();
-        return new SuccessResponse<Channel>(entity);
+        return new SuccessResponse<Profile>(entity);
     }
 
     [HttpDelete]
-    public ActionResult Delete(Channel body)
+    public ActionResult Delete(Profile body)
     {
         _repository.Remove(body);
         _repository.Save();
-        return new SuccessResponse<Channel>(body);
+        return new SuccessResponse<Profile>(body);
     }
 
 
@@ -65,14 +64,14 @@ public class ChannelController : Controller
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        return new SuccessResponse<IEnumerable<Channel>>(
-            _repository.Get(CompositeFilter<Channel>.ApplyFilter(filter), includeProperties: includes));
+        return new SuccessResponse<IEnumerable<Profile>>(
+            _repository.Get(CompositeFilter<Profile>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult GetId(long id, string? includes = "")
+    public ActionResult GetId(Guid id, string? includes = "")
     {
-        return new SuccessResponse<Channel>(_repository.GetById(id.ToString(), includes));
+        return new SuccessResponse<Profile>(_repository.GetById(id, includes));
     }
 }

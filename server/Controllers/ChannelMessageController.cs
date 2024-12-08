@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
-using server.Services;
 
 namespace server.Controllers;
 
@@ -12,99 +11,67 @@ namespace server.Controllers;
 [Route("[controller]")]
 public class ChannelMessageController : Controller
 {
-    private readonly IChannelMessageService _channelmessageService;
+    private readonly IRepository<ChannelMessage> _repository;
 
-    public ChannelMessageController(IChannelMessageService channelmessageService)
+    public ChannelMessageController(IUnitOfWork unitOfWork)
     {
-        _channelmessageService = channelmessageService;
+        _repository = unitOfWork.ChannelMessages;
     }
 
     [HttpPost]
-    public ActionResult CreateChannelMessage(ChannelMessage channelmessage)
+    public ActionResult Create(ChannelMessage body)
     {
-        try
-        {
-            return new SuccessResponse<ChannelMessage>(_channelmessageService.CreateChannelMessage(channelmessage));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("ChannelMessage is not create");
-        }
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelMessage>(entity);
     }
 
     [HttpPut]
-    public ActionResult UpdateChannelMessage(ChannelMessage channelmessage)
+    public ActionResult Update(ChannelMessage body)
     {
-        try
-        {
-            return new SuccessResponse<ChannelMessage>(_channelmessageService.UpdateChannelMessage(channelmessage));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("ChannelMessage is not update");
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelMessage>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdateChannelMessagePatch(long id, [FromBody] JsonPatchDocument<ChannelMessage> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<ChannelMessage> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<ChannelMessage>(_channelmessageService.PatchChannelMessage(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channelmessage is not update");
-        }
+        return new SuccessResponse<ChannelMessage>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteChannelMessage(long id)
+    public ActionResult DeleteId(long id)
     {
-        try
-        {
-            return new SuccessResponse<ChannelMessage>(_channelmessageService.DeleteChannelMessage(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channelmessage is not delete");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<ChannelMessage>(entity);
     }
 
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public ActionResult<IEnumerable<ChannelMessage>> GetChannelMessageByFilter(string filterString)
+    [HttpDelete]
+    public ActionResult Delete(ChannelMessage body)
     {
-        var filterResult = new ClientFilter();
-        if (!string.IsNullOrEmpty(filterString))
-            filterResult = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        var compositeFilterExpression = CompositeFilter<ChannelMessage>.ApplyFilter(filterResult);
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<ChannelMessage>(body);
+    }
 
-        var DepartmetnList = _channelmessageService.GetChannelMessageByFilter(compositeFilterExpression);
-        return new SuccessResponse<IEnumerable<ChannelMessage>>(DepartmetnList);
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<ChannelMessage>>(
+            _repository.Get(CompositeFilter<ChannelMessage>.ApplyFilter(filter), includeProperties: includes));
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ChannelMessage>> Get(string? filter)
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
     {
-        return GetChannelMessageByFilter(filter);
-    }
-
-    [HttpGet]
-    [Route("{channelmessageId}")]
-    public ActionResult<IEnumerable<ChannelMessage>> GetChannelMessageById(long channelmessageId)
-    {
-        try
-        {
-            return new SuccessResponse<ChannelMessage>(_channelmessageService.GetChannelMessage(channelmessageId));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("channelmessage is not get");
-        }
+        return new SuccessResponse<ChannelMessage>(_repository.GetById(id.ToString(), includes));
     }
 }

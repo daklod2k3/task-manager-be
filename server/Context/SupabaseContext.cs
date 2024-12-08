@@ -45,6 +45,9 @@ public partial class SupabaseContext : DbContext
     public virtual DbSet<TaskUser> TaskUsers { get; set; }
 
     public virtual DbSet<UserMessage> UserMessages { get; set; }
+    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Permission> Permissions { get; set; }
+    public virtual DbSet<Resource> Resources { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -99,7 +102,11 @@ public partial class SupabaseContext : DbContext
             entity.Property(e => e.Name)
                 .HasColumnType("character varying")
                 .HasColumnName("name");
+            entity.Property(e => e.DepartmentId).HasColumnName("department_id");
 
+            entity.HasOne(d => d.Department).WithMany(p => p.Channels)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("channels_department_id_fkey");
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Channels)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("channels_created_by_fkey");

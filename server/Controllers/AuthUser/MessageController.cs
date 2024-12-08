@@ -5,15 +5,15 @@ using server.Entities;
 using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers;
+namespace server.Controllers.AuthUser;
 
 [ApiController]
-[Route("[controller]")]
-public class UserMessageController : Controller
+[Route("auth/user/[controller]")]
+public class MessageController : Controller
 {
-    private readonly IRepository<UserMessage> _repository;
+    private readonly IUserMessageRepository _repository;
 
-    public UserMessageController(IUnitOfWork unitOfWork)
+    public MessageController(IUnitOfWork unitOfWork)
     {
         _repository = unitOfWork.UserMessages;
     }
@@ -60,19 +60,32 @@ public class UserMessageController : Controller
 
 
     [HttpGet]
-    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
-        int? pageItem, string? includes = "")
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, string? orderBy, int? page,
+        int? pageSize, string? includes = "")
     {
+        var user_id = new Guid(AuthController.GetUserId(HttpContext));
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        var list = _repository.GetUserMessageList(
+                user_id,
+                _repository.GetQuery(CompositeFilter<UserMessage>.ApplyFilter(filter), includes, orderBy, page,
+                    pageSize))
+            .ToList();
+
+        foreach (var userMessage in list)
+            userMessage.SendTo = userMessage.FromId != user_id ? userMessage.From : userMessage.To;
         return new SuccessResponse<IEnumerable<UserMessage>>(
-            _repository.Get(CompositeFilter<UserMessage>.ApplyFilter(filter), includeProperties: includes));
+            list
+        );
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult GetId(long id, string? includes = "")
+    public ActionResult GetId(Guid id, [FromQuery(Name = "filter")] string? filterString, string? orderBy, int? page,
+        int? pageSize, string? includes = "")
     {
-        return new SuccessResponse<UserMessage>(_repository.GetById(id.ToString(), includes));
+        var user_id = new Guid(AuthController.GetUserId(HttpContext));
+        return new SuccessResponse<IEnumerable<UserMessage>>(_repository
+            .GetDirectMessages(user_id, id, _repository.GetQuery(null, includes, orderBy, page, pageSize)).ToList());
     }
 }

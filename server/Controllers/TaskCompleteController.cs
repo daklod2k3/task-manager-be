@@ -15,14 +15,13 @@ public class TaskCompleteController : Controller
 
     public TaskCompleteController(IUnitOfWork unitOfWork)
     {
-        _tasks = unitOfWork.Task;
-        _files = unitOfWork.FileRepository;
+        _tasks = unitOfWork.Tasks;
+        _files = unitOfWork.Files;
         _unitOfWork = unitOfWork;
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
     }
 
     [HttpPost("preview/{taskId}")]
-   
     public async Task<IActionResult> MarkPreview(string taskId, [FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0) return new ErrorResponse("No file uploaded.");

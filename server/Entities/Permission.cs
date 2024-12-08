@@ -18,7 +18,7 @@ public class Permission
 
     public long? RoleId { get; set; }
 
-    public virtual Resource Resource { get; set; } = null!;
+    public virtual Resource? Resource { get; set; } = null!;
 
     public virtual Role? Role { get; set; }
 }

@@ -5,21 +5,21 @@ using server.Entities;
 using server.Helpers;
 using server.Interfaces;
 
-namespace server.Controllers;
+namespace server.Controllers.AuthUser;
 
 [ApiController]
-[Route("[controller]")]
-public class TaskController : Controller
+[Route("auth/user/[controller]")]
+public class ChannelController : Controller
 {
-    private readonly IRepository<TaskEntity> _repository;
+    private readonly IChannelRepository _repository;
 
-    public TaskController(IUnitOfWork unitOfWork)
+    public ChannelController(IUnitOfWork unitOfWork)
     {
-        _repository = unitOfWork.Tasks;
+        _repository = unitOfWork.Channels;
     }
 
     [HttpPost]
-    public ActionResult Create(TaskEntity comment)
+    public ActionResult Create(Channel comment)
     {
         var id = AuthController.GetUserId(HttpContext);
         comment.CreatedBy = new Guid(id);
@@ -27,7 +27,7 @@ public class TaskController : Controller
         {
             var entity = _repository.Add(comment);
             _repository.Save();
-            return new SuccessResponse<TaskEntity>(entity);
+            return new SuccessResponse<Channel>(entity);
         }
         catch (Exception ex)
         {
@@ -37,13 +37,13 @@ public class TaskController : Controller
     }
 
     [HttpPut]
-    public ActionResult Update(TaskEntity body)
+    public ActionResult Update(Channel body)
     {
         try
         {
             var comment = _repository.Update(body);
             _repository.Save();
-            return new SuccessResponse<TaskEntity>(comment);
+            return new SuccessResponse<Channel>(comment);
         }
         catch (Exception ex)
         {
@@ -53,11 +53,11 @@ public class TaskController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskEntity> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Channel> patchDoc)
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_repository.UpdatePatch(id, patchDoc));
+            return new SuccessResponse<Channel>(_repository.UpdatePatch(id, patchDoc));
         }
         catch (Exception ex)
         {
@@ -74,7 +74,7 @@ public class TaskController : Controller
             var entity = _repository.GetById(id.ToString());
             _repository.Remove(entity);
             _repository.Save();
-            return new SuccessResponse<TaskEntity>(null);
+            return new SuccessResponse<Channel>(null);
         }
         catch (Exception ex)
         {
@@ -84,13 +84,13 @@ public class TaskController : Controller
     }
 
     [HttpDelete]
-    public ActionResult Delete(TaskEntity body)
+    public ActionResult Delete(Channel body)
     {
         try
         {
             _repository.Remove(body);
             _repository.Save();
-            return new SuccessResponse<TaskEntity>(body);
+            return new SuccessResponse<Channel>(body);
         }
         catch (Exception ex)
         {
@@ -102,21 +102,22 @@ public class TaskController : Controller
 
     [HttpGet]
     public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
-        int? pageSize, string? includes = "", string? orderBy = null)
+        int? pageItem, string? includes = "")
     {
+        var user_id = new Guid(AuthController.GetUserId(HttpContext));
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
-        return new SuccessResponse<IEnumerable<TaskEntity>>(
-            _repository.Get(CompositeFilter<TaskEntity>.ApplyFilter(filter), includes, orderBy, page, pageSize));
+        return new SuccessResponse<IEnumerable<Channel>>(
+            _repository.GetByUser(user_id, CompositeFilter<Channel>.ApplyFilter(filter), includes));
     }
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<IEnumerable<TaskEntity>> GetId(long id, string? includes = "")
+    public ActionResult<IEnumerable<TaskComment>> GetId(long id, string? includes = "")
     {
         try
         {
-            return new SuccessResponse<TaskEntity>(_repository.GetById(id.ToString(), includes));
+            return new SuccessResponse<Channel>(_repository.GetById(id.ToString(), includes));
         }
         catch (Exception ex)
         {

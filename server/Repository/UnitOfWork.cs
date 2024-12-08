@@ -10,39 +10,39 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(SupabaseContext context)
     {
         _context = context;
-        Task = new TaskRepository(_context);
-        TaskDepartment = new TaskDepartmentRepository(_context);
-        TaskUser = new TaskUserRepository(_context);
-        User = new UserRepository(_context);
-        Department = new DepartmentRepository(_context);
-        DepartmentUser = new DepartmentUserRepository(_context);
-        Channel = new ChannelRepository(_context);
-        ChannelUser = new ChannelUserRepository(_context);
-        UserMessage = new UserMessageRepository(_context);
-        ChannelMessage = new ChannelMessageRepository(_context);
-        Role = new RoleRepository(_context);
-        Permission = new PermissionRepository(_context);
-        Resource = new ResourceRepository(_context);
-        FileRepository = new FileRepository(_context);
+        Tasks = new TaskRepository(_context);
+        TaskDepartments = new TaskDepartmentRepository(_context);
+        TaskUsers = new TaskUserRepository(_context);
+        Users = new UserRepository(_context);
+        Departments = new DepartmentRepository(_context);
+        DepartmentUsers = new DepartmentUserRepository(_context);
+        Roles = new RoleRepository(_context);
+        TaskComments = new TaskCommentRepository(_context);
+        Files = new FileRepository(_context);
+        Channels = new ChannelRepository(_context);
+        ChannelMessages = new ChannelMessageRepository(_context);
+        ChannelUsers = new ChannelUserRepository(_context);
+        Notifications = new NotificationRepository(_context);
+        UserMessages = new UserMessageRepository(_context);
+        TaskHistories = new TaskHistoryRepository(_context);
     }
 
-    public IFileRepository FileRepository { get; }
 
-    public ITaskRepository Task { get; }
-    public ITaskDepartmentRepository TaskDepartment { get; }
-    public IDepartment Department { get; }
-    public IDepartmentUser DepartmentUser { get; }
-    public ITaskUserRepository TaskUser { get; }
-    public IUserRepository User { get; }
-    //public IDepartmentRepository Department {  get; }
-    //public IDepartmentUserRepository DepartmentUser { get; }
-    public IChannelRepository Channel { get; }
-    public IChannelUserRepository ChannelUser { get; }
-    public IUserMessageRepository UserMessage { get; }
-    public IChannelMessageRepository ChannelMessage { get; }
-    public IRoleRepository Role { get; }
-    public IPermissionRepository Permission { get; }
-    public IResourceRepository Resource { get; }
+    public IChannelRepository Channels { get; }
+    public IChannelMessageRepository ChannelMessages { get; }
+    public IChannelUserRepository ChannelUsers { get; }
+    public IDepartmentRepository Departments { get; }
+    public IDepartmentUserRepository DepartmentUsers { get; }
+    public IFileRepository Files { get; }
+    public INotificationRepository Notifications { get; }
+    public IRoleRepository Roles { get; }
+    public ITaskCommentRepository TaskComments { get; }
+    public ITaskDepartmentRepository TaskDepartments { get; }
+    public ITaskRepository Tasks { get; }
+    public ITaskHistoryRepository TaskHistories { get; }
+    public ITaskUserRepository TaskUsers { get; }
+    public IUserMessageRepository UserMessages { get; }
+    public IUserRepository Users { get; }
 
     public int Save()
     {
