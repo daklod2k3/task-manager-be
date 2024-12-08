@@ -15,7 +15,7 @@ public class PermissionController : Controller
 
     public PermissionController(IUnitOfWork unitOfWork)
     {
-        //_repository = unitOfWork.Permission;
+        _repository = unitOfWork.Permissions;
     }
 
     [HttpPost]
@@ -51,7 +51,7 @@ public class PermissionController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Permission> patchDoc)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Permission> patchDoc)
     {
         return new SuccessResponse<Permission>(_repository.UpdatePatch(id, patchDoc));
     }

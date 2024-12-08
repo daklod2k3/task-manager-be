@@ -18,5 +18,6 @@ public interface IUnitOfWork
     IUserMessageRepository UserMessages { get; }
     IUserRepository Users { get; }
     IResourceRepository Resources { get; }
+    IPermissionRepository Permissions { get; }
     int Save();
 }

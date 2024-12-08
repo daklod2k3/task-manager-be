@@ -35,13 +35,13 @@ public class UserController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Profile> patchDoc)
+    public ActionResult UpdatePatch(string id, [FromBody] JsonPatchDocument<Profile> patchDoc)
     {
         return new SuccessResponse<Profile>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteId(long id)
+    public ActionResult DeleteId(string id)
     {
         var entity = _repository.GetById(id.ToString());
         _repository.Remove(entity);
