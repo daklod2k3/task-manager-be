@@ -62,7 +62,7 @@ public class DepartmentUserController: Controller
             }
         departmentuser.Department = null;
         departmentuser.User = null;
-        var result = _repository.Update(departmentuser);
+        var result = _repository.Update(DepartmentUser);
         _repository.Save();
         return new SuccessResponse<DepartmentUser>(result);
     }

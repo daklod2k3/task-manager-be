@@ -60,7 +60,7 @@ public class ChannelController: Controller
         }
         channel.ChannelMessages = null;
         channel.ChannelUsers = null;
-        var result = _repository.Update(channel);
+        var result = _repository.Update(Channel);
         _repository.Save();
         return new SuccessResponse<Channel>(result);
     }

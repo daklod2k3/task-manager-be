@@ -60,7 +60,7 @@ public class ChannelMessageController: Controller
         }
         channelmessage.Channel = null;
         channelmessage.File = null;
-        var result = _repository.Update(channelmessage);
+        var result = _repository.Update(ChannelMessage);
         _repository.Save();
         return new SuccessResponse<ChannelMessage>(result);
     }

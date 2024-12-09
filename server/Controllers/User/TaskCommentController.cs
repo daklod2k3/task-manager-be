@@ -58,7 +58,7 @@ public class TaskCommentController: Controller
         }
         taskcomment.User = null;
         taskcomment.Task = null;
-        var result = _repository.Update(taskcomment);
+        var result = _repository.Update(TaskComment);
         _repository.Save();
         return new SuccessResponse<TaskComment>(result);
     }

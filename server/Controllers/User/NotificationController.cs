@@ -55,7 +55,7 @@ public class NotificationController: Controller
             return new ErrorResponse("You can't change this");
         }
         notification.User = null;
-        var result = _repository.Update(notification);
+        var result = _repository.Update(Notification);
         _repository.Save();
         return new SuccessResponse<Notification>(result);
     }
