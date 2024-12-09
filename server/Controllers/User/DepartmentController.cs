@@ -67,13 +67,13 @@ public class DepartmentController: Controller
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteTask(long id)
+    public ActionResult DeleteDepartment(long id)
     {
         var iduser = AuthController.GetUserId(HttpContext);
         var department = _repository.GetById(id);
         if(_repository.GetById(department.Id) == null) return new ErrorResponse("Department not found");
         if(!department.DepartmentUsers.Any(du => du.UserId == new Guid(iduser) && du.OwnerType == EDepartmentOwnerType.Owner))
-            return new ErrorResponse("You can't update this Department");
+            return new ErrorResponse("You can't delete this Department");
         var result = _repository.Remove(department);
         _repository.Save();
         return new SuccessResponse<Department>(result);

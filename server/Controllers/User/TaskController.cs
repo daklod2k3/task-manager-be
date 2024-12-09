@@ -49,10 +49,15 @@ public class TaskController: Controller
         if(task == default){
             return new ErrorResponse("Task is not found");
         }
-        if( task.CreatedBy != new Guid(id) && (task.DueDate != taskEntity.DueDate || 
+        if(task.CreatedBy != new Guid(id)){
+            return new ErrorResponse("You can't change this");
+        }
+        if( task.CreatedBy == new Guid(id) && (task.DueDate != taskEntity.DueDate || 
         task.Description != taskEntity.Description  || 
         task.Title != taskEntity.Title || 
-        task.Status != taskEntity.Status ||
+        task.Priority != taskEntity.Priority ||
+        task.CreatedAt != taskEntity.CreatedAt ||
+        task.DueDate!= taskEntity.DueDate ||
         task.Priority != taskEntity.Priority ||
         task.CreatedBy != taskEntity.CreatedBy)){
             return new ErrorResponse("You can't change this");
