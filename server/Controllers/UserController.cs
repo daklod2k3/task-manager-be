@@ -35,9 +35,13 @@ public class UserController : Controller
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<Profile> patchDoc)
+    public ActionResult UpdatePatch(string id, [FromBody] JsonPatchDocument<Profile> patchDoc)
     {
-        return new SuccessResponse<Profile>(_repository.UpdatePatch(id, patchDoc));
+        if (!Guid.TryParse(id, out Guid guidId))
+        {
+            return BadRequest(new ErrorResponse("Invalid ID format."));
+        }
+        return new SuccessResponse<Profile>(_repository.UpdatePatch(guidId, patchDoc));
     }
 
     [HttpDelete("{id}")]
