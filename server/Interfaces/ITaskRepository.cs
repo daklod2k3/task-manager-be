@@ -8,4 +8,6 @@ public interface ITaskRepository : IRepository<TaskEntity>
 {
     public IEnumerable<TaskEntity> GetTaskByIdUser(Guid id, Expression<Func<TaskEntity, bool>>? filter, string? orderBy,
         string? includeProperties, QueryableExtensions.Pagination? pagination);
+
+    public IQueryable<TaskEntity> GetByDepartmentId(long id);
 }

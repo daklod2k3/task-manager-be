@@ -14,6 +14,7 @@ public class Repository<T> : IRepository<T> where T : class
     internal SupabaseContext context;
 
     internal DbSet<T> dbSet;
+    public IQueryable<T> customQuery => dbSet;
 
     public Repository(SupabaseContext context)
     {
@@ -69,16 +70,16 @@ public class Repository<T> : IRepository<T> where T : class
 
     public IEnumerable<T> Get(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
         string? orderBy = null,
-        int? page = null, int? pageSize = null)
+        int? page = null, int? pageSize = null, IQueryable<T> query = null)
     {
-        return GetQuery(filter, includeProperties, orderBy, page, pageSize).ToList();
+        return GetQuery(filter, includeProperties, orderBy, page, pageSize, query).ToList();
     }
 
-    public IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
+    public IQueryable<T> GetQuery(  Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
         string? orderBy = null,
-        int? page = null, int? pageSize = null)
+        int? page = null, int? pageSize = null,IQueryable<T> query = null)
     {
-        IQueryable<T> query = dbSet;
+       query = query ?? dbSet;
 
         if (filter != null) query = query.Where(filter);
 
