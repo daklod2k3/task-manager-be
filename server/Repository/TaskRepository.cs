@@ -22,4 +22,9 @@ public class TaskRepository : Repository<TaskEntity>, ITaskRepository
             .Distinct();
         return query.ToList();
     }
+
+    public IQueryable<TaskEntity> GetByDepartmentId(long id)
+    {
+        return dbSet.Where(t=> t.TaskDepartments.Any(td=> td.DepartmentId == id));
+    }
 }

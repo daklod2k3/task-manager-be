@@ -7,11 +7,11 @@ public interface IRepository<T> where T : class
 {
     IEnumerable<T> Get(Expression<Func<T, bool>>? filter = null,
         string? includeProperties = null, string? orderBy = null,
-        int? pag = null, int? pageSize = null);
+        int? pag = null, int? pageSize = null, IQueryable<T> query = null);
 
     IQueryable<T> GetQuery(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
         string? orderBy = null,
-        int? pag = null, int? pageSize = null);
+        int? pag = null, int? pageSize = null, IQueryable<T> query = null);
 
     T GetById(object id, string? includeProperties = null, string? keyProperty = "Id");
     T Add(T entity);
