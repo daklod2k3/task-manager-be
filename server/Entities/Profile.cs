@@ -30,7 +30,7 @@ public class Profile
 
     [JsonIgnore] public virtual ICollection<TaskComment> TaskComments { get; set; } = new List<TaskComment>();
 
-    public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
+    [JsonIgnore] public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 
     [JsonIgnore] public virtual ICollection<FileEntity> Files { get; set; } = new List<FileEntity>();
 
