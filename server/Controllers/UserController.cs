@@ -45,7 +45,7 @@ public class UserController : Controller
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteId(long id)
+    public ActionResult DeleteId(string id)
     {
         var entity = _repository.GetById(id.ToString());
         _repository.Remove(entity);

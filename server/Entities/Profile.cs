@@ -17,7 +17,6 @@ public class Profile
 
     public long RoleId { get; set; }
 
-
     public virtual Role? Role { get; set; } = null!;
 
     [JsonIgnore] public virtual ICollection<ChannelMessage> ChannelMessages { get; set; } = new List<ChannelMessage>();
@@ -30,7 +29,7 @@ public class Profile
 
     [JsonIgnore] public virtual ICollection<TaskComment> TaskComments { get; set; } = new List<TaskComment>();
 
-    public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
+    [JsonIgnore] public virtual ICollection<DepartmentUser> DepartmentUsers { get; set; } = new List<DepartmentUser>();
 
     [JsonIgnore] public virtual ICollection<FileEntity> Files { get; set; } = new List<FileEntity>();
 

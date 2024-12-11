@@ -22,8 +22,15 @@ public class DepartmentController : Controller
     public ActionResult GetDepartments()
     {
         var userId = new Guid(AuthController.GetUserId(HttpContext));
-        var departmentList = _unitOfWork.Departments.Get(t =>
-            t.DepartmentUsers.Any(du => du.UserId == userId));
+        var userRole = Users.GetById(userId).RoleId;
+        if(userRole == 0)
+        {
+            var departmentListAll = _unitOfWork.Departments.Get(includeProperties: "DepartmentUsers.User,TaskDepartments.Task");
+            return new SuccessResponse<IEnumerable<Department>>(departmentListAll);
+        }
+
+         var departmentList = _unitOfWork.Departments.Get(t =>
+            t.DepartmentUsers.Any(du => du.UserId == userId),includeProperties: "DepartmentUsers.User,TaskDepartments.Task");
 
         return new SuccessResponse<IEnumerable<Department>>(departmentList);
     }

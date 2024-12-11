@@ -57,7 +57,7 @@ public class ResourceController : Controller
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteId(Resource id)
+    public ActionResult DeleteId(long id)
     {
         try
         {
