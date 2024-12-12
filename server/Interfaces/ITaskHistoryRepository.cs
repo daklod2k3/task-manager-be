@@ -1,9 +1,7 @@
 using server.Entities;
 
-namespace server.Interfaces
+namespace server.Interfaces;
+
+public interface ITaskHistoryRepository : IRepository<TaskHistory>
 {
-    public interface ITaskHistoryRepository : IRepository<TaskHistory>
-    {
-        public TaskHistory Update(TaskHistory taskHistory);
-    }
 }

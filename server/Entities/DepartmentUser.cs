@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace server.Entities;
 
-namespace server.Entities;
-
-public partial class DepartmentUser
+public class DepartmentUser
 {
     public long Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid? UserId { get; set; }
 
     public long? DepartmentId { get; set; }
+    public EDepartmentOwnerType OwnerType { get; set; } = EDepartmentOwnerType.Member;
 
     public virtual Department? Department { get; set; }
 

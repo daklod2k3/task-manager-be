@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -10,103 +9,69 @@ namespace server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class DepartmentController : Controller
 {
-    private readonly IDepartmentService _departmentService;
-    public DepartmentController(IDepartmentService departmentService)
+    private readonly IRepository<Department> _repository;
+
+    public DepartmentController(IUnitOfWork unitOfWork)
     {
-        _departmentService = departmentService;
+        _repository = unitOfWork.Departments;
     }
 
-    //phuong thuc get
-    [HttpGet]
-    public IActionResult GetAllDepartment()
-    {
-        try
-        {
-            return new SuccessResponse<IEnumerable<Department>>(_departmentService.GetAllDepartment());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not found");
-        }
-    }
-
-    //phuong thuc get theo id
-    [HttpGet("{id}")]
-    public IActionResult GetDepartmentById(long id)
-    {
-        try
-        {
-            return new SuccessResponse<Department>(_departmentService.GetDepartmentById(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not found");
-        }
-    }
-
-    //phuong thuc post tao 1 department
     [HttpPost]
-    public IActionResult CreateDepartment(Department department)
+    public ActionResult Create(Department body)
     {
-        try
-        {
-            return new SuccessResponse<Department>(_departmentService.CreateDepartment(department));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not create");
-        }
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<Department>(entity);
     }
-    //phuong thuc PUT update 1 department
-    [HttpPut("{id}")]
-    public IActionResult UpdateDepartmentById(long id, Department department)
-    {
-        try
-        {
-            return new SuccessResponse<Department>(_departmentService.UpdateDepartmentById(id, department));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not update");
-        }
-    }
-    
 
-    //phong thuc PATCH update 1 department 
-    [HttpPatch("{id}")]
-    public IActionResult PatchDepartmentById(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
+    [HttpPut]
+    public ActionResult Update(Department body)
     {
-        try
-        {
-            var department = _departmentService.GetDepartmentById(id);
-            patchDoc.ApplyTo(department);
-            return new SuccessResponse<Department>(_departmentService.PatchDepartmentById(id, patchDoc));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not update");
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<Department>(entity);
     }
-    //phuong thuc delete 1 department
-    [HttpDelete("{id}")]
-    public IActionResult DeleteDepartmentById(long id)
+
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Department> patchDoc)
     {
-        try
-        {
-            return new SuccessResponse<Department>(_departmentService.DeleteDepartmentById(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("Department is not delete");
-        }
+        return new SuccessResponse<Department>(_repository.UpdatePatch(id, patchDoc));
+    }
+
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Department>(entity);
+    }
+
+    [HttpDelete]
+    public ActionResult Delete(Department body)
+    {
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<Department>(body);
+    }
+
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<Department>>(
+            _repository.Get(CompositeFilter<Department>.ApplyFilter(filter), includes));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
+    {
+        return new SuccessResponse<Department>(_repository.GetById(id.ToString(), includes));
     }
 }

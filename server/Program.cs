@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Linq;
 using Npgsql;
 using server.Context;
 using server.Controllers;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Middlewares;
 using server.Repository;
 using server.Services;
 using Supabase;
@@ -31,16 +33,17 @@ var cookieAuthName = builder.Configuration["Authentication:CookieAuthName"]!;
 builder.Services.AddControllers(options =>
     {
         options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter());
-
+        options.Filters.Add<DefaultRequirePermissionFilter>();
     })
     .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+            options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        }
+    );
 //     .AddNewtonsoftJson(options =>
 // {
 //     options.SerializerSettings.ContractResolver = new DefaultContractResolver
@@ -59,6 +62,7 @@ builder.Services.AddControllers(options =>
 //     
 // });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -97,20 +101,57 @@ builder.Services.AddAuthentication().AddJwtBearer(option =>
         ValidAudience = builder.Configuration["Authentication:ValidAudience"],
         ValidIssuer = builder.Configuration["Authentication:ValidIssuer"]
     };
+
     option.Events = new JwtBearerEvents
     {
+        // OnTokenValidated = context =>
+        // {
+        //     var userId = context.Principal?.FindFirst("sub")?.Value;
+        //     if (!string.IsNullOrEmpty(userId))
+        //     {
+        //         var identity = context.Principal.Identity as ClaimsIdentity;
+        //         identity.AddClaim(new Claim(ClaimTypes.Name, userId));
+        //     }
+        //     return Task.CompletedTask;
+        // },
         OnMessageReceived = context =>
         {
-            context.Token = context.Request.Cookies[cookieAuthName];
+            if (context.Token is not null) return Task.CompletedTask;
+            var cookie = context.Request.Cookies[cookieAuthName];
+            if (cookie is null) return Task.CompletedTask;
+            if (cookie.Contains("base64-"))
+            {
+                cookie = cookie.Replace("base64-", "");
+                var padding = cookie.Length % 4;
+                if (padding > 0) cookie += new string('=', 4 - padding); // Add padding if necessary
+                cookie = Encoding.UTF8.GetString(Convert.FromBase64String(cookie));
+                // var token = cookie;
+                // context.Token = token;
+                // return Task.CompletedTask;
+            }
+
+
+            try
+            {
+                var token = JObject.Parse(cookie)["access_token"];
+                context.Token = token.ToString();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Cookie token value parse error!");
+            }
+
             return Task.CompletedTask;
         }
     };
 });
 
-//ORM builder
+// ORM builder
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection"));
 dataSourceBuilder.MapEnum<ETaskPriority>("TaskPriority");
 dataSourceBuilder.MapEnum<ETaskStatus>("TaskStatus");
+dataSourceBuilder.MapEnum<EDepartmentOwnerType>("EDepartmentOwnerType");
+dataSourceBuilder.MapEnum<ETaskHistoryType>("ETaskHistoryType");
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<SupabaseContext>(options =>
     options.UseNpgsql(dataSource));
@@ -122,15 +163,13 @@ var supabase = new Client(supabaseUrl, supabaseAnonKey);
 supabase.Auth.Options.AllowUnconfirmedUserSessions = true;
 builder.Services.AddSingleton(supabase);
 
-
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<DefaultRequirePermissionFilter>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddScoped<ITaskUserService, TaskUserService>();
-builder.Services.AddScoped<ITaskDepartmentService, TaskDepartmentService>();
-builder.Services.AddScoped<ITaskHistoryService, TaskHistoryService>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+// builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -139,7 +178,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 
 app.UseHttpsRedirection();
 app.MapControllers().RequireAuthorization();
@@ -152,12 +190,11 @@ app.UseExceptionHandler(e =>
         var json = JsonSerializer.Serialize(new ErrorResponse(contextFeature.Error.Message)
             { Status = HttpStatusCode.InternalServerError });
         Console.WriteLine(context.Response.StatusCode);
-        // if (context.Response.StatusCode != 0)
-        //     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsync(json);
     });
 });
-// app.UseMiddleware<AuthMiddleware>();
 
+// app.UseMiddleware<AuthMiddleware>();
+if (!app.Environment.IsDevelopment()) app.Urls.Add("http://0.0.0.0:" + builder.Configuration.GetValue<int>("PORT"));
 app.Run();

@@ -1,143 +1,125 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Entities;
-using server.Interfaces;
-using Microsoft.AspNetCore.JsonPatch;
-using System.Linq.Expressions;
 using server.Helpers;
-namespace server.Controllers
+using server.Interfaces;
+
+namespace server.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class TaskUserController : Controller
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class TaskUserController : Controller
+    private readonly IRepository<TaskUser> _repository;
+
+    public TaskUserController(IUnitOfWork unitOfWork)
     {
-        private readonly ITaskService _taskService;
-        private readonly ITaskUserService _taskUserService;
-        public TaskUserController(ITaskService taskService, ITaskUserService taskUserService)
-        {
-            _taskService = taskService;
-            _taskUserService = taskUserService;
-        }
+        _repository = unitOfWork.TaskUsers;
+    }
 
-        [HttpGet]
-        public IActionResult GetAllTaskUser()
+    [HttpPost]
+    public ActionResult Create(TaskUser comment)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskUserService.GetAllTaskUsers());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not found" });
-            }
+            var entity = _repository.Add(comment);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(entity);
         }
-        //phuong thuc get theo id
-        [HttpGet("{id}")]
-        public IActionResult GetTaskUserById(long id)
+        catch (Exception ex)
         {
-            try
-            {
-                return Ok(_taskUserService.GetTaskUserById(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not found" });
-            }
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
         }
+    }
 
-        //phuong thuc post tao 1 department
-        [HttpPost("create")]
-        public IActionResult CreateTaskUser(TaskUser taskUser)
+    [HttpPut]
+    public ActionResult Update(TaskUser body)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskUserService.CreateTaskUser(taskUser));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not create" });
-            }
+            var comment = _repository.Update(body);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(comment);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
 
-        //phuong thuc put update 1 department
-        [HttpPut("{id}")]
-        public IActionResult UpdateTaskUserById(long id, TaskUser taskUser)
+    [HttpPatch("{id}")]
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskUserService.UpdateTaskUserById(id, taskUser));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
-            }
+            return new SuccessResponse<TaskUser>(_repository.UpdatePatch(id, patchDoc));
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse("Task is not update");
+        }
+    }
 
-        //phuong thuc patch update 1 taskuser
-        [HttpPatch("{id}")]
-        public IActionResult PatchTaskUserById(long id, [FromBody] JsonPatchDocument<TaskUser> patchDoc)
+    [HttpDelete("{id}")]
+    public ActionResult DeleteId(long id)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskUserService.PatchTaskUserById(id, patchDoc));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
-            }
+            var entity = _repository.GetById(id.ToString());
+            _repository.Remove(entity);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(entity);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
 
-        //phuong thuc delete 1 taskuser
-        public IActionResult DeleteTaskUserById(long id)
+    [HttpDelete]
+    public ActionResult Delete(TaskUser body)
+    {
+        try
         {
-            try
-            {
-                return Ok(_taskUserService.DeleteTaskUserById(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not delete" });
-            }
+            _repository.Remove(body);
+            _repository.Save();
+            return new SuccessResponse<TaskUser>(body);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
+        }
+    }
 
 
+    [HttpGet]
+    public ActionResult<IEnumerable<TaskEntity>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageSize, string? includes = "", string? orderBy = null)
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<TaskUser>>(
+            _repository.Get(CompositeFilter<TaskUser>.ApplyFilter(filter), includes, orderBy, page, pageSize));
+    }
 
-        [HttpPost]
-        public IActionResult AssignTaskToUser(TaskUser[] taskUsers)
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult<IEnumerable<TaskUser>> GetId(long id, string? includes = "")
+    {
+        try
         {
-
-            return Ok(_taskService.AssignTaskToUser(taskUsers));
+            return new SuccessResponse<TaskUser>(_repository.GetById(id.ToString(), includes));
         }
-        [HttpPut]
-        public ActionResult UpdateAssignTaskToUser(TaskUser taskUser)
+        catch (Exception ex)
         {
-            try
-            {
-                return Ok(_taskService.UpdateAssignTaskToUser(taskUser));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not update" });
-            }
-        }
-        [HttpDelete]
-        public ActionResult DeleteAssignTaskToUser(long id)
-        {
-            try
-            {
-                return Ok(_taskService.DeleteAssignTaskToUser(id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "TaskUser is not delete" });
-            }
+            Console.WriteLine(ex.ToString());
+            return new ErrorResponse(ex.ToString());
         }
     }
 }

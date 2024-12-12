@@ -1,113 +1,77 @@
-using System.Linq.Expressions;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
-using server.Interfaces; 
+using server.Interfaces;
 
 namespace server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
-public class DepartmentUserController : Controller 
+public class DepartmentUserController : Controller
 {
-    private readonly IDepartmentUserService _departmentUserService;
-    public DepartmentUserController(IDepartmentUserService departmentUserService)
+    private readonly IRepository<DepartmentUser> _repository;
+
+    public DepartmentUserController(IUnitOfWork unitOfWork)
     {
-        _departmentUserService = departmentUserService;
+        _repository = unitOfWork.DepartmentUsers;
     }
 
-    //phuong thuc get
-    [HttpGet]
-    public IActionResult GetAllDepartmentUser()
-    {
-        try
-        {
-            return new SuccessResponse<IEnumerable<DepartmentUser>>(_departmentUserService.GetAllDepartmentUser());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
-    }
-
-    //phuong thuc get theo id
-    [HttpGet("{id}")]
-    public IActionResult GetDepartmentUserById(long id)
-    {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.GetDepartmentUserById(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
-    }
-
-    //phuong thuc post tao 1 departmentuser
     [HttpPost]
-    public IActionResult CreateDepartmentUser(DepartmentUser departmentUser)
+    public ActionResult Create(DepartmentUser body)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.CreateDepartmentUser(departmentUser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
+        var entity = _repository.Add(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
     }
 
-    //phuong thuc put update 1 departmentuser
-    [HttpPut("{id}")]
-    public IActionResult UpdateDepartmentUserById(long id, DepartmentUser departmentUser)
+    [HttpPut]
+    public ActionResult Update(DepartmentUser body)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUserById(id, departmentUser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
+        var entity = _repository.Update(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
     }
 
-    //phuong thuc patch update 1 departmentuser
     [HttpPatch("{id}")]
-    public IActionResult PatchDepartmentUserById(long id, [FromBody] JsonPatchDocument<DepartmentUser> departmentUserPatch)
+    public ActionResult UpdatePatch(int id, [FromBody] JsonPatchDocument<DepartmentUser> patchDoc)
     {
-        try
-        {
-            var departmentUser = _departmentUserService.GetDepartmentUserById(id);
-            departmentUserPatch.ApplyTo(departmentUser);
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.UpdateDepartmentUserById(id, departmentUser));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
+        return new SuccessResponse<DepartmentUser>(_repository.UpdatePatch(id, patchDoc));
     }
 
-    //phuong thuc delete 1 departmentuser
     [HttpDelete("{id}")]
-    public IActionResult DeleteDepartmentUserById(long id)
+    public ActionResult DeleteId(long id)
     {
-        try
-        {
-            return new SuccessResponse<DepartmentUser>(_departmentUserService.DeleteDepartmentUserById(id));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse("DepartmentUser is not found");
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(entity);
+    }
+
+    [HttpDelete]
+    public ActionResult Delete(DepartmentUser body)
+    {
+        _repository.Remove(body);
+        _repository.Save();
+        return new SuccessResponse<DepartmentUser>(body);
+    }
+
+
+    [HttpGet]
+    public ActionResult Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
+    {
+        var filter = new ClientFilter();
+        if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
+        return new SuccessResponse<IEnumerable<DepartmentUser>>(
+            _repository.Get(CompositeFilter<DepartmentUser>.ApplyFilter(filter), includeProperties: includes));
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public ActionResult GetId(long id, string? includes = "")
+    {
+        return new SuccessResponse<DepartmentUser>(_repository.GetById(id.ToString(), includes));
     }
 }
