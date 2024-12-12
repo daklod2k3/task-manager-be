@@ -163,7 +163,6 @@ builder.Services.AddSingleton(supabase);
 
 builder.Services.AddScoped<DefaultRequirePermissionFilter>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IUnitNotification, UnitNotification>();
 builder.Services.AddScoped<IRepository<TaskComment>, TaskCommentRepository>();
 builder.Services.AddScoped<IRepository<TaskHistory>, TaskHistoryRepository>();
 builder.Services.AddHttpContextAccessor();

@@ -17,9 +17,9 @@ namespace server.Controllers;
 public class NotificationController : Controller
 {
     private readonly IRepository<Notification> _repository;
-    public NotificationController(IUnitNotification _unitnotification)
+    public NotificationController(IUnitOfWork _unitofwork)
     {
-        _repository = _unitnotification.Notification;
+        _repository = _unitofwork.Notifications;
     }
 
 
