@@ -1,9 +1,11 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Services;
 
 namespace server.Controllers;
 
@@ -19,99 +21,51 @@ public class PermissionController : Controller
     }
 
     [HttpPost]
-    public ActionResult Create(Permission role)
+    public ActionResult CreatePermission(Permission permission)
     {
-        try
-        {
-            var entity = _repository.Add(role);
-            _repository.Save();
-            return new SuccessResponse<Permission>(entity);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.Add(permission);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
 
     [HttpPut]
-    public ActionResult Update(Permission body)
+    public ActionResult UpdatePermission(Permission permission)
     {
-        try
-        {
-            var role = _repository.Update(body);
-            _repository.Save();
-            return new SuccessResponse<Permission>(role);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.Update(permission);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Permission> patchDoc)
+    public ActionResult UpdatePermission(long id, [FromBody] JsonPatchDocument<Permission> patchDoc)
     {
         return new SuccessResponse<Permission>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteId(long id)
+    public ActionResult DeletePermission(long id)
     {
-        try
-        {
-            var entity = _repository.GetById(id);
-            _repository.Remove(entity);
-            _repository.Save();
-            return new SuccessResponse<Permission>(entity);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Permission>(entity);
     }
-
-    [HttpDelete]
-    public ActionResult Delete(Permission body)
-    {
-        try
-        {
-            _repository.Remove(body);
-            _repository.Save();
-            return new SuccessResponse<Permission>(body);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
-    }
-
 
     [HttpGet]
-    public ActionResult Get([FromQuery(Name = "filter")] string? filterString,
-        string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<Permission>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<Permission>>(
-            _repository.Get(CompositeFilter<Permission>.ApplyFilter(filter), includes));
+            _repository.Get(CompositeFilter<Permission>.ApplyFilter(filter), includeProperties: includes));
+        
     }
 
     [HttpGet]
-    [Route("{id}")]
-    public ActionResult<IEnumerable<Permission>> GetId(long id, string? includes)
+    [Route("{permissionId}")]
+    public ActionResult<IEnumerable<Permission>> GetPermissionById(long permissionId, string? includes = "")
     {
-        try
-        {
-            return new SuccessResponse<Permission>(_repository.GetById(id.ToString(), includes));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        return new SuccessResponse<Permission>(_repository.GetById(permissionId.ToString(), includes));
     }
 }

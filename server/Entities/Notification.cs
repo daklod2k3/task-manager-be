@@ -1,4 +1,4 @@
-﻿namespace server.Entities;
+namespace server.Entities;
 
 public class Notification
 {

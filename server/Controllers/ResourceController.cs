@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using server.Entities;
 using server.Helpers;
 using server.Interfaces;
+using server.Services;
 
 namespace server.Controllers;
 
@@ -19,99 +20,51 @@ public class ResourceController : Controller
     }
 
     [HttpPost]
-    public ActionResult Create(Resource role)
+    public ActionResult CreateResource(Resource resource)
     {
-        try
-        {
-            var entity = _repository.Add(role);
-            _repository.Save();
-            return new SuccessResponse<Resource>(entity);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.Add(resource);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
 
     [HttpPut]
-    public ActionResult Update(Resource body)
+    public ActionResult UpdateResource(Resource resource)
     {
-        try
-        {
-            var role = _repository.Update(body);
-            _repository.Save();
-            return new SuccessResponse<Resource>(role);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.Update(resource);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
 
     [HttpPatch("{id}")]
-    public ActionResult UpdatePatch(long id, [FromBody] JsonPatchDocument<Resource> patchDoc)
+    public ActionResult UpdateResource(long id, [FromBody] JsonPatchDocument<Resource> patchDoc)
     {
         return new SuccessResponse<Resource>(_repository.UpdatePatch(id, patchDoc));
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteId(Resource id)
+    public ActionResult DeleteResource(long id)
     {
-        try
-        {
-            var entity = _repository.GetById(id);
-            _repository.Remove(entity);
-            _repository.Save();
-            return new SuccessResponse<Resource>(entity);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        var entity = _repository.GetById(id.ToString());
+        _repository.Remove(entity);
+        _repository.Save();
+        return new SuccessResponse<Resource>(entity);
     }
-
-    [HttpDelete]
-    public ActionResult Delete(Resource body)
-    {
-        try
-        {
-            _repository.Remove(body);
-            _repository.Save();
-            return new SuccessResponse<Resource>(body);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
-    }
-
 
     [HttpGet]
-    public ActionResult Get([FromQuery(Name = "filter")] string? filterString,
-        string? includes, int? page, int? pageItem)
+    public ActionResult<IEnumerable<Resource>> Get([FromQuery(Name = "filter")] string? filterString, int? page,
+        int? pageItem, string? includes = "")
     {
         var filter = new ClientFilter();
         if (!string.IsNullOrEmpty(filterString)) filter = JsonConvert.DeserializeObject<ClientFilter>(filterString);
         return new SuccessResponse<IEnumerable<Resource>>(
-            _repository.Get(CompositeFilter<Resource>.ApplyFilter(filter), includes));
+            _repository.Get(CompositeFilter<Resource>.ApplyFilter(filter), includeProperties: includes));
+        
     }
 
     [HttpGet]
-    [Route("{id}")]
-    public ActionResult GetId(long id, string? includes)
+    [Route("{resourceId}")]
+    public ActionResult<IEnumerable<Resource>> GetResourceById(long resourceId, string? includes = "")
     {
-        try
-        {
-            return new SuccessResponse<Resource>(_repository.GetById(id.ToString(), includes));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return new ErrorResponse(ex.ToString());
-        }
+        return new SuccessResponse<Resource>(_repository.GetById(resourceId.ToString(), includes));
     }
 }
